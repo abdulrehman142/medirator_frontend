@@ -1,0 +1,253 @@
+import appointmentsImg from "/medirator_images/appointment.png";
+import React, { useState } from "react";
+
+
+interface AppointmentsProps {
+  darkMode?: boolean;
+}
+
+const Appointments = ({ darkMode = false }: AppointmentsProps) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentTime, setAppointmentTime] = useState("");
+  const [doctor, setDoctor] = useState("");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const validateEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
+
+  const dateOptions = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() + index);
+    return {
+      value: date.toISOString().split("T")[0],
+      label: date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }),
+    };
+  });
+
+  const timeOptions = [
+    "09:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "02:00 PM",
+    "03:00 PM",
+    "04:00 PM",
+    "05:00 PM",
+  ];
+
+  const handleSubmit = async (ev: React.FormEvent) => {
+    ev.preventDefault();
+    setError(null);
+    setSuccess(false);
+    setLoading(true);
+
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !phone.trim() ||
+      !appointmentDate ||
+      !appointmentTime ||
+      !doctor.trim() ||
+      !reason.trim()
+    ) {
+      setError("Please fill all appointment details.");
+      setLoading(false);
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      setSuccess(true);
+      setName("");
+      setEmail("");
+      setPhone("");
+      setAppointmentDate("");
+      setAppointmentTime("");
+      setDoctor("");
+      setReason("");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to book appointment. Please try again later.";
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={darkMode ? "dark" : ""}>
+      <div className="flex flex-col md:flex-row dark:text-white justify-between items-center dark:bg-black font-sans gap-4 md:gap-0">
+        <div className="w-full md:w-[34%] flex flex-col items-center justify-center text-center p-2 md:p-6 m-2 md:m-4">
+          <img
+            src={appointmentsImg}
+            alt="Appointment"
+            className="h-24 w-24 md:h-32 md:w-32 object-contain mb-3 md:mb-4"
+            loading="lazy"
+          />
+          <div className="text-xl text-[#0B3C5D] dark:text-white md:text-2xl font-bold">
+            Book your appointment
+          </div>
+          <div className="p-2 m-2 text-sm text-[#8e8e93] md:text-base">
+            Choose a date and time to schedule your visit
+            <br /> with the right doctor quickly and easily.
+          </div>
+        </div>
+
+        <div className="w-full max-w-4xl m-2 md:m-4 px-3 md:px-4 md:px-8 py-6 md:py-8 relative z-10">
+          <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-8">
+            {error && <div className="mb-4 text-red-500 text-sm md:text-base">{error}</div>}
+            {success && (
+              <div className="mb-4 text-green-600 text-sm md:text-base">
+                Appointment booked successfully.
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <div>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    Patient Name
+                  </label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full border rounded-2xl border-[#0B3C5D] p-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
+                    placeholder="Full name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <div>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    Phone
+                  </label>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
+                    placeholder="03XXXXXXXXX"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    Doctor Name
+                  </label>
+                  <input
+                    value={doctor}
+                    onChange={(e) => setDoctor(e.target.value)}
+                    className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
+                    placeholder="Preferred doctor"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <div>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    Appointment Date
+                  </label>
+                  <select
+                    value={appointmentDate}
+                    onChange={(e) => setAppointmentDate(e.target.value)}
+                    className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
+                    required
+                  >
+                    <option value="">Select date</option>
+                    {dateOptions.map((dateOption) => (
+                      <option key={dateOption.value} value={dateOption.value}>
+                        {dateOption.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    Appointment Time
+                  </label>
+                  <select
+                    value={appointmentTime}
+                    onChange={(e) => setAppointmentTime(e.target.value)}
+                    className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
+                    required
+                  >
+                    <option value="">Select time slot</option>
+                    {timeOptions.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                  Reason for Visit
+                </label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white min-h-[100px] md:min-h-[160px] focus:outline-none text-sm"
+                  placeholder="Describe your concern"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 w-full md:w-auto text-sm disabled:opacity-50"
+                >
+                  {loading ? "Booking..." : "Book Appointment"}
+                </button>
+                <div className="text-xs md:text-sm text-black dark:text-gray-300 text-center md:text-right">
+                  Need help? <a href="mailto:mediratorinfo@gmail.com" className="underline">mediratorinfo@gmail.com</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Appointments;
