@@ -1,5 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import patientImg from "/medirator_images/patient.png";
+import { adminApi } from "../../../api/adminApi";
+import { reportsApi } from "../../../api/reportsApi";
+import { usersApi } from "../../../api/usersApi";
+import { useLanguage } from "../../../context/LanguageContext";
+import type { TestReport } from "../../../types/api";
 
 interface PatientManagementPageProps {
   darkMode?: boolean;
@@ -7,120 +12,198 @@ interface PatientManagementPageProps {
 
 interface PatientRecord {
   id: string;
+  user_id?: string;
   name: string;
   age: number;
-  status: "Active" | "Inactive" | "Critical";
-  flaggedCritical: boolean;
-  medicalHistory: string;
+  status: "Active" | "Inactive";
+  gender?: string;
+  phone?: string;
+  blood_group?: string;
+  allergies?: string;
+  chronic_diseases?: string;
+  emergency_contact?: string;
+  family_history?: string;
 }
 
+interface PatientArtifacts {
+  reports: TestReport[];
+}
+
+const normalizePatient = (patient: {
+  id?: string;
+  user_id?: string;
+  name?: string;
+  age?: number;
+  status?: "Active" | "Inactive";
+  gender?: string;
+  phone?: string;
+  blood_group?: string;
+  allergies?: string;
+  chronic_diseases?: string;
+  emergency_contact?: string;
+  family_history?: string;
+}): PatientRecord => ({
+  id: patient.id ?? "Unknown",
+  user_id: patient.user_id,
+  name: patient.name ?? "Unnamed patient",
+  age: patient.age ?? 0,
+  status: patient.status ?? "Inactive",
+  gender: patient.gender,
+  phone: patient.phone,
+  blood_group: patient.blood_group,
+  allergies: patient.allergies,
+  chronic_diseases: patient.chronic_diseases,
+  emergency_contact: patient.emergency_contact,
+  family_history: patient.family_history,
+});
+
+const toLowerText = (value: string | undefined | null) => (value ?? "").toLowerCase();
+
+const asText = (value: unknown, fallback = "N/A") => {
+  if (typeof value === "string") {
+    const normalized = value.trim();
+    return normalized.length > 0 ? normalized : fallback;
+  }
+  if (Array.isArray(value)) {
+    const normalized = value
+      .map((item) => (typeof item === "string" ? item.trim() : String(item).trim()))
+      .filter((item) => item.length > 0);
+    return normalized.length > 0 ? normalized.join(", ") : fallback;
+  }
+  return fallback;
+};
+
+const isObjectIdLike = (value: string | undefined) => Boolean(value && /^[a-fA-F0-9]{24}$/.test(value.trim()));
+
 const PatientManagementPage = ({ darkMode = false }: PatientManagementPageProps) => {
+  const { t } = useLanguage();
+  const [apiError, setApiError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Inactive" | "Critical">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Inactive">("All");
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
-  const [patients, setPatients] = useState<PatientRecord[]>([
-    {
-      id: "PT-240318-07",
-      name: "Ayesha Khan",
-      age: 32,
-      status: "Active",
-      flaggedCritical: false,
-      medicalHistory: "Hypertension under monitoring; weekly BP checks.",
-    },
-    {
-      id: "PT-240402-11",
-      name: "Hassan Ali",
-      age: 45,
-      status: "Critical",
-      flaggedCritical: true,
-      medicalHistory: "Type 2 diabetes with elevated sugar trend.",
-    },
-    {
-      id: "PT-240215-03",
-      name: "Sara Iqbal",
-      age: 28,
-      status: "Active",
-      flaggedCritical: false,
-      medicalHistory: "Asthma care plan with inhaler adherence follow-up.",
-    },
-    {
-      id: "PT-240501-09",
-      name: "Bilal Hussain",
-      age: 51,
-      status: "Inactive",
-      flaggedCritical: false,
-      medicalHistory: "Missed last two appointments; account temporarily inactive.",
-    },
-  ]);
+  const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(null);
-  const [selectedViewMode, setSelectedViewMode] = useState<"profile" | "history" | null>(null);
-  const [editingPatientId, setEditingPatientId] = useState<string | null>(null);
+  const [selectedViewMode, setSelectedViewMode] = useState<"profile" | null>(null);
   const [pendingDeletePatientId, setPendingDeletePatientId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editAge, setEditAge] = useState("");
+  const [patientArtifacts, setPatientArtifacts] = useState<PatientArtifacts | null>(null);
+  const [loadingArtifacts, setLoadingArtifacts] = useState(false);
+  const [downloadingDocumentId, setDownloadingDocumentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        const response = await adminApi.listPatients();
+        const nextPatients = Array.isArray(response) ? response.map(normalizePatient) : [];
+        setPatients(nextPatients);
+        setApiError(null);
+      } catch {
+        setApiError("No available data.");
+      }
+    };
+
+    void loadPatients();
+  }, []);
+
+  useEffect(() => {
+    const selectedPatientId = selectedPatient?.id;
+    const selectedPatientUserId = selectedPatient?.user_id;
+    if (!selectedPatient || !selectedPatientId || selectedViewMode !== "profile") {
+      setPatientArtifacts(null);
+      return;
+    }
+
+    const loadArtifacts = async () => {
+      setLoadingArtifacts(true);
+      const candidateIds = [selectedPatientUserId, selectedPatientId].filter(
+        (value): value is string => Boolean(value && isObjectIdLike(value)),
+      );
+
+      let resolvedPatientUserId: string | null = null;
+
+      for (const candidateId of candidateIds) {
+        try {
+          const profile = await usersApi.getPatientProfileForDoctor(candidateId);
+          if (profile) {
+            resolvedPatientUserId = candidateId;
+            break;
+          }
+        } catch {
+          // try next candidate id
+        }
+      }
+
+      if (!resolvedPatientUserId) {
+        resolvedPatientUserId = selectedPatientUserId ?? null;
+      }
+
+      let nextReports: TestReport[] = [];
+      if (resolvedPatientUserId) {
+        const reportsResult = await Promise.allSettled([reportsApi.list({ patient_id: resolvedPatientUserId })]);
+        nextReports = reportsResult[0].status === "fulfilled" ? reportsResult[0].value : [];
+      } else {
+        // Fallback for legacy rows missing raw user_id in admin list response.
+        const reportsResult = await Promise.allSettled([reportsApi.list()]);
+        const allReports = reportsResult[0].status === "fulfilled" ? reportsResult[0].value : [];
+        const reportPatientIds = new Set(candidateIds);
+        nextReports = allReports.filter((report) => reportPatientIds.has(report.patient_id));
+      }
+
+      setPatientArtifacts({
+        reports: nextReports,
+      });
+      setLoadingArtifacts(false);
+    };
+
+    void loadArtifacts();
+  }, [selectedPatient?.id, selectedPatient?.user_id, selectedViewMode]);
+
+  const handleDownloadDocument = async (documentId: string) => {
+    if (!documentId) {
+      return;
+    }
+    setDownloadingDocumentId(documentId);
+    try {
+      const { blob, fileName } = await reportsApi.downloadFile(documentId);
+      const objectUrl = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(objectUrl);
+    } finally {
+      setDownloadingDocumentId(null);
+    }
+  };
 
   const filteredPatients = useMemo(() => {
     return patients.filter((patient) => {
       const matchesSearch =
-        patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        patient.id.toLowerCase().includes(searchQuery.toLowerCase());
+        toLowerText(patient.name).includes(searchQuery.toLowerCase()) ||
+        toLowerText(patient.id).includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "All" || patient.status === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
   }, [patients, searchQuery, statusFilter]);
 
-  const startEdit = (patient: PatientRecord) => {
-    setEditingPatientId(patient.id);
-    setEditName(patient.name);
-    setEditAge(String(patient.age));
-  };
-
-  const saveEdit = () => {
-    if (!editingPatientId || !editName.trim() || !editAge.trim()) {
-      return;
-    }
-
-    setPatients((current) =>
-      current.map((patient) =>
-        patient.id === editingPatientId
-          ? { ...patient, name: editName.trim(), age: Number(editAge) || patient.age }
-          : patient,
-      ),
-    );
-    setEditingPatientId(null);
-  };
-
   const viewPatientProfile = (patient: PatientRecord) => {
     setSelectedPatient(patient);
     setSelectedViewMode("profile");
   };
 
-  const viewMedicalHistory = (patient: PatientRecord) => {
-    setSelectedPatient(patient);
-    setSelectedViewMode("history");
-  };
-
   const deletePatient = (patientId: string) => {
     setPatients((current) => current.filter((patient) => patient.id !== patientId));
+
+    void adminApi
+      .deletePatient(patientId)
+      .then(() => setApiError(null))
+      .catch(() => setApiError("Patient delete not confirmed by server."));
 
     if (selectedPatient?.id === patientId) {
       setSelectedPatient(null);
     }
-  };
-
-  const toggleCriticalFlag = (patientId: string) => {
-    setPatients((current) =>
-      current.map((patient) =>
-        patient.id === patientId
-          ? {
-              ...patient,
-              flaggedCritical: !patient.flaggedCritical,
-              status: !patient.flaggedCritical ? "Critical" : "Active",
-            }
-          : patient,
-      ),
-    );
   };
 
   const confirmDeletePatient = () => {
@@ -140,11 +223,10 @@ const PatientManagementPage = ({ darkMode = false }: PatientManagementPageProps)
     return "border-yellow-600 text-yellow-700 dark:text-yellow-400";
   };
 
-  const statusFilterOptions: Array<"All" | "Active" | "Inactive" | "Critical"> = [
+  const statusFilterOptions: Array<"All" | "Active" | "Inactive"> = [
     "All",
     "Active",
     "Inactive",
-    "Critical",
   ];
 
   return (
@@ -152,14 +234,17 @@ const PatientManagementPage = ({ darkMode = false }: PatientManagementPageProps)
       <div className="flex flex-col md:flex-row justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-4 shadow-md gap-4">
         <div>
           <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">Patient Management</h2>
-          <p className="text-sm md:text-base text-center md:text-left ml-0 md:ml-5 md:pl-5 mt-2 text-gray-200">
-            Manage patient records, profiles, history, and critical care flagging.
-          </p>
         </div>
         <img src={patientImg} alt="Patient Management" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
       </div>
 
       <div className="dark:bg-black px-3 md:px-6 py-6 space-y-4 font-sans">
+        {apiError && (
+          <div className="rounded-2xl border border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-950/20 dark:text-amber-300">
+            {apiError}
+          </div>
+        )}
+
         <section className="rounded-2xl border-4 border-[#0B3C5D] bg-white dark:bg-black p-4 md:p-6">
           <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
             <div className="flex flex-col sm:flex-row gap-2 w-full md:max-w-2xl">
@@ -237,7 +322,7 @@ const PatientManagementPage = ({ darkMode = false }: PatientManagementPageProps)
                     <td className="px-4 py-3">{patient.age}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full border px-3 py-1 text-xs ${statusBadgeClassName(patient.status)}`}>
-                        {patient.flaggedCritical ? "Critical" : patient.status}
+                        {patient.status}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -251,31 +336,10 @@ const PatientManagementPage = ({ darkMode = false }: PatientManagementPageProps)
                         </button>
                         <button
                           type="button"
-                          onClick={() => startEdit(patient)}
-                          className="rounded-2xl border border-[#0B3C5D] px-3 py-1.5"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
                           onClick={() => setPendingDeletePatientId(patient.id)}
                           className="rounded-2xl border border-red-600 text-red-600 px-3 py-1.5"
                         >
                           Delete
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => viewMedicalHistory(patient)}
-                          className="rounded-2xl border border-[#0B3C5D] px-3 py-1.5"
-                        >
-                          Medical History
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => toggleCriticalFlag(patient.id)}
-                          className="rounded-2xl border border-yellow-600 text-yellow-700 px-3 py-1.5"
-                        >
-                          {patient.flaggedCritical ? "Unflag Critical" : "Flag Critical"}
                         </button>
                       </div>
                     </td>
@@ -286,7 +350,7 @@ const PatientManagementPage = ({ darkMode = false }: PatientManagementPageProps)
           </div>
         </section>
 
-        {(selectedPatient || editingPatientId) && (
+        {selectedPatient && (
           <section className="rounded-2xl border-4 border-[#0B3C5D] bg-white dark:bg-black p-4 md:p-6 text-black dark:text-white">
             {selectedPatient && selectedViewMode === "profile" ? (
               <div>
@@ -296,36 +360,41 @@ const PatientManagementPage = ({ darkMode = false }: PatientManagementPageProps)
                   <div className="rounded-2xl border border-[#0B3C5D] p-3">ID: {selectedPatient.id}</div>
                   <div className="rounded-2xl border border-[#0B3C5D] p-3">Age: {selectedPatient.age}</div>
                   <div className="rounded-2xl border border-[#0B3C5D] p-3">Status: {selectedPatient.status}</div>
+                  <div className="rounded-2xl border border-[#0B3C5D] p-3">Gender: {selectedPatient.gender || "N/A"}</div>
+                  <div className="rounded-2xl border border-[#0B3C5D] p-3">Phone: {selectedPatient.phone || "N/A"}</div>
+                  <div className="rounded-2xl border border-[#0B3C5D] p-3">Blood Group: {selectedPatient.blood_group || "N/A"}</div>
+                  <div className="rounded-2xl border border-[#0B3C5D] p-3">Allergies: {selectedPatient.allergies || "N/A"}</div>
+                  <div className="rounded-2xl border border-[#0B3C5D] p-3">Chronic Diseases: {selectedPatient.chronic_diseases || "N/A"}</div>
+                  <div className="rounded-2xl border border-[#0B3C5D] p-3">Emergency Contact: {selectedPatient.emergency_contact || "N/A"}</div>
                 </div>
-              </div>
-            ) : null}
 
-            {selectedPatient && selectedViewMode === "history" ? (
-              <div>
-                <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Medical History</h3>
-                <div className="mt-3 rounded-2xl border border-[#0B3C5D] p-3 text-sm">{selectedPatient.medicalHistory}</div>
-              </div>
-            ) : null}
-
-            {editingPatientId ? (
-              <div className="mt-4">
-                <h4 className="text-base font-semibold text-[#0B3C5D] dark:text-white">Edit Patient</h4>
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <input
-                    value={editName}
-                    onChange={(event) => setEditName(event.target.value)}
-                    className="rounded-2xl border border-[#0B3C5D] px-3 py-2 bg-white dark:bg-black"
-                    placeholder="Name"
-                  />
-                  <input
-                    value={editAge}
-                    onChange={(event) => setEditAge(event.target.value)}
-                    className="rounded-2xl border border-[#0B3C5D] px-3 py-2 bg-white dark:bg-black"
-                    placeholder="Age"
-                  />
-                  <button type="button" onClick={saveEdit} className="rounded-2xl border border-[#0B3C5D] px-3 py-2">
-                    Save Changes
-                  </button>
+                <div className="mt-4 grid grid-cols-1 gap-3 text-sm">
+                  <section className="rounded-2xl border border-[#0B3C5D] p-3">
+                    <h4 className="font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "uploadedDocuments", "Uploaded Documents")}</h4>
+                    {loadingArtifacts ? (
+                      <p className="mt-2 text-xs">{t("auth", "loading", "Loading...")}</p>
+                    ) : patientArtifacts?.reports.length ? (
+                      <ul className="mt-2 space-y-2">
+                        {patientArtifacts.reports.map((report) => (
+                          <li key={report.id} className="rounded-xl border border-[#0B3C5D]/40 p-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="font-medium">{asText(report.file_name, "Unnamed document")}</p>
+                              <button
+                                type="button"
+                                onClick={() => void handleDownloadDocument(report.id)}
+                                disabled={downloadingDocumentId === report.id}
+                                className="rounded-2xl border border-[#0B3C5D] bg-white px-3 py-1 text-xs font-medium text-black transition-all duration-300 hover:bg-[#0B3C5D] hover:text-white disabled:opacity-50 dark:bg-black dark:text-white dark:hover:bg-gray-800"
+                              >
+                                {downloadingDocumentId === report.id ? t("auth", "downloading", "Downloading...") : t("auth", "download", "Download")}
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-xs">No available data</p>
+                    )}
+                  </section>
                 </div>
               </div>
             ) : null}

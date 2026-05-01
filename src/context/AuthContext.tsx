@@ -1,23 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import axios from "axios";
+import { authApi } from "../api/authApi";
+import { tokenStore } from "../auth/tokenStore";
 
 export type UserRole = "patient" | "doctor" | "admin";
 
-export const ADMIN_EMAIL = "admin@medirator";
-export const ADMIN_PASSWORD = "rehman@16@";
-const ADMIN_EMAIL_NORMALIZED = ADMIN_EMAIL.toLowerCase();
-
 interface AuthUser {
+  id: string;
   email: string;
   role: UserRole;
-}
-
-interface AuthAccount {
-  email: string;
-  role: Exclude<UserRole, "admin">;
-  password: string;
-  name: string;
-  phone: string;
 }
 
 interface RegisterAccountInput {
@@ -28,32 +20,35 @@ interface RegisterAccountInput {
   phone: string;
 }
 
+interface AuthResult {
+  ok: boolean;
+  error?: string;
+}
+
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  authReady: boolean;
   login: (nextUser: AuthUser) => void;
-  loginWithCredentials: (input: { email: string; password: string; role: UserRole }) => {
-    ok: boolean;
-    error?: string;
-  };
-  registerAccount: (input: RegisterAccountInput) => { ok: boolean; error?: string };
-  logout: () => void;
+  loginWithCredentials: (input: { email: string; password: string; role: UserRole }) => Promise<AuthResult>;
+  registerAccount: (input: RegisterAccountInput) => Promise<AuthResult>;
+  logout: () => Promise<void>;
 }
 
 const AUTH_STORAGE_KEY = "medirator_auth_user";
-const ACCOUNT_STORAGE_KEY = "medirator_auth_accounts";
+const REFRESH_TOKEN_KEY = "medirator_refresh_token";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const readStoredUser = (): AuthUser | null => {
   try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) {
       return null;
     }
 
     const parsed = JSON.parse(raw) as Partial<AuthUser>;
-    if (!parsed.email || !parsed.role) {
+    if (!parsed.id || !parsed.email || !parsed.role) {
       return null;
     }
 
@@ -62,6 +57,7 @@ const readStoredUser = (): AuthUser | null => {
     }
 
     return {
+      id: parsed.id,
       email: parsed.email,
       role: parsed.role as UserRole,
     };
@@ -70,118 +66,105 @@ const readStoredUser = (): AuthUser | null => {
   }
 };
 
-const readStoredAccounts = (): AuthAccount[] => {
-  try {
-    const raw = localStorage.getItem(ACCOUNT_STORAGE_KEY);
-
-    if (!raw) {
-      return [];
-    }
-
-    const parsed = JSON.parse(raw) as AuthAccount[];
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed.filter(
-      (account) =>
-        typeof account.email === "string" &&
-        typeof account.password === "string" &&
-        typeof account.name === "string" &&
-        typeof account.phone === "string" &&
-        (account.role === "patient" || account.role === "doctor"),
-    );
-  } catch {
-    return [];
-  }
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(() => readStoredUser());
-  const [accounts, setAccounts] = useState<AuthAccount[]>(() => readStoredAccounts());
+  const [authReady, setAuthReady] = useState(false);
 
   const login = (nextUser: AuthUser) => {
     setUser(nextUser);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextUser));
+    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextUser));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY) ?? undefined;
+
+    try {
+      await authApi.logout(refreshToken);
+    } catch {
+      // Keep client logout reliable even if server logout fails.
+    }
+
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+    tokenStore.clear();
   };
 
-  const loginWithCredentials = (input: { email: string; password: string; role: UserRole }) => {
-    const normalizedEmail = input.email.trim().toLowerCase();
+  const loginWithCredentials = async (input: { email: string; password: string; role: UserRole }): Promise<AuthResult> => {
+    try {
+      await authApi.login({
+        email: input.email.trim().toLowerCase(),
+        password: input.password,
+      });
 
-    if (input.role === "admin") {
-      if (normalizedEmail !== ADMIN_EMAIL_NORMALIZED || input.password !== ADMIN_PASSWORD) {
-        return { ok: false, error: "Invalid admin credentials." };
+      const currentUser = await authApi.me();
+
+      if (currentUser.role !== input.role) {
+        await logout();
+        return { ok: false, error: "Selected role does not match this account." };
       }
 
-      login({ email: normalizedEmail, role: "admin" });
+      login({ id: currentUser.id, email: currentUser.email, role: currentUser.role });
       return { ok: true };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const detail = error.response?.data?.detail;
+        if (typeof detail === "string" && detail.trim()) {
+          return { ok: false, error: detail };
+        }
+      }
+      return { ok: false, error: "Invalid credentials or server unavailable." };
     }
-
-    const matchedAccount = accounts.find(
-      (account) => account.email === normalizedEmail && account.role === input.role,
-    );
-
-    if (!matchedAccount) {
-      return { ok: false, error: "No account found for this email and role." };
-    }
-
-    if (matchedAccount.password !== input.password) {
-      return { ok: false, error: "Incorrect password." };
-    }
-
-    login({ email: normalizedEmail, role: input.role });
-    return { ok: true };
   };
 
-  const registerAccount = (input: RegisterAccountInput) => {
-    const normalizedEmail = input.email.trim().toLowerCase();
-
-    if (normalizedEmail === ADMIN_EMAIL_NORMALIZED) {
-      return { ok: false, error: "This email is reserved and cannot be registered." };
-    }
-
-    const emailAlreadyExists = accounts.some((account) => account.email === normalizedEmail);
-
-    if (emailAlreadyExists) {
-      return {
-        ok: false,
-        error: "This email is already registered with another account. Use a different email.",
-      };
-    }
-
-    const nextAccounts = [
-      ...accounts,
-      {
-        email: normalizedEmail,
-        role: input.role,
+  const registerAccount = async (input: RegisterAccountInput): Promise<AuthResult> => {
+    try {
+      await authApi.register({
+        email: input.email.trim().toLowerCase(),
         password: input.password,
-        name: input.name.trim(),
-        phone: input.phone.trim(),
-      },
-    ];
+        full_name: input.name.trim(),
+        role: input.role,
+      });
 
-    setAccounts(nextAccounts);
-    localStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(nextAccounts));
-
-    return { ok: true };
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Registration failed. Please try a different email." };
+    }
   };
+
+  useEffect(() => {
+    const bootstrapAuth = async () => {
+      const token = tokenStore.getAccessToken();
+
+      if (!token) {
+        setAuthReady(true);
+        return;
+      }
+
+      try {
+        const currentUser = await authApi.me();
+        login({ id: currentUser.id, email: currentUser.email, role: currentUser.role });
+      } catch {
+        await logout();
+      } finally {
+        setAuthReady(true);
+      }
+    };
+
+    void bootstrapAuth();
+  }, []);
 
   const value = useMemo(
     () => ({
       user,
       isAuthenticated: !!user,
+      authReady,
       login,
       loginWithCredentials,
       registerAccount,
       logout,
     }),
-    [accounts, user]
+    [authReady, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

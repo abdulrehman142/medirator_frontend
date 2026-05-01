@@ -1,7 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { appointmentsApi } from "../../../api/appointmentsApi";
+import type { Appointment as ApiAppointment } from "../../../types/api";
 
 import appointmentImg from "/medirator_images/appointment.png";
+import { useDoctorPatient } from "../../../context/DoctorPatientContext";
+import { useAuth } from "../../../context/AuthContext";
+import { useLanguage } from "../../../context/LanguageContext";
 
 interface AppointmentsPageProps {
   darkMode?: boolean;
@@ -13,45 +18,119 @@ type AppointmentFilter = "today" | "week";
 interface Appointment {
   id: string;
   patientName: string;
+  patientId: string;
+  patientDisplayId: string;
   date: string;
   time: string;
   status: AppointmentStatus;
 }
 
-const initialUpcomingAppointments: Appointment[] = [
-  { id: "AP-101", patientName: "Ayesha Khan", date: "2026-04-18", time: "09:00 AM", status: "Confirmed" },
-  { id: "AP-102", patientName: "Hassan Ali", date: "2026-04-18", time: "11:30 AM", status: "Pending" },
-  { id: "AP-103", patientName: "Sara Iqbal", date: "2026-04-20", time: "03:00 PM", status: "Confirmed" },
-  { id: "AP-104", patientName: "Bilal Hussain", date: "2026-04-22", time: "10:15 AM", status: "Pending" },
-];
+const initialUpcomingAppointments: Appointment[] = [];
 
-const initialPastAppointments: Appointment[] = [
-  { id: "AP-091", patientName: "Zainab Fatima", date: "2026-04-12", time: "09:30 AM", status: "Completed" },
-  { id: "AP-090", patientName: "Imran Shah", date: "2026-04-11", time: "01:00 PM", status: "Missed" },
-  { id: "AP-089", patientName: "Maryam Noor", date: "2026-04-10", time: "02:45 PM", status: "Completed" },
-];
+const initialPastAppointments: Appointment[] = [];
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+const formatIsoToDate = (isoDateTime: string) => {
+  const date = new Date(isoDateTime);
+  return date.toISOString().slice(0, 10);
+};
+
+const formatIsoTo12Hour = (isoDateTime: string) => {
+  const date = new Date(isoDateTime);
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const normalizedHours = hours % 12 === 0 ? 12 : hours % 12;
+  return `${normalizedHours}:${minutes} ${suffix}`;
+};
+
+const mapApiStatusToUiStatus = (status: ApiAppointment["status"]): AppointmentStatus => {
+  if (status === "completed") {
+    return "Completed";
+  }
+
+  if (status === "canceled") {
+    return "Cancelled";
+  }
+
+  if (status === "rescheduled") {
+    return "Pending";
+  }
+
+  return "Confirmed";
+};
+
+const mapApiAppointment = (appointment: ApiAppointment): Appointment => ({
+  id: appointment.id,
+  patientName: appointment.patient_id,
+  patientId: appointment.patient_id,
+  patientDisplayId: appointment.patient_id,
+  date: formatIsoToDate(appointment.scheduled_for),
+  time: formatIsoTo12Hour(appointment.scheduled_for),
+  status: mapApiStatusToUiStatus(appointment.status),
+});
+
 const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { patients } = useDoctorPatient();
+  const todayDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [appointmentFilter, setAppointmentFilter] = useState<AppointmentFilter>("today");
   const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>(initialUpcomingAppointments);
   const [pastAppointments, setPastAppointments] = useState<Appointment[]>(initialPastAppointments);
-  const [patientNameInput, setPatientNameInput] = useState("");
-  const [dateInput, setDateInput] = useState("2026-04-18");
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [patientIdInput, setPatientIdInput] = useState("");
+  const [dateInput, setDateInput] = useState(todayDate);
   const [timeInput, setTimeInput] = useState("09:00");
   const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
   const [editDateInput, setEditDateInput] = useState("");
   const [editTimeInput, setEditTimeInput] = useState("");
 
+  useEffect(() => {
+    const loadAppointments = async () => {
+      try {
+        const response = await appointmentsApi.list();
+
+        if (response.length === 0) {
+          return;
+        }
+
+        const mappedAppointments = response.map((apiAppointment) => {
+          const mapped = mapApiAppointment(apiAppointment);
+          const matchedPatient = patients.find((patient) => patient.id === apiAppointment.patient_id);
+          return {
+            ...mapped,
+            patientName: matchedPatient?.name ?? mapped.patientName,
+            patientDisplayId: matchedPatient?.displayId ?? mapped.patientDisplayId,
+          };
+        });
+        const nextUpcoming = mappedAppointments.filter(
+          (appointment) => appointment.status !== "Completed" && appointment.status !== "Cancelled",
+        );
+        const nextPast = mappedAppointments.filter(
+          (appointment) => appointment.status === "Completed" || appointment.status === "Cancelled",
+        );
+
+        setUpcomingAppointments(nextUpcoming);
+        setPastAppointments(nextPast);
+        setApiError(null);
+      } catch {
+        setApiError("No available data.");
+      }
+    };
+
+    void loadAppointments();
+  }, [patients]);
+
   const filteredUpcomingAppointments = useMemo(() => {
     if (appointmentFilter === "today") {
-      return upcomingAppointments.filter((appointment) => appointment.date === "2026-04-18");
+      return upcomingAppointments.filter((appointment) => appointment.date === todayDate);
     }
 
     return upcomingAppointments;
-  }, [appointmentFilter, upcomingAppointments]);
+  }, [appointmentFilter, upcomingAppointments, todayDate]);
 
   const statusBadgeClass = (status: AppointmentStatus) => {
     if (status === "Confirmed" || status === "Completed") {
@@ -78,25 +157,38 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
     return `${normalizedHour}:${minutePart} ${suffix}`;
   };
 
-  const handleScheduleAppointment = () => {
-    const trimmedPatientName = patientNameInput.trim();
+  const handleScheduleAppointment = async () => {
+    const selectedPatient = patients.find((patient) => patient.id === patientIdInput);
 
-    if (!trimmedPatientName || !dateInput || !timeInput) {
+    if (!selectedPatient || !dateInput || !timeInput || !user?.id) {
       return;
     }
 
-    const now = Date.now();
-    const nextAppointment: Appointment = {
-      id: `AP-${now}`,
-      patientName: trimmedPatientName,
-      date: dateInput,
-      time: formatTimeTo12Hour(timeInput),
-      status: "Pending",
-    };
-
-    setUpcomingAppointments((current) => [nextAppointment, ...current]);
-    setPatientNameInput("");
-    setTimeInput("09:00");
+    try {
+      await appointmentsApi.create({
+        patient_id: selectedPatient.id,
+        doctor_id: user.id,
+        reason: "Doctor scheduled appointment",
+        scheduled_for: `${dateInput}T${timeInput}:00`,
+      });
+      const response = await appointmentsApi.list();
+      const mappedAppointments = response.map((apiAppointment) => {
+        const mapped = mapApiAppointment(apiAppointment);
+        const matchedPatient = patients.find((patient) => patient.id === apiAppointment.patient_id);
+        return {
+          ...mapped,
+          patientName: matchedPatient?.name ?? mapped.patientName,
+          patientDisplayId: matchedPatient?.displayId ?? mapped.patientDisplayId,
+        };
+      });
+      setUpcomingAppointments(mappedAppointments.filter((appointment) => appointment.status !== "Completed" && appointment.status !== "Cancelled"));
+      setPastAppointments(mappedAppointments.filter((appointment) => appointment.status === "Completed" || appointment.status === "Cancelled"));
+      setPatientIdInput("");
+      setTimeInput("09:00");
+      setApiError(null);
+    } catch {
+      setApiError("Unable to schedule appointment on server.");
+    }
   };
 
   const handleReschedule = (appointmentId: string) => {
@@ -116,23 +208,32 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
     setEditTimeInput(`${String(normalizedHour).padStart(2, "0")}:${minutePart}`);
   };
 
-  const handleSaveReschedule = (appointmentId: string) => {
+  const handleSaveReschedule = async (appointmentId: string) => {
     if (!editDateInput || !editTimeInput) {
       return;
     }
 
-    setUpcomingAppointments((current) =>
-      current.map((appointment) =>
-        appointment.id === appointmentId
-          ? {
-              ...appointment,
-              date: editDateInput,
-              time: formatTimeTo12Hour(editTimeInput),
-              status: "Pending",
-            }
-          : appointment,
-      ),
-    );
+    try {
+      await appointmentsApi.update(appointmentId, {
+        scheduled_for: `${editDateInput}T${editTimeInput}:00`,
+        status: "rescheduled",
+      });
+      setUpcomingAppointments((current) =>
+        current.map((appointment) =>
+          appointment.id === appointmentId
+            ? {
+                ...appointment,
+                date: editDateInput,
+                time: formatTimeTo12Hour(editTimeInput),
+                status: "Pending",
+              }
+            : appointment,
+        ),
+      );
+      setApiError(null);
+    } catch {
+      setApiError("Unable to reschedule appointment.");
+    }
 
     setEditingAppointmentId(null);
     setEditDateInput("");
@@ -145,33 +246,50 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
     setEditTimeInput("");
   };
 
-  const handleCancel = (appointmentId: string) => {
-    setUpcomingAppointments((current) =>
-      current.map((appointment) =>
-        appointment.id === appointmentId
-          ? {
-              ...appointment,
-              status: "Cancelled",
-            }
-          : appointment,
-      ),
-    );
+  const handleCancel = async (appointmentId: string) => {
+    try {
+      await appointmentsApi.update(appointmentId, { status: "canceled" });
+      setUpcomingAppointments((current) =>
+        current.map((appointment) =>
+          appointment.id === appointmentId
+            ? {
+                ...appointment,
+                status: "Cancelled",
+              }
+            : appointment,
+        ),
+      );
+      setApiError(null);
+    } catch {
+      setApiError("Unable to cancel appointment.");
+    }
   };
 
-  const handleStartConsultation = (appointmentId: string) => {
+  const handleStartConsultation = async (appointmentId: string) => {
     const selectedAppointment = upcomingAppointments.find((appointment) => appointment.id === appointmentId);
 
     if (!selectedAppointment) {
       return;
     }
 
-    setUpcomingAppointments((current) => current.filter((appointment) => appointment.id !== appointmentId));
-    setPastAppointments((current) => [{ ...selectedAppointment, status: "Completed" }, ...current]);
+    try {
+      await appointmentsApi.update(appointmentId, { status: "completed" });
+      setUpcomingAppointments((current) => current.filter((appointment) => appointment.id !== appointmentId));
+      setPastAppointments((current) => [{ ...selectedAppointment, status: "Completed" }, ...current]);
+      setApiError(null);
+    } catch {
+      setApiError("Unable to mark appointment as completed.");
+    }
   };
 
   const handleOpenPatientProfile = (appointment: Appointment) => {
-    navigate(`/doctor/pages/patient-management?patient=${encodeURIComponent(appointment.patientName)}`);
+    navigate(`/doctor/pages/patient-management?patient=${encodeURIComponent(appointment.patientId)}`);
   };
+
+  const selectedPatient = useMemo(
+    () => patients.find((patient) => patient.id === patientIdInput) ?? null,
+    [patientIdInput, patients],
+  );
 
   const calendarCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -193,14 +311,17 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
           <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">
             Appointments
           </h2>
-          <p className="text-sm md:text-base text-center md:text-left ml-0 md:ml-5 md:pl-5 mt-2 text-gray-200">
-            Clear and manageable appointment board for upcoming and past consultations.
-          </p>
         </div>
         <img src={appointmentImg} alt="Banner" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
       </div>
 
       <div className="dark:bg-black px-3 md:px-6 py-6 space-y-4 font-sans">
+        {apiError && (
+          <div className="rounded-2xl border border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-950/20 dark:text-amber-300">
+            {apiError}
+          </div>
+        )}
+
         <div className="flex justify-center items-center -mt-1 md:-mt-2">
           <div className="inline-flex flex-wrap justify-center gap-2 rounded-full border border-[#0B3C5D]/30 bg-white/90 dark:bg-black/80 p-2 shadow-md backdrop-blur-sm">
             <button
@@ -280,7 +401,7 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
                     <div>
                       <div className="font-semibold">{appointment.patientName}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {appointment.date} • {appointment.time}
+                        {appointment.patientDisplayId} • {appointment.date} • {appointment.time}
                       </div>
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(appointment.status)}`}>
@@ -357,14 +478,14 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
               ))}
               {filteredUpcomingAppointments.length === 0 && (
                 <div className="rounded-2xl border border-[#0B3C5D] p-3 text-sm text-gray-500 dark:text-gray-400">
-                  No appointments in this filter.
+                  {t("auth", "noAppointmentsInThisFilter", "No appointments in this filter.")}
                 </div>
               )}
             </div>
           </div>
 
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6">
-            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Past Appointments</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "pastAppointments", "Past Appointments")}</h3>
             <div className="mt-4 space-y-3">
               {pastAppointments.map((appointment) => (
                 <div
@@ -375,7 +496,7 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
                     <div>
                       <div className="font-semibold">{appointment.patientName}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {appointment.date} • {appointment.time}
+                        {appointment.patientDisplayId} • {appointment.date} • {appointment.time}
                       </div>
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(appointment.status)}`}>
@@ -391,12 +512,19 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
         <section className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6">
           <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">➕ Schedule Appointment</h3>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-            <input
-              value={patientNameInput}
-              onChange={(event) => setPatientNameInput(event.target.value)}
-              placeholder="Patient name"
+            <select
+              value={patientIdInput}
+              onChange={(event) => setPatientIdInput(event.target.value)}
               className="rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-3 py-2 text-sm text-black dark:text-white"
-            />
+            >
+              <option value="">Select registered patient</option>
+              {patients.length === 0 && <option value="" disabled>No registered patients available</option>}
+              {patients.map((patient) => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.name} - {patient.displayId}
+                </option>
+              ))}
+            </select>
             <input
               type="date"
               value={dateInput}
@@ -412,6 +540,7 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
             <button
               type="button"
               onClick={handleScheduleAppointment}
+              disabled={!selectedPatient}
               className="rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] text-white px-4 py-2 text-sm hover:opacity-90 transition-all duration-300"
             >
               Schedule appointment

@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import dashboardImg from "/medirator_images/dashboard.png";
 import downloadIcon from "/medirator_images/download.png";
 
 import DoctorPatientDropdown from "../../../components/DoctorPatientDropdown";
 import { useDoctorPatient } from "../../../context/DoctorPatientContext";
+import { clinicalApi } from "../../../api/clinicalApi";
 
 interface VisualizerPageProps {
   darkMode?: boolean;
@@ -104,6 +105,7 @@ const TrendCard = ({ title, values, labels, unit, abnormalThreshold }: TrendCard
 const VisualizerPage = ({ darkMode = false }: VisualizerPageProps) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("week");
   const { selectedPatient } = useDoctorPatient();
+  const [recordsSummary, setRecordsSummary] = useState<{ total: number; timeline: string[] } | null>(null);
 
   const patientAdjustment = useMemo(() => {
     switch (selectedPatient.id) {
@@ -178,6 +180,23 @@ const VisualizerPage = ({ darkMode = false }: VisualizerPageProps) => {
     URL.revokeObjectURL(url);
   };
 
+  useEffect(() => {
+    const load = async () => {
+      if (!selectedPatient.id) {
+        setRecordsSummary(null);
+        return;
+      }
+      try {
+        const records = await clinicalApi.records(selectedPatient.id);
+        const timeline = (records.timeline as Array<{ summary?: string }>) ?? [];
+        setRecordsSummary({ total: timeline.length, timeline: timeline.slice(0, 5).map((item) => item.summary ?? "") });
+      } catch {
+        setRecordsSummary(null);
+      }
+    };
+    void load();
+  }, [selectedPatient.id]);
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <div className="flex flex-col md:flex-row justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-4 md:p-6 shadow-md gap-4">
@@ -185,9 +204,6 @@ const VisualizerPage = ({ darkMode = false }: VisualizerPageProps) => {
           <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">
             Visualizer
           </h2>
-          <p className="text-sm md:text-base text-center md:text-left ml-0 md:ml-5 md:pl-5 mt-2 text-gray-200">
-            Current patient: {selectedPatient.name} ({selectedPatient.id})
-          </p>
           <div className="ml-0 md:ml-5 md:pl-5 mt-3">
             <DoctorPatientDropdown darkMode={darkMode} />
           </div>
@@ -287,6 +303,7 @@ const VisualizerPage = ({ darkMode = false }: VisualizerPageProps) => {
               <li className="rounded-2xl border border-red-600 bg-red-50 dark:bg-red-950/20 p-3 text-red-700 dark:text-red-300">
                 Total abnormal values: {abnormalSummary.total}
               </li>
+              <li className="rounded-2xl border border-[#0B3C5D] p-3">Timeline records: {recordsSummary?.total ?? 0}</li>
             </ul>
           </section>
         </div>

@@ -1,6 +1,8 @@
 import bot from "/medirator_images/medibotlogo.png";
 import React, { useMemo, useState } from "react";
 
+import { useLanguage } from "../context/LanguageContext";
+
 
 type ChatMessage = {
   id: number;
@@ -9,42 +11,63 @@ type ChatMessage = {
 };
 
 const Medibot: React.FC = () => {
+  const { t } = useLanguage();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
       role: "bot",
-      text: "Hi! I’m Medibot. Ask me about services, appointments, test results, or data security.",
+      text: t("chatbot", "greeting", "Hi! I’m Medibot. Ask me about services, appointments, test reports, or records."),
     },
   ]);
   const [loading, setLoading] = useState(false);
 
   const quickPrompts = useMemo(
     () => [
-      "How do I book an appointment?",
-      "Where can I view test results?",
-      "How is my data protected?",
+      t("chatbot", "promptAppointment", "How do I book an appointment?"),
+      t("chatbot", "promptReports", "Where can I view test reports?"),
+      t("chatbot", "promptPrivacy", "How is my data protected?"),
     ],
-    []
+    [t]
   );
 
   const getBotReply = (userText: string) => {
     const normalized = userText.toLowerCase();
 
-    if (normalized.includes("appointment")) {
-      return "You can go to Services → Appointments to manage upcoming visits and history.";
+    if (normalized.includes("appointment") || normalized.includes("اپائنٹمنٹ") || normalized.includes("ملاقات")) {
+      return t(
+        "chatbot",
+        "replyAppointment",
+        "You can go to Services → Appointments to manage upcoming visits and history."
+      );
     }
-    if (normalized.includes("test") || normalized.includes("result")) {
-      return "Open Services → Test Results to review your reports and keep them organized.";
+    if (normalized.includes("test") || normalized.includes("result") || normalized.includes("رپورٹ")) {
+      return t(
+        "chatbot",
+        "replyReports",
+        "Open Services → Test Reports to review your reports and keep them organized."
+      );
     }
-    if (normalized.includes("security") || normalized.includes("data") || normalized.includes("privacy")) {
-      return "Medirator keeps your records protected with controlled access and secure handling of sensitive data.";
+    if (normalized.includes("security") || normalized.includes("data") || normalized.includes("privacy") || normalized.includes("محفوظ")) {
+      return t(
+        "chatbot",
+        "replyPrivacy",
+        "Medirator keeps your records protected with controlled access and secure handling of sensitive data."
+      );
     }
-    if (normalized.includes("history") || normalized.includes("record")) {
-      return "Medical History and Unified Records help you keep all healthcare information in one place.";
+    if (normalized.includes("history") || normalized.includes("record") || normalized.includes("تاریخ")) {
+      return t(
+        "chatbot",
+        "replyHistory",
+        "Family History helps you keep all healthcare information in one place."
+      );
     }
 
-    return "I can help with Medical History, Salts, Health Risks, Appointments, Test Results, Unified Records, Data Security, and Visualizer.";
+    return t(
+      "chatbot",
+      "replyGeneral",
+      "I can help with Family History, Salts, Health Risks, Appointments, Test Reports, and Visualizer."
+    );
   };
 
   const handleSend = async (text: string) => {
@@ -78,10 +101,7 @@ const Medibot: React.FC = () => {
     <div className="dark:text-white dark:bg-black font-sans min-h-screen flex flex-col">
       <div className="flex flex-col md:flex-row justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-4 md:p-6 shadow-md gap-4">
         <div className="">
-          <h2 className="text-3xl md:text-5xl font-bold text-center md:text-left">Medibot</h2>
-          <p className="text-sm md:text-base mt-2 text-center md:text-left text-white/90">
-            Your quick healthcare assistant chat.
-          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-center md:text-left">{t("chatbot", "title", "Medibot")}</h2>
         </div>
         <img src={bot} alt="Medibot banner" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
       </div>
@@ -105,7 +125,7 @@ const Medibot: React.FC = () => {
                 </div>
               </div>
             ))}
-            {loading && <div className="text-xs text-[#8e8e93]">Medibot is typing...</div>}
+            {loading && <div className="text-xs text-[#8e8e93]">{t("chatbot", "typing", "Medibot is typing...")}</div>}
           </div>
 
           <div className="flex flex-wrap gap-2 mt-3">
@@ -131,19 +151,19 @@ const Medibot: React.FC = () => {
               value={input}
               onChange={(ev) => setInput(ev.target.value)}
               className="flex-1 p-2 border-2 rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-              placeholder="Ask Medibot something..."
+              placeholder={t("chatbot", "placeholder", "Ask Medibot something...")}
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
               className="bg-white dark:bg-black border-2 rounded-2xl border-[#0B3C5D] hover:text-white dark:text-white hover:bg-gray-800 dark:hover:bg-[#0B3C5D] text-black px-4 rounded text-sm"
             >
-              Send
+              {t("chatbot", "send", "Send")}
             </button>
           </form>
 
           <div className="text-xs md:text-sm text-black md:text-white dark:text-gray-300 text-center md:text-right mt-3">
-            Need human help?{" "}
+            {t("chatbot", "humanHelp", "Need human help?")} {" "}
             <a href="mailto:mediratorinfo@gmail.com" className="underline">
               mediratorinfo@gmail.com
             </a>

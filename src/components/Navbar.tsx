@@ -4,9 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import mediratorLogo from "/medirator_images/mediratorlogo.png";
 import dropdownArrowLight from "/medirator_images/dropdown.png";
 import dropdownArrowDark from "/medirator_images/ddropdown.png";
+import languageIcon from "/medirator_images/langauge.png";
 import register from "/medirator_images/register.png";
 import login from "/medirator_images/login.png";
 import logoutImg from "/medirator_images/logout.png";
+import editIcon from "/medirator_images/edit.png";
 import instagram from "/medirator_images/instaicon.png";
 import youtube from "/medirator_images/youtubeicon.svg";
 import discord from "/medirator_images/discordicon.png";
@@ -31,6 +33,7 @@ import moonIcon from "/medirator_images/darkmode.svg";
 import "../index.css";
 import Dropdown from "../components/Dropdown";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 interface NavbarProps {
   darkMode: boolean;
@@ -85,15 +88,27 @@ const SocialIcon: React.FC<SocialIconProps> = ({
 
 const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const languageDropdownRef = useRef<HTMLDivElement>(null);
+  const { language, setLanguage, t } = useLanguage();
   const socialIconSizeClassName = "w-6 h-6 ";
+  const languageOptions = [
+    { code: "en", label: t("navbar", "english", "English") },
+    { code: "ur", label: t("navbar", "urdu", "Urdu") },
+  ] as const;
+  const activeLanguage = languageOptions.find((option) => option.code === language);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (languageDropdownRef.current && !languageDropdownRef.current.contains(event.target as Node)) {
+        setIsLanguageDropdownOpen(false);
       }
     };
 
@@ -116,19 +131,19 @@ const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
             {/* 🟣 Middle: Nav Links - Hidden on mobile */}
             <div className="hidden lg:flex p-6 relative">
               {[
-                { name: "Home", href: "/" },
-                { name: "Services", href: "/services" },
-                { name: "How it works", href: "/how-it-works" },
-                { name: "About Us", href: "/about" },
-                { name: "FAQs", href: "/faqs" },
-                { name: "Medibot", href: "/medibot" },
+                { name: t("navbar", "home", "Home"), href: "/" },
+                { name: t("navbar", "services", "Services"), href: "/services" },
+                { name: t("navbar", "howItWorks", "How it works"), href: "/how-it-works" },
+                { name: t("navbar", "aboutUs", "About Us"), href: "/about" },
+                { name: t("navbar", "faqs", "FAQs"), href: "/faqs" },
+                { name: t("navbar", "medibot", "Medibot"), href: "/medibot" },
               ].map((item, index) => (
                 <div
                   key={index}
                   className="relative"
                   ref={item.name === "Services" ? dropdownRef : null}
                 >
-                  {item.name === "Services" ? (
+                  {item.href === "/services" ? (
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       className="group flex items-center justify-center hover:bg-[#0B3C5D] rounded p-2 m-2 font-ibm-plex-mono font-medium text-sm dark:text-white text-black transition-all duration-200 whitespace-nowrap cursor-pointer"
@@ -153,7 +168,7 @@ const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
                       <span className="flex items-center group-hover:text-white">{item.name}</span>
                     </Link>
                   )}
-                  {item.name === "Services" && isDropdownOpen && (
+                  {item.href === "/services" && isDropdownOpen && (
                     <div className="absolute top-full left-0 z-50 mt-1">
                       <Dropdown darkMode={darkMode} />
                     </div>
@@ -229,12 +244,68 @@ const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
         </div>
 
         <div className="hidden md:flex gap-1 relative ml-auto mr-4">
+          <div className="relative" ref={languageDropdownRef}>
+            <button
+              onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
+              className="bg-white border-2 border-[#0B3C5D] text-[#0B3C5D] shadow-sm hover:shadow-md dark:bg-[#0B3C5D] dark:text-white dark:border-white/20 dark:hover:bg-[#123f5e] text-sm px-3 py-2 rounded-2xl transition-all duration-300 inline-flex items-center gap-3 cursor-pointer min-w-[180px] justify-between whitespace-nowrap"
+            >
+              <span className="flex items-center gap-2 min-w-0">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0B3C5D] dark:bg-white/10 shrink-0">
+                  <img src={languageIcon} alt="Language" className="h-4 w-4 object-contain" loading="lazy" />
+                </span>
+                <span className="min-w-0 text-left leading-tight">
+                  <span className="block text-[11px] uppercase tracking-[0.18em] opacity-70">
+                    {t("navbar", "language", "Language")}
+                  </span>
+                  <span className="block truncate font-medium">{activeLanguage?.label ?? "English"}</span>
+                </span>
+              </span>
+              <img
+                src={darkMode ? dropdownArrowLight : dropdownArrowDark}
+                alt="Language Dropdown"
+                className={`h-3 w-3 flex-shrink-0 transition-all duration-200 ${
+                  isLanguageDropdownOpen ? "rotate-180" : ""
+                }`}
+                loading="lazy"
+              />
+            </button>
+
+            {isLanguageDropdownOpen && (
+              <div
+                className={`absolute right-0 mt-2 z-50 flex flex-col shadow-lg rounded-2xl p-2 border-2 min-w-[180px] ${
+                  darkMode ? "bg-[#071621] border-white/10" : "bg-white border-[#0B3C5D]"
+                }`}
+              >
+                {languageOptions.map((option) => (
+                  <button
+                    key={option.code}
+                    onClick={() => {
+                      setLanguage(option.code);
+                      setIsLanguageDropdownOpen(false);
+                    }}
+                    className={`m-1 rounded-xl transition-all duration-200 cursor-pointer text-left px-3 py-2 font-ibm-plex-mono text-sm border ${
+                      language === option.code
+                        ? darkMode
+                          ? "bg-white/10 text-white border-white/20"
+                          : "bg-[#0B3C5D] text-white border-[#0B3C5D]"
+                        : darkMode
+                          ? "bg-[#0B3C5D] hover:bg-white/10 text-white border-white/10"
+                          : "bg-[#f5f8fb] hover:bg-[#0B3C5D] text-black hover:text-white border-[#d2dee8]"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {!isAuthenticated && (
             <>
               <button
                 onClick={() => navigate("/register")}
                 style={{ cursor: "pointer" }}
-                className="bg-[#0B3C5D] dark:bg-black border-4 border-[#0B3C5D] hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-2 cursor-pointer"
+                className="bg-[#0B3C5D] dark:bg-black border-4 border-[#0B3C5D] hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-2xl transition-all duration-300 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 <img
                   src={register}
@@ -242,13 +313,13 @@ const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
                   className="w-4 h-4 object-cover rounded"
                   loading="lazy"
                 />
-                Register
+                {t("navbar", "register", "Register")}
               </button>
 
               <button
                 onClick={() => navigate("/login")}
                 style={{ cursor: "pointer" }}
-                className="bg-[#0B3C5D] dark:bg-black border-4 border-[#0B3C5D] hover:bg-gray-800  text-white text-sm px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-2 cursor-pointer"
+                className="bg-[#0B3C5D] dark:bg-black border-4 border-[#0B3C5D] hover:bg-gray-800  text-white text-sm px-4 py-2 rounded-2xl transition-all duration-300 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 <img
                   src={login}
@@ -256,7 +327,7 @@ const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
                   className="w-5 h-5 object-cover rounded"
                   loading="lazy"
                 />
-                Login
+                {t("navbar", "login", "Login")}
               </button>
             </>
           )}
@@ -265,9 +336,9 @@ const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
             <button
               onClick={() => navigate("/admin")}
               style={{ cursor: "pointer" }}
-              className="bg-white dark:bg-black border-4 border-[#0B3C5D] hover:bg-[#0B3C5D] hover:text-white dark:text-white text-[#0B3C5D] text-sm px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-2 cursor-pointer"
+              className="bg-white dark:bg-black border-4 border-[#0B3C5D] hover:bg-[#0B3C5D] hover:text-white dark:text-white text-[#0B3C5D] text-sm px-4 py-2 rounded-2xl transition-all duration-300 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
-              Admin Panel
+              {t("navbar", "adminPanel", "Admin Panel")}
             </button>
           )}
 
@@ -275,23 +346,34 @@ const Navbar = ({ darkMode, setDarkMode }: NavbarProps) => {
             <button
               onClick={() => navigate("/doctor")}
               style={{ cursor: "pointer" }}
-              className="bg-white dark:bg-black border-4 border-[#0B3C5D] hover:bg-[#0B3C5D] hover:text-white dark:text-white text-[#0B3C5D] text-sm px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-2 cursor-pointer"
+              className="bg-white dark:bg-black border-4 border-[#0B3C5D] hover:bg-[#0B3C5D] hover:text-white dark:text-white text-[#0B3C5D] text-sm px-4 py-2 rounded-2xl transition-all duration-300 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
-              Doctor Panel
+              {t("navbar", "doctorPanel", "Doctor Panel")}
+            </button>
+          )}
+
+          {isAuthenticated && user?.role === "patient" && (
+            <button
+              onClick={() => navigate("/profile")}
+              style={{ cursor: "pointer" }}
+              className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 text-sm transition-all duration-300 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
+            >
+              <img src={editIcon} alt="Edit profile" className="w-5 h-5 object-cover rounded" loading="lazy" />
+              {t("navbar", "profile", "Profile")}
             </button>
           )}
 
           {isAuthenticated && (
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 navigate("/login");
               }}
               style={{ cursor: "pointer" }}
-              className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 text-sm transition-all duration-300 flex items-center gap-2 cursor-pointer"
+              className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 text-sm transition-all duration-300 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
               <img src={logoutImg} alt="Logout" className="w-5 h-5 object-cover rounded" loading="lazy" />
-              Logout
+              {t("navbar", "logout", "Logout")}
             </button>
           )}
         </div>

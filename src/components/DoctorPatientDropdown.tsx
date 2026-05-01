@@ -44,13 +44,22 @@ const DoctorPatientDropdown = ({ darkMode }: DoctorPatientDropdownProps) => {
         type="button"
         onClick={() => setIsOpen((current) => !current)}
         className={toggleButtonClassName}
+        disabled={patients.length === 0}
       >
-        <div className="font-ibm-plex-mono text-sm truncate text-left">{selectedPatient.name}</div>
+        <div className="flex flex-col items-start text-left min-w-0">
+          <div className="font-ibm-plex-mono text-sm truncate w-40">{selectedPatient.name}</div>
+          <div className="text-[10px] opacity-80 truncate w-40">{selectedPatient.displayId}</div>
+        </div>
         <span className="text-xs opacity-80">{isOpen ? "▲" : "▼"}</span>
       </button>
 
       {isOpen && (
         <div className="mt-1">
+          {patients.length === 0 && (
+            <div className="m-1 w-48 rounded-md bg-white px-3 py-2 text-sm text-black dark:bg-[#0B3C5D] dark:text-white">
+              No registered patients
+            </div>
+          )}
           {patients.map((patient) => (
             <button
               key={patient.id}
@@ -61,7 +70,10 @@ const DoctorPatientDropdown = ({ darkMode }: DoctorPatientDropdownProps) => {
               }}
               className={`${itemClassName} ${patient.id === selectedPatient.id ? "ring-2 ring-white/40" : ""}`}
             >
-              <div className="font-ibm-plex-mono text-sm truncate">{patient.name}</div>
+              <div className="flex flex-col items-start min-w-0">
+                <div className="font-ibm-plex-mono text-sm truncate w-40">{patient.name}</div>
+                <div className="text-[10px] opacity-80 truncate w-40">{patient.displayId}</div>
+              </div>
             </button>
           ))}
         </div>

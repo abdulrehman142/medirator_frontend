@@ -3,10 +3,9 @@ import saltsImg from "/medirator_images/salts.png";
 import healthrisksImg from "/medirator_images/healthrisks.png";
 import appointmentsImg from "/medirator_images/appointment.png";
 import testresultsImg from "/medirator_images/testresults.png";
-import recordsImg from "/medirator_images/records.png";
-import datasecurityImg from "/medirator_images/datasecurity.png";
 import visualizerImg from "/medirator_images/dashboard.png";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 
 
@@ -22,15 +21,14 @@ interface DropdownProps {
 }
 
 const Dropdown = ({ darkMode }: DropdownProps) => {
+  const { t } = useLanguage();
   const services = [
-    { name: "Medical History", img: historyImg, route: "/medical-history" },
-    { name: "Salts", img: saltsImg, route: "/salts" },
-    { name: "Health Risks", img: healthrisksImg, route: "/health-risks" },
-    { name: "Appointments", img: appointmentsImg, route: "/appointments" },
-    { name: "Test Results", img: testresultsImg, route: "/test-results" },
-    { name: "Unified Records", img: recordsImg, route: "/unified-records" },
-    { name: "Data Security", img: datasecurityImg, route: "/data-security" },
-    { name: "Visualizer", img: visualizerImg, route: "/visualizer" },
+    { name: t("navbar", "familyHistory", "Family History"), img: historyImg, route: "/family-history" },
+    { name: t("navbar", "salts", "Salts"), img: saltsImg, route: "/salts" },
+    { name: t("navbar", "healthRisks", "Health Risks"), img: healthrisksImg, route: "/health-risks" },
+    { name: t("navbar", "appointments", "Appointments"), img: appointmentsImg, route: "/appointments" },
+    { name: t("navbar", "reportAnalysis", "Report Analysis"), img: testresultsImg, route: "/report-analysis" },
+    { name: t("navbar", "visualizer", "Visualizer"), img: visualizerImg, route: "/visualizer" },
   ];
 
   return (

@@ -7,6 +7,7 @@ import discord from "/medirator_images/discordicon.png";
 import wdiscord from "/medirator_images/wdiscordicon.png";
 import sunIcon from "/medirator_images/sun.png";
 import moonIcon from "/medirator_images/moon.jpg";
+import { useLanguage } from "../context/LanguageContext";
 
 
 
@@ -65,17 +66,18 @@ const SocialIcon: React.FC<SocialIconProps> = ({
 };
 
 const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
+  const { t } = useLanguage();
   const navLinkClass =
     "py-2 xl:px-0 hover:text-white hover:bg-[#0B3C5D] dark:hover:bg-[#0B3C5D] rounded w-max transition-all duration-200";
   const socialIconSizeClassName = "w-6 h-6 ";
   const defaultFooterLinks = [
-    { label: "Home", path: "/" },
-    { label: "Services", path: "/services" },
-    { label: "How it works", path: "/how-it-works" },
-    { label: "Medibot", path: "/medibot" },
-    { label: "FAQs", path: "/faqs" },
-    { label: "Login", path: "/login" },
-    { label: "About Us", path: "/about" },
+    { label: t("navbar", "home", "Home"), path: "/" },
+    { label: t("navbar", "services", "Services"), path: "/services" },
+    { label: t("navbar", "howItWorks", "How it works"), path: "/how-it-works" },
+    { label: t("navbar", "medibot", "Medibot"), path: "/medibot" },
+    { label: t("navbar", "faqs", "FAQs"), path: "/faqs" },
+    { label: t("navbar", "login", "Login"), path: "/login" },
+    { label: t("navbar", "aboutUs", "About Us"), path: "/about" },
   ];
   const footerLinks = customLinks && customLinks.length > 0 ? customLinks : defaultFooterLinks;
 
@@ -194,7 +196,7 @@ const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
 
               {/* Footer tagline */}
               <div className="font-ibm-plex-mono dark:text-[#FFFFFF] text-[#0B3C5D] text-base leading-[32px]  break-words whitespace-normal m-2 p-0">
-                Wellness, effortless with Medirator.
+                {t("footer", "tagline", "Wellness, effortless with Medirator.")}
               </div>
             </div>
           </div>
@@ -204,7 +206,7 @@ const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
         <div className="mx-0 xl:mx-10 flex flex-col xl:flex-row justify-between items-start gap-y-4">
           <div className="text-[#250843] mx-4 xl:mx-6">
             <p className="text-sm font-ibm-plex-mono dark:text-[#FFFFFF] text-[#250843]">
-              © 2025 Medirator All Rights Reserved.
+              {t("footer", "rights", "© 2025 Medirator All Rights Reserved.")}
             </p>
           </div>
 
@@ -213,14 +215,14 @@ const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
               to="/privacy-policy"
               className="hover:underline text-[#0B3C5D] text-xs block  mx-2 font-ibm-plex-mono dark:text-[#FFFFFF]"
             >
-              Privacy Policy
+              {t("footer", "privacyPolicy", "Privacy Policy")}
             </Link>
 
             <Link
               to="/terms"
               className="hover:underline text-[#0B3C5D] text-xs block  mx-2 font-ibm-plex-mono dark:text-[#FFFFFF]"
             >
-              Terms & Conditions
+              {t("footer", "terms", "Terms & Conditions")}
             </Link>
           </div>
         </div>
@@ -229,7 +231,7 @@ const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
       {/* Footer Hero / Logo Section */}
       <div className="overflow-hidden bg-[#FFFFFF] dark:bg-black">
         <h1 className="tracking-tight font-jersey text-[#0B3C5D] dark:text-white  xl:text-[90px] text-[91.03px] text-center xl:leading-[180.24px] leading-[56.9px]">
-         Medirator-Your Custom Healthcare Assistant
+         {t("footer", "heroLine", "Medirator-Your Custom Healthcare Assistant")}
         </h1>
       </div>
     </div>

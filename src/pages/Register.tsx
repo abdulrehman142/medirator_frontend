@@ -5,6 +5,7 @@ import registerImage from "/medirator_images/register.png";
 import patient from "/medirator_images/patient.png";
 import doctor from "/medirator_images/doctor.png";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 
 
@@ -16,6 +17,7 @@ interface RegisterProps {
 }
 
 const Register = ({ darkMode = false }: RegisterProps) => {
+  const { t } = useLanguage();
   const { registerAccount } = useAuth();
   const [role, setRole] = useState<"patient" | "doctor">("patient");
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
@@ -30,8 +32,8 @@ const Register = ({ darkMode = false }: RegisterProps) => {
   const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   const roleOptions = [
-    { value: "patient" as const, label: "Patient", icon: patient },
-    { value: "doctor" as const, label: "Doctor", icon: doctor },
+    { value: "patient" as const, label: t("auth", "patient", "Patient"), icon: patient },
+    { value: "doctor" as const, label: t("auth", "doctor", "Doctor"), icon: doctor },
   ];
 
   const selectedRole = roleOptions.find((option) => option.value === role) ?? roleOptions[0];
@@ -56,32 +58,31 @@ const Register = ({ darkMode = false }: RegisterProps) => {
     setLoading(true);
 
     if (!role || !name.trim() || !email.trim() || !phone.trim() || !password.trim() || !confirmPassword.trim()) {
-      setError("Please fill all registration details.");
+      setError(t("auth", "registrationDetailsRequired", "Please fill all registration details."));
       setLoading(false);
       return;
     }
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
+      setError(t("auth", "invalidEmail", "Please enter a valid email address."));
       setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Password and confirm password must match.");
+      setError(t("auth", "passwordMismatch", "Password and confirm password must match."));
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password should be at least 6 characters.");
+      setError(t("auth", "passwordTooShort", "Password should be at least 6 characters."));
       setLoading(false);
       return;
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      const registerResult = registerAccount({
+      const registerResult = await registerAccount({
         email,
         role,
         password,
@@ -90,7 +91,7 @@ const Register = ({ darkMode = false }: RegisterProps) => {
       });
 
       if (!registerResult.ok) {
-        setError(registerResult.error ?? "Registration failed. Please try again.");
+        setError(registerResult.error ?? t("auth", "registrationFailed", "Registration failed. Please try again."));
         setLoading(false);
         return;
       }
@@ -102,7 +103,7 @@ const Register = ({ darkMode = false }: RegisterProps) => {
       setPassword("");
       setConfirmPassword("");
     } catch {
-      setError("Registration failed. Please try again.");
+      setError(t("auth", "registrationFailed", "Registration failed. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -119,22 +120,21 @@ const Register = ({ darkMode = false }: RegisterProps) => {
             loading="lazy"
           />
           <div className="text-xl text-[#0B3C5D] dark:text-white md:text-2xl font-bold">
-            Create your account
+            {t("auth", "registerTitle", "Create your account")}
           </div>
           <div className="p-2 m-2 text-sm text-[#8e8e93] md:text-base">
-            Register as Patient or Doctor
-            <br /> to get personalized healthcare access.
+            {t("auth", "registerSubtitle", "Register as Patient or Doctor to get personalized healthcare access.")}
           </div>
         </div>
 
         <div className="w-full max-w-4xl m-2 md:m-4 px-3 md:px-4 md:px-8 py-6 md:py-8 relative z-10">
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-8">
             {error && <div className="mb-4 text-red-500 text-sm md:text-base">{error}</div>}
-            {success && <div className="mb-4 text-green-600 text-sm md:text-base">Registration successful.</div>}
+            {success && <div className="mb-4 text-green-600 text-sm md:text-base">{t("auth", "registerSuccess", "Registration successful.")}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
               <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Role</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "role", "Role")}</label>
                 <div className="relative" ref={roleDropdownRef}>
                   <button
                     type="button"
@@ -184,61 +184,61 @@ const Register = ({ darkMode = false }: RegisterProps) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Full Name</label>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "fullName", "Full Name")}</label>
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                    placeholder="Your full name"
+                    placeholder={t("auth", "fullNamePlaceholder", "Your full name")}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Phone</label>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "phone", "Phone")}</label>
                   <input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                    placeholder="03XXXXXXXXX"
+                    placeholder={t("auth", "phonePlaceholder", "03XXXXXXXXX")}
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Email</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "email", "Email")}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                  placeholder="you@example.com"
+                  placeholder={t("auth", "emailPlaceholder", "you@example.com")}
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Password</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "password", "Password")}</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                    placeholder="Create password"
+                    placeholder={t("auth", "createPassword", "Create password")}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Confirm Password</label>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "confirmPassword", "Confirm Password")}</label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                    placeholder="Confirm password"
+                    placeholder={t("auth", "confirmPasswordPlaceholder", "Confirm password")}
                     required
                   />
                 </div>
@@ -250,10 +250,10 @@ const Register = ({ darkMode = false }: RegisterProps) => {
                   disabled={loading}
                   className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 w-full md:w-auto text-sm disabled:opacity-50"
                 >
-                  {loading ? "Registering..." : "Register"}
+                  {loading ? t("auth", "registering", "Registering...") : t("auth", "registerButton", "Register")}
                 </button>
                 <div className="text-xs md:text-sm text-black dark:text-gray-300 text-center md:text-right">
-                  Your account helps keep records and care secure.
+                  {t("auth", "recordsSecure", "Your account helps keep records and care secure.")}
                 </div>
               </div>
             </form>

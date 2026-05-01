@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import dashboardImg from "/medirator_images/dashboard.png";
 import healthRisksImg from "/medirator_images/healthrisks.png";
 
 import DoctorPatientDropdown from "../../../components/DoctorPatientDropdown";
+import { aiApi } from "../../../api/aiApi";
 import { useDoctorPatient } from "../../../context/DoctorPatientContext";
 
 interface AIRiskIndicatorPageProps {
@@ -14,6 +15,14 @@ interface AIRiskIndicatorPageProps {
 const AIRiskIndicatorPage = ({ darkMode = false }: AIRiskIndicatorPageProps) => {
   const navigate = useNavigate();
   const { selectedPatient } = useDoctorPatient();
+  const [apiRiskProfile, setApiRiskProfile] = useState<{
+    score: number;
+    level: string;
+    trend: string;
+    factors: string[];
+    history: number[];
+  } | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const riskProfile = useMemo(() => {
     const profiles: Record<string, { score: number; level: string; trend: string; factors: string[]; history: number[] }> = {
@@ -43,12 +52,39 @@ const AIRiskIndicatorPage = ({ darkMode = false }: AIRiskIndicatorPageProps) => 
     return profiles[selectedPatient.id] ?? profiles["PT-240318-07"];
   }, [selectedPatient.id]);
 
-  const riskScore = riskProfile.score;
-  const riskLevel = riskProfile.level;
-  const trend = riskProfile.trend;
+  useEffect(() => {
+    const loadRisk = async () => {
+      if (!selectedPatient.id) {
+        setApiRiskProfile(null);
+        setApiError("No registered patients available.");
+        return;
+      }
 
-  const contributingFactors = riskProfile.factors;
-  const riskHistory = riskProfile.history;
+      try {
+        const response = await aiApi.riskScore({ patient_id: selectedPatient.id });
+        setApiRiskProfile({
+          score: response.score,
+          level: response.level,
+          trend: response.trend,
+          factors: response.factors,
+          history: response.history,
+        });
+        setApiError(null);
+      } catch {
+        setApiError("No available data.");
+      }
+    };
+
+    void loadRisk();
+  }, [selectedPatient.id]);
+
+  const effectiveRiskProfile = apiRiskProfile ?? riskProfile;
+  const riskScore = effectiveRiskProfile.score;
+  const riskLevel = effectiveRiskProfile.level;
+  const trend = effectiveRiskProfile.trend;
+
+  const contributingFactors = effectiveRiskProfile.factors;
+  const riskHistory = effectiveRiskProfile.history;
 
   const scoreClassName = useMemo(() => {
     if (riskScore >= 70) {
@@ -69,12 +105,14 @@ const AIRiskIndicatorPage = ({ darkMode = false }: AIRiskIndicatorPageProps) => 
           <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">
             AI Risk Indicator
           </h2>
-          <p className="text-sm md:text-base text-center md:text-left ml-0 md:ml-5 md:pl-5 mt-2 text-gray-200">
-            Current patient: {selectedPatient.name} ({selectedPatient.id})
-          </p>
           <div className="ml-0 md:ml-5 md:pl-5 mt-3">
             <DoctorPatientDropdown darkMode={darkMode} />
           </div>
+          {apiError && (
+            <div className="ml-0 md:ml-5 md:pl-5 mt-3 max-w-md rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-500 dark:bg-amber-950/20 dark:text-amber-300">
+              {apiError}
+            </div>
+          )}
         </div>
         <img src={healthRisksImg} alt="AI Risk Indicator Banner" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
       </div>

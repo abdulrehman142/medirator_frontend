@@ -6,6 +6,7 @@ import encryptionIcon from "/medirator_images/encryption.png";
 import bandrugIcon from "/medirator_images/bandrug.png";
 import manageschedulesIcon from "/medirator_images/manageschedules.png";
 import simpleinterfaceIcon from "/medirator_images/simpleinterface.png";
+import { useLanguage } from "../context/LanguageContext";
 
 
 
@@ -18,6 +19,7 @@ interface DropdownProps {
   darkMode: boolean;
 }
 const Whychooseus = ({ darkMode }: DropdownProps) => {
+  const { t } = useLanguage();
   return (
     <div>
       <div className="flex dark:bg-black bg-white">
@@ -29,7 +31,7 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
         />
         <div className="flex flex-col p-5 m-5">
           <div className="text-[#0B3C5D] dark:text-white text-2xl font-bold mb-5">
-            Why Choose Us?
+            {t("whyChooseUs", "title", "Why Choose Us?")}
           </div>
           <div className="flex items-center">
             <img
@@ -39,7 +41,7 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              Access <strong>patient history</strong>, medications, and family medical background.
+              {t("whyChooseUs", "point1", "Access patient history, medications, and family medical background.")}
             </div>
           </div>
           <div className="flex items-center">
@@ -50,7 +52,7 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              Predict health risks for <strong>proactive care</strong>.
+              {t("whyChooseUs", "point2", "Predict health risks for proactive care.")}
             </div>
           </div>
           <div className="flex items-center">
@@ -61,7 +63,7 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              Protect sensitive information with <strong>encryption and access control</strong>.
+              {t("whyChooseUs", "point3", "Protect sensitive information with encryption and access control.")}
             </div>
           </div>
           <div className="flex items-center">
@@ -72,7 +74,7 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-             Avoid duplication and harmful <strong>drug interactions</strong>.
+             {t("whyChooseUs", "point4", "Avoid duplication and harmful drug interactions.")}
             </div>
           </div>
           <div className="flex items-center">
@@ -83,7 +85,7 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-             <strong>Manage schedules, records, tests, and appointments</strong><br/> in one place.
+             {t("whyChooseUs", "point5", "Manage schedules, records, tests, and appointments in one place.")}
             </div>
           </div>
           <div className="flex items-center">
@@ -94,7 +96,7 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              <strong>Simplified interfaces</strong> for doctors and patients.
+              {t("whyChooseUs", "point6", "Simplified interfaces for doctors and patients.")}
             </div>
           </div>
         </div>

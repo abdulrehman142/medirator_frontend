@@ -1,8 +1,12 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+
+import { usersApi } from "../api/usersApi";
+import { toPatientDisplayId } from "../utils/idDisplay";
 
 export interface DoctorPatientRecord {
   id: string;
+  displayId: string;
   name: string;
   age: string;
   gender: string;
@@ -11,103 +15,170 @@ export interface DoctorPatientRecord {
   allergies: string;
   chronicDiseases: string;
   emergencyContact: string;
+  medicalHistory: string;
   doctorNotes: string[];
+  // PATIENT SCOPE: uploadedDocuments are STRICTLY scoped to this patient
+  // Each document in this array must have a corresponding patient_id in metadata
+  // and can ONLY be accessed by operations on this specific patient
   uploadedDocuments: Array<{
+    id?: string;
     title: string;
     type: string;
     summary: string;
+    metadata?: Record<string, string>;
+    doctorNote?: string;
   }>;
 }
 
-const initialPatients: DoctorPatientRecord[] = [
-  {
-    id: "PT-240318-07",
-    name: "Ayesha Khan",
-    age: "32",
-    gender: "Female",
-    contact: "+92 300 1234567",
-    bloodGroup: "B+",
-    allergies: "Penicillin, Dust",
-    chronicDiseases: "Hypertension",
-    emergencyContact: "Imran Khan (+92 301 9876543)",
-    doctorNotes: [
-      "BP remains stable this week; continue current antihypertensive plan.",
-      "Recommend low-sodium diet and 30 minutes daily walk.",
-      "Follow-up suggested in 14 days with home BP log.",
-    ],
-    uploadedDocuments: [
-      {
-        title: "CBC Report",
-        type: "Report",
-        summary: "Complete blood count review from 12 Mar 2026 with no urgent abnormalities.",
-      },
-      {
-        title: "Chest Scan",
-        type: "Scan",
-        summary: "Chest scan from 03 Feb 2026 showing no acute chest findings.",
-      },
-      {
-        title: "ECG Summary",
-        type: "Report",
-        summary: "ECG summary from 27 Jan 2026 with normal rhythm interpretation.",
-      },
-    ],
+const emptyPatient: DoctorPatientRecord = {
+  id: "",
+  displayId: "",
+  name: "No registered patients available",
+  age: "-",
+  gender: "Not specified",
+  contact: "Not specified",
+  bloodGroup: "Not specified",
+  allergies: "Not recorded",
+  chronicDiseases: "Not recorded",
+  emergencyContact: "Not recorded",
+  medicalHistory: "Not recorded",
+  doctorNotes: [],
+  uploadedDocuments: [],
+};
+
+const toStringValue = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value;
+    }
+  }
+
+  return "";
+};
+
+const toAgeString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return String(value);
+    }
+
+    if (typeof value === "string" && value.trim().length > 0 && !Number.isNaN(Number(value))) {
+      return String(Number(value));
+    }
+  }
+
+  return "-";
+};
+
+const calculateAgeFromDateOfBirth = (value: unknown) => {
+  if (typeof value !== "string" || !value.trim()) {
+    return "-";
+  }
+
+  const dateOfBirth = new Date(value);
+  if (Number.isNaN(dateOfBirth.getTime())) {
+    return "-";
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - dateOfBirth.getFullYear();
+  const monthDifference = today.getMonth() - dateOfBirth.getMonth();
+
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dateOfBirth.getDate())) {
+    age -= 1;
+  }
+
+  return age >= 0 ? String(age) : "-";
+};
+
+const buildPatientRecord = (
+  patientId: string,
+  displayId: string,
+  name: string,
+  age: number,
+  medicalHistory: string,
+  details?: {
+    gender?: string;
+    phone?: string;
+    bloodGroup?: string;
+    allergies?: string;
+    chronicDiseases?: string;
+    emergencyContact?: string;
   },
-  {
-    id: "PT-240402-11",
-    name: "Hassan Ali",
-    age: "45",
-    gender: "Male",
-    contact: "+92 302 2223344",
-    bloodGroup: "A-",
-    allergies: "None known",
-    chronicDiseases: "Type 2 Diabetes",
-    emergencyContact: "Amina Ali (+92 312 6655443)",
-    doctorNotes: [
-      "Fasting sugar elevated; monitor post-prandial readings for 1 week.",
-      "Medication adherence improved since last visit.",
-    ],
-    uploadedDocuments: [
-      {
-        title: "HbA1c Report",
-        type: "Report",
-        summary: "HbA1c report from 04 Apr 2026 showing elevated sugar control markers.",
-      },
-      {
-        title: "Kidney Function Test",
-        type: "Report",
-        summary: "Kidney function test from 02 Apr 2026 for diabetes monitoring.",
-      },
-    ],
-  },
-  {
-    id: "PT-240215-03",
-    name: "Sara Iqbal",
-    age: "28",
-    gender: "Female",
-    contact: "+92 333 9988776",
-    bloodGroup: "O+",
-    allergies: "Peanuts",
-    chronicDiseases: "Asthma",
-    emergencyContact: "Bilal Iqbal (+92 321 7722110)",
-    doctorNotes: [
-      "Inhaler usage technique reviewed and corrected.",
-      "Avoid known triggers and keep rescue inhaler available.",
-    ],
-    uploadedDocuments: [
-      {
-        title: "Pulmonary Function Test",
-        type: "Report",
-        summary: "Pulmonary function test from 15 Feb 2026 supporting asthma follow-up.",
-      },
-      {
-        title: "Allergy Panel",
-        type: "Report",
-        summary: "Allergy panel from 11 Feb 2026 confirming peanut sensitivity.",
-      },
-    ],
-  },
-];
+): DoctorPatientRecord => {
+  return {
+    id: patientId,
+    displayId: toPatientDisplayId(displayId || patientId),
+    name,
+    age: String(age),
+    gender: details?.gender ?? "Not specified",
+    contact: details?.phone ?? "Not specified",
+    bloodGroup: details?.bloodGroup ?? "Not specified",
+    allergies: details?.allergies ?? "Not recorded",
+    chronicDiseases: details?.chronicDiseases ?? (medicalHistory || "Not recorded"),
+    emergencyContact: details?.emergencyContact ?? "Not recorded",
+    medicalHistory: medicalHistory || "Not recorded",
+    // PATIENT SCOPE: These arrays are initially empty for each patient
+    // and are populated separately during hydration for the selected patient
+    doctorNotes: [],
+    uploadedDocuments: [],
+  };
+};
+
+const normalizeRegisteredPatient = (patient: {
+  id?: string;
+  user_id?: string;
+  patient_id?: string;
+  display_id?: string;
+  patientId?: string;
+  patientID?: string;
+  name?: string;
+  full_name?: string;
+  patient_name?: string;
+  fullName?: string;
+  age?: number | string;
+  patient_age?: number | string;
+  years_of_age?: number | string;
+  date_of_birth?: string;
+  dateOfBirth?: string;
+  dob?: string;
+  birth_date?: string;
+  gender?: string;
+  phone?: string;
+  blood_group?: string;
+  bloodGroup?: string;
+  allergies?: string[];
+  chronic_diseases?: string[];
+  chronicDiseases?: string[];
+  emergency_contact?: string;
+  emergencyContact?: string;
+  medical_history?: string;
+  medicalHistory?: string;
+}) =>
+  buildPatientRecord(
+    toStringValue(patient.id, patient.user_id, patient.patient_id, patient.patientId, patient.patientID),
+    toStringValue(patient.display_id, patient.patient_id, patient.patientId, patient.patientID, patient.id),
+    toStringValue(patient.name, patient.full_name, patient.patient_name, patient.fullName) || "Unnamed patient",
+    Number(
+      toAgeString(
+        patient.age,
+        patient.patient_age,
+        patient.years_of_age,
+        calculateAgeFromDateOfBirth(
+          patient.date_of_birth ?? patient.dateOfBirth ?? patient.dob ?? patient.birth_date,
+        ),
+      ),
+    ) || 0,
+    patient.medical_history ?? patient.medicalHistory ?? "",
+    {
+      gender: patient.gender,
+      phone: patient.phone,
+      bloodGroup: toStringValue(patient.blood_group, patient.bloodGroup),
+      allergies: (patient.allergies ?? []).join(", "),
+      chronicDiseases: (patient.chronic_diseases ?? patient.chronicDiseases ?? []).join(", "),
+      emergencyContact: toStringValue(patient.emergency_contact, patient.emergencyContact),
+    },
+  );
 
 interface DoctorPatientContextValue {
   patients: DoctorPatientRecord[];
@@ -121,11 +192,31 @@ interface DoctorPatientContextValue {
 const DoctorPatientContext = createContext<DoctorPatientContextValue | null>(null);
 
 export const DoctorPatientProvider = ({ children }: { children: ReactNode }) => {
-  const [patients, setPatients] = useState<DoctorPatientRecord[]>(initialPatients);
-  const [selectedPatientId, setSelectedPatientId] = useState(initialPatients[0].id);
+  const [patients, setPatients] = useState<DoctorPatientRecord[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState("");
+
+  useEffect(() => {
+    const loadRegisteredPatients = async () => {
+      try {
+        const response = await usersApi.listRegisteredPatients();
+        const nextPatients = Array.isArray(response)
+          ? response
+              .map(normalizeRegisteredPatient)
+              .filter((patient) => patient.id.trim().length > 0)
+          : [];
+        setPatients(nextPatients);
+        setSelectedPatientId((current) => (nextPatients.some((patient) => patient.id === current) ? current : nextPatients[0]?.id ?? ""));
+      } catch {
+        setPatients([]);
+        setSelectedPatientId("");
+      }
+    };
+
+    void loadRegisteredPatients();
+  }, []);
 
   const selectedPatient = useMemo(
-    () => patients.find((patient) => patient.id === selectedPatientId) ?? patients[0],
+    () => patients.find((patient) => patient.id === selectedPatientId) ?? patients[0] ?? emptyPatient,
     [patients, selectedPatientId],
   );
 

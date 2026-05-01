@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import dropdownArrowLight from "/medirator_images/dropdown.png";
 import dropdownArrowDark from "/medirator_images/ddropdown.png";
 import loginImage from "/medirator_images/login.png";
@@ -16,14 +16,15 @@ import {
   useAuth,
   type UserRole,
 } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 interface LoginProps {
   darkMode?: boolean;
 }
 
 const Login = ({ darkMode = false }: LoginProps) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
-  const location = useLocation();
   const { loginWithCredentials } = useAuth();
   const [role, setRole] = useState<UserRole>("patient");
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
@@ -35,9 +36,9 @@ const Login = ({ darkMode = false }: LoginProps) => {
   const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   const roleOptions = [
-    { value: "patient" as const, label: "Patient", icon: patient },
-    { value: "doctor" as const, label: "Doctor", icon: doctor },
-    { value: "admin" as const, label: "Admin", icon: admin },
+    { value: "patient" as const, label: t("auth", "patient", "Patient"), icon: patient },
+    { value: "doctor" as const, label: t("auth", "doctor", "Doctor"), icon: doctor },
+    { value: "admin" as const, label: t("auth", "admin", "Admin"), icon: admin },
   ];
 
   const selectedRole = roleOptions.find((option) => option.value === role) ?? roleOptions[0];
@@ -62,27 +63,26 @@ const Login = ({ darkMode = false }: LoginProps) => {
     setLoading(true);
 
     if (!role || !email.trim() || !password.trim()) {
-      setError("Please fill all login details.");
+      setError(t("auth", "loginDetailsRequired", "Please fill all login details."));
       setLoading(false);
       return;
     }
 
     if (role !== "admin" && !validateEmail(email)) {
-      setError("Please enter a valid email address.");
+      setError(t("auth", "invalidEmail", "Please enter a valid email address."));
       setLoading(false);
       return;
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      const loginResult = loginWithCredentials({
+      const loginResult = await loginWithCredentials({
         email,
         password,
         role: role as UserRole,
       });
 
       if (!loginResult.ok) {
-        setError(loginResult.error ?? "Login failed. Please try again.");
+        setError(loginResult.error ?? t("auth", "loginFailed", "Login failed. Please try again."));
         setLoading(false);
         return;
       }
@@ -91,22 +91,15 @@ const Login = ({ darkMode = false }: LoginProps) => {
       setEmail("");
       setPassword("");
 
-      const redirectPath =
-        typeof (location.state as { from?: string } | null)?.from === "string"
-          ? (location.state as { from?: string }).from
-          : null;
-
       if (role === "admin") {
         navigate("/admin", { replace: true });
       } else if (role === "doctor") {
         navigate("/doctor", { replace: true });
-      } else if (redirectPath && redirectPath !== "/admin") {
-        navigate(redirectPath, { replace: true });
       } else {
         navigate("/", { replace: true });
       }
     } catch {
-      setError("Login failed. Please try again.");
+      setError(t("auth", "loginFailed", "Login failed. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -123,22 +116,21 @@ const Login = ({ darkMode = false }: LoginProps) => {
             loading="lazy"
           />
           <div className="text-xl text-[#0B3C5D] dark:text-white md:text-2xl font-bold">
-            Welcome back
+            {t("auth", "loginTitle", "Welcome back")}
           </div>
           <div className="p-2 m-2 text-sm text-[#8e8e93] md:text-base">
-            Login to access your healthcare dashboard,
-            <br /> records, appointments, and insights.
+            {t("auth", "loginSubtitle", "Login to access your healthcare dashboard, records, appointments, and insights.")}
           </div>
         </div>
 
         <div className="w-full max-w-4xl m-2 md:m-4 px-3 md:px-4 md:px-8 py-6 md:py-8 relative z-10">
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-8">
             {error && <div className="mb-4 text-red-500 text-sm md:text-base">{error}</div>}
-            {success && <div className="mb-4 text-green-600 text-sm md:text-base">Login successful.</div>}
+            {success && <div className="mb-4 text-green-600 text-sm md:text-base">{t("auth", "loginSuccess", "Login successful.")}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
               <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Role</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "role", "Role")}</label>
                 <div className="relative" ref={roleDropdownRef}>
                   <button
                     type="button"
@@ -187,25 +179,25 @@ const Login = ({ darkMode = false }: LoginProps) => {
               </div>
 
               <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Email</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "email", "Email")}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                  placeholder="you@example.com"
+                  placeholder={t("auth", "emailPlaceholder", "you@example.com")}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">Password</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "password", "Password")}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                  placeholder="Enter your password"
+                  placeholder={t("auth", "enterPassword", "Enter your password")}
                   required
                 />
               </div>
@@ -216,10 +208,10 @@ const Login = ({ darkMode = false }: LoginProps) => {
                   disabled={loading}
                   className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 w-full md:w-auto text-sm disabled:opacity-50"
                 >
-                  {loading ? "Signing in..." : "Login"}
+                  {loading ? t("auth", "signingIn", "Signing in...") : t("auth", "loginButton", "Login")}
                 </button>
                 <div className="text-xs md:text-sm text-black dark:text-gray-300 text-center md:text-right">
-                  Secure access for patient, doctor, and admin accounts.
+                  {t("auth", "secureAccess", "Secure access for patient, doctor, and admin accounts.")}
                 </div>
               </div>
             </form>

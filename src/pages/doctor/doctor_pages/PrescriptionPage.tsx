@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 
 import editIcon from "/medirator_images/edit.png";
 import downloadIcon from "/medirator_images/download.png";
@@ -8,6 +9,8 @@ import printIcon from "/medirator_images/print.png";
 
 import DoctorPatientDropdown from "../../../components/DoctorPatientDropdown";
 import { useDoctorPatient } from "../../../context/DoctorPatientContext";
+import { useAuth } from "../../../context/AuthContext";
+import { clinicalApi } from "../../../api/clinicalApi";
 
 interface PrescriptionPageProps {
   darkMode?: boolean;
@@ -22,86 +25,12 @@ interface PrescriptionRecord {
   createdAt: string;
 }
 
-const seedActivePrescription: PrescriptionRecord = {
-  id: "active-1",
-  medicineName: "Atorvastatin",
-  dosage: "10mg",
-  frequency: "Once at night",
-  duration: "30 days",
-  createdAt: "Today",
-};
-
-const seedPastPrescriptions: PrescriptionRecord[] = [
-  {
-    id: "past-1",
-    medicineName: "Ibuprofen",
-    dosage: "400mg",
-    frequency: "Three times a day",
-    duration: "3 days",
-    createdAt: "Last week",
-  },
-  {
-    id: "past-2",
-    medicineName: "Vitamin D",
-    dosage: "1000 IU",
-    frequency: "Once a day",
-    duration: "14 days",
-    createdAt: "Two weeks ago",
-  },
-];
-
 const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
+  const { user } = useAuth();
   const { selectedPatient } = useDoctorPatient();
-  const [prescriptionStore, setPrescriptionStore] = useState<Record<string, { current: PrescriptionRecord[]; past: PrescriptionRecord[] }>>({
-    "PT-240318-07": {
-      current: [seedActivePrescription],
-      past: seedPastPrescriptions,
-    },
-    "PT-240402-11": {
-      current: [
-        {
-          id: "active-2",
-          medicineName: "Metformin",
-          dosage: "500mg",
-          frequency: "Twice a day",
-          duration: "30 days",
-          createdAt: "Today",
-        },
-      ],
-      past: [
-        {
-          id: "past-3",
-          medicineName: "Gliclazide",
-          dosage: "80mg",
-          frequency: "Once a day",
-          duration: "14 days",
-          createdAt: "Last month",
-        },
-      ],
-    },
-    "PT-240215-03": {
-      current: [
-        {
-          id: "active-3",
-          medicineName: "Salbutamol Inhaler",
-          dosage: "2 puffs",
-          frequency: "As needed",
-          duration: "14 days",
-          createdAt: "Today",
-        },
-      ],
-      past: [
-        {
-          id: "past-4",
-          medicineName: "Montelukast",
-          dosage: "10mg",
-          frequency: "Once a day",
-          duration: "30 days",
-          createdAt: "Two weeks ago",
-        },
-      ],
-    },
-  });
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [currentPrescriptions, setCurrentPrescriptions] = useState<PrescriptionRecord[]>([]);
+  const [pastPrescriptions, setPastPrescriptions] = useState<PrescriptionRecord[]>([]);
   const [formValues, setFormValues] = useState<Omit<PrescriptionRecord, "id" | "createdAt">>({
     medicineName: "",
     dosage: "",
@@ -109,9 +38,6 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     duration: "",
   });
   const [editTarget, setEditTarget] = useState<{ id: string; source: "current" | "past" } | null>(null);
-
-  const currentPrescriptions = prescriptionStore[selectedPatient.id]?.current ?? [seedActivePrescription];
-  const pastPrescriptions = prescriptionStore[selectedPatient.id]?.past ?? seedPastPrescriptions;
 
   const isFormComplete =
     formValues.medicineName.trim().length > 0 &&
@@ -129,71 +55,83 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     setEditTarget(null);
   };
 
-  const savePrescription = () => {
+  const loadPrescriptions = async () => {
+    if (!selectedPatient.id) {
+      setCurrentPrescriptions([]);
+      setPastPrescriptions([]);
+      return;
+    }
+    try {
+      const [currentResult, pastResult] = await Promise.allSettled([
+        clinicalApi.listCurrentMedications(selectedPatient.id),
+        clinicalApi.listPastMedications(selectedPatient.id),
+      ]);
+      const currentMeds = currentResult.status === "fulfilled" ? currentResult.value : [];
+      const pastMeds = pastResult.status === "fulfilled" ? pastResult.value : [];
+      setCurrentPrescriptions(
+        currentMeds.map((item) => ({
+          id: item.id,
+          medicineName: item.medication_name,
+          dosage: item.dosage,
+          frequency: item.instructions,
+          duration: item.end_date ? `${new Date(item.start_date ?? item.created_at).toLocaleDateString()} - ${new Date(item.end_date).toLocaleDateString()}` : "Ongoing",
+          createdAt: new Date(item.created_at).toLocaleDateString(),
+        })),
+      );
+      setPastPrescriptions(
+        pastMeds.map((item) => ({
+          id: item.id,
+          medicineName: item.medication_name,
+          dosage: item.dosage,
+          frequency: item.instructions,
+          duration: item.end_date ? `${new Date(item.start_date ?? item.created_at).toLocaleDateString()} - ${new Date(item.end_date).toLocaleDateString()}` : "Completed",
+          createdAt: new Date(item.created_at).toLocaleDateString(),
+        })),
+      );
+      if (currentResult.status === "rejected" && pastResult.status === "rejected") {
+        setApiError("No available data.");
+      } else {
+        setApiError(null);
+      }
+    } catch {
+      setApiError("No available data.");
+    }
+  };
+
+  const savePrescription = async () => {
     if (!isFormComplete) {
       return;
     }
 
-    const now = new Date();
-    const createdAt = now.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-
-    const nextPrescription: PrescriptionRecord = {
-      id: `${now.getTime()}`,
-      ...formValues,
-      createdAt,
-    };
-
-    setPrescriptionStore((currentStore) => {
-      const patientStore = currentStore[selectedPatient.id] ?? { current: [seedActivePrescription], past: seedPastPrescriptions };
-
-      if (editTarget) {
-        const nextCurrent =
-          editTarget.source === "current"
-            ? patientStore.current.map((prescription) =>
-                prescription.id === editTarget.id
-                  ? {
-                      ...prescription,
-                      ...formValues,
-                      createdAt,
-                    }
-                  : prescription,
-              )
-            : patientStore.current;
-
-        const nextPast =
-          editTarget.source === "past"
-            ? patientStore.past.map((prescription) =>
-                prescription.id === editTarget.id
-                  ? {
-                      ...prescription,
-                      ...formValues,
-                      createdAt,
-                    }
-                  : prescription,
-              )
-            : patientStore.past;
-
-        return {
-          ...currentStore,
-          [selectedPatient.id]: {
-            current: nextCurrent,
-            past: nextPast,
-          },
-        };
+    try {
+      if (!user?.id) {
+        setApiError("Please login again before creating prescriptions.");
+        return;
       }
-
-      return {
-        ...currentStore,
-        [selectedPatient.id]: {
-          ...patientStore,
-          current: [...patientStore.current, nextPrescription],
-        },
-      };
-    });
+      if (editTarget) {
+        await clinicalApi.updateMedication(editTarget.id, {
+          dosage: formValues.dosage,
+          instructions: `${formValues.frequency} | ${formValues.duration}`,
+        });
+      } else {
+        await clinicalApi.createMedication({
+          patient_id: selectedPatient.id,
+          doctor_id: user.id,
+          medication_name: formValues.medicineName,
+          dosage: formValues.dosage,
+          instructions: `${formValues.frequency} | ${formValues.duration}`,
+          status: "current",
+        });
+      }
+      await loadPrescriptions();
+      setApiError(null);
+    } catch (error) {
+      const detail =
+        error instanceof AxiosError
+          ? ((error.response?.data as { detail?: string } | undefined)?.detail ?? error.message)
+          : "Unable to save prescription.";
+      setApiError(detail || "Unable to save prescription.");
+    }
 
     setEditTarget(null);
     setFormValues({
@@ -214,6 +152,16 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     setEditTarget({ id: prescription.id, source });
   };
 
+  const movePrescription = async (source: "current" | "past", prescriptionId: string) => {
+    try {
+      await clinicalApi.updateMedication(prescriptionId, { status: source === "current" ? "past" : "current" });
+      await loadPrescriptions();
+      setApiError(null);
+    } catch {
+      setApiError("Unable to update medication status.");
+    }
+  };
+
   const latestPrescription = currentPrescriptions[currentPrescriptions.length - 1] ?? null;
 
   useEffect(() => {
@@ -224,6 +172,7 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
       duration: "",
     });
     setEditTarget(null);
+    void loadPrescriptions();
   }, [selectedPatient.id]);
 
   const buildPrescriptionPdf = (prescription: PrescriptionRecord) => {
@@ -258,11 +207,6 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
 
   const iconImageClassName = "h-4 w-4 object-contain";
 
-  const patientContextLabel = useMemo(
-    () => `${selectedPatient.name} (${selectedPatient.id})`,
-    [selectedPatient.id, selectedPatient.name],
-  );
-
   return (
     <div className={darkMode ? "dark" : ""}>
       <div className="flex flex-col md:flex-row justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-4 md:p-6 shadow-md gap-4">
@@ -270,12 +214,6 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
           <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">
             Prescription
           </h2>
-          <p className="text-sm md:text-base text-center md:text-left ml-0 md:ml-5 md:pl-5 mt-2 text-gray-200">
-            Fast prescription workflow for the active patient record.
-          </p>
-          <div className="ml-0 md:ml-5 md:pl-5 mt-3 inline-flex rounded-full border border-white/30 bg-white/10 px-4 py-1 text-sm text-white">
-            For patient: {patientContextLabel}
-          </div>
           <div className="ml-0 md:ml-5 md:pl-5 mt-3">
             <DoctorPatientDropdown darkMode={darkMode} />
           </div>
@@ -284,6 +222,11 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
       </div>
 
       <div className="dark:text-white dark:bg-black font-sans px-3 md:px-6 py-6 space-y-6">
+        {apiError && (
+          <div className="rounded-2xl border border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-950/20 dark:text-amber-300">
+            {apiError}
+          </div>
+        )}
         <section className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4 items-start">
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6 self-start">
             <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -394,7 +337,6 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                   <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
                     Current Prescriptions
                   </h3>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Tied to {patientContextLabel}</p>
                 </div>
               </div>
 
@@ -416,6 +358,13 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                       >
                         <img src={editIcon} alt="Edit" className={iconImageClassName} />
                         Edit
+                      </button>
+                      <button
+                        type="button"
+                        className={iconButtonClassName}
+                        onClick={() => movePrescription("current", prescription.id)}
+                      >
+                        Archive
                       </button>
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
@@ -448,6 +397,13 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                       >
                         <img src={editIcon} alt="Edit" className={iconImageClassName} />
                         Edit
+                      </button>
+                      <button
+                        type="button"
+                        className={iconButtonClassName}
+                        onClick={() => movePrescription("past", prescription.id)}
+                      >
+                        Restore
                       </button>
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">

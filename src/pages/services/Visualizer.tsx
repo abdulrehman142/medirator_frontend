@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import visualizerImg from "/medirator_images/dashboard.png";
 import {
   Bar,
@@ -16,6 +16,8 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
+import { clinicalApi } from "../../api/clinicalApi";
+import { useLanguage } from "../../context/LanguageContext";
 
 
 interface VisualizerProps {
@@ -23,57 +25,67 @@ interface VisualizerProps {
 }
 
 const Visualizer = ({ darkMode = false }: VisualizerProps) => {
+  const { t } = useLanguage();
   const [chartView, setChartView] = useState<"weekly" | "monthly">("monthly");
   const [activeRiskIndex, setActiveRiskIndex] = useState(0);
+  const [snapshot, setSnapshot] = useState<{
+    appointments: number;
+    reports: number;
+    medicationsCurrent: number;
+    timelineItems: string[];
+    risks: Array<{ title: string; value: number; color: string }>;
+  } | null>(null);
 
   const kpiCards = [
-    { label: "Avg Blood Pressure", value: "128/82", change: "-4% this month" },
-    { label: "Avg Glucose", value: "112 mg/dL", change: "-6% this month" },
-    { label: "Medication Adherence", value: "91%", change: "+3% this week" },
-    { label: "Sleep Consistency", value: "7.2 hrs", change: "+0.5 hrs" },
+    { label: t("services", "totalAppointments", "Total Appointments"), value: String(snapshot?.appointments ?? 0), change: t("services", "fromPatientRecords", "From patient records") },
+    { label: t("services", "totalReports", "Total Reports"), value: String(snapshot?.reports ?? 0), change: t("services", "fromPatientRecords", "From patient records") },
+    { label: t("services", "currentSaltsTitle", "Current Salts"), value: String(snapshot?.medicationsCurrent ?? 0), change: t("services", "activeMedications", "Active medications") },
+    { label: t("services", "timelineItems", "Timeline Items"), value: String(snapshot?.timelineItems.length ?? 0), change: t("services", "recordedEvents", "Recorded events") },
   ];
 
   const monthlyBarData = [
-    { label: "Jan", bloodPressure: 138, glucose: 126 },
-    { label: "Feb", bloodPressure: 134, glucose: 122 },
-    { label: "Mar", bloodPressure: 132, glucose: 119 },
-    { label: "Apr", bloodPressure: 130, glucose: 117 },
-    { label: "May", bloodPressure: 129, glucose: 115 },
-    { label: "Jun", bloodPressure: 128, glucose: 112 },
+    { label: t("services", "jan", "Jan"), bloodPressure: 138, glucose: 126 },
+    { label: t("services", "feb", "Feb"), bloodPressure: 134, glucose: 122 },
+    { label: t("services", "mar", "Mar"), bloodPressure: 132, glucose: 119 },
+    { label: t("services", "apr", "Apr"), bloodPressure: 130, glucose: 117 },
+    { label: t("services", "may", "May"), bloodPressure: 129, glucose: 115 },
+    { label: t("services", "jun", "Jun"), bloodPressure: 128, glucose: 112 },
   ];
 
   const weeklyBarData = [
-    { label: "Mon", bloodPressure: 130, glucose: 114 },
-    { label: "Tue", bloodPressure: 128, glucose: 112 },
-    { label: "Wed", bloodPressure: 129, glucose: 113 },
-    { label: "Thu", bloodPressure: 127, glucose: 110 },
-    { label: "Fri", bloodPressure: 126, glucose: 109 },
-    { label: "Sat", bloodPressure: 128, glucose: 111 },
-    { label: "Sun", bloodPressure: 127, glucose: 108 },
+    { label: t("services", "mon", "Mon"), bloodPressure: 130, glucose: 114 },
+    { label: t("services", "tue", "Tue"), bloodPressure: 128, glucose: 112 },
+    { label: t("services", "wed", "Wed"), bloodPressure: 129, glucose: 113 },
+    { label: t("services", "thu", "Thu"), bloodPressure: 127, glucose: 110 },
+    { label: t("services", "fri", "Fri"), bloodPressure: 126, glucose: 109 },
+    { label: t("services", "sat", "Sat"), bloodPressure: 128, glucose: 111 },
+    { label: t("services", "sun", "Sun"), bloodPressure: 127, glucose: 108 },
   ];
 
   const activityComparison = [
-    { metric: "Appointments", current: 8, target: 10 },
-    { metric: "Tests Completed", current: 5, target: 6 },
-    { metric: "Hydration Goals", current: 22, target: 28 },
-    { metric: "Exercise Days", current: 17, target: 20 },
+    { metric: t("services", "appointmentsMetric", "Appointments"), current: 8, target: 10 },
+    { metric: t("services", "testsCompletedMetric", "Tests Completed"), current: 5, target: 6 },
+    { metric: t("services", "hydrationGoalsMetric", "Hydration Goals"), current: 22, target: 28 },
+    { metric: t("services", "exerciseDaysMetric", "Exercise Days"), current: 17, target: 20 },
   ];
 
   const correlationPoints = [
-    { day: "Mon", sleepHours: 6.2, glucose: 122, risk: 58 },
-    { day: "Tue", sleepHours: 6.8, glucose: 118, risk: 52 },
-    { day: "Wed", sleepHours: 7.1, glucose: 114, risk: 46 },
-    { day: "Thu", sleepHours: 7.4, glucose: 111, risk: 42 },
-    { day: "Fri", sleepHours: 7.8, glucose: 108, risk: 37 },
-    { day: "Sat", sleepHours: 8.1, glucose: 105, risk: 32 },
-    { day: "Sun", sleepHours: 7.6, glucose: 109, risk: 39 },
+    { day: t("services", "mon", "Mon"), sleepHours: 6.2, glucose: 122, risk: 58 },
+    { day: t("services", "tue", "Tue"), sleepHours: 6.8, glucose: 118, risk: 52 },
+    { day: t("services", "wed", "Wed"), sleepHours: 7.1, glucose: 114, risk: 46 },
+    { day: t("services", "thu", "Thu"), sleepHours: 7.4, glucose: 111, risk: 42 },
+    { day: t("services", "fri", "Fri"), sleepHours: 7.8, glucose: 108, risk: 37 },
+    { day: t("services", "sat", "Sat"), sleepHours: 8.1, glucose: 105, risk: 32 },
+    { day: t("services", "sun", "Sun"), sleepHours: 7.6, glucose: 109, risk: 39 },
   ];
 
-  const riskOverview = [
-    { title: "Cardiac Risk", value: 28, color: "#22C55E" },
-    { title: "Diabetes Risk", value: 42, color: "#EAB308" },
-    { title: "Stress Risk", value: 56, color: "#F97316" },
-  ];
+  const riskOverview = snapshot?.risks?.length
+    ? snapshot.risks
+    : [
+        { title: t("services", "cardiacRisk", "Cardiac Risk"), value: 28, color: "#22C55E" },
+        { title: t("services", "diabetesRisk", "Diabetes Risk"), value: 42, color: "#EAB308" },
+        { title: t("services", "stressRisk", "Stress Risk"), value: 56, color: "#F97316" },
+      ];
   const activeBarData = chartView === "monthly" ? monthlyBarData : weeklyBarData;
   const maxBarValue = Math.max(...activeBarData.map((item) => Math.max(item.bloodPressure, item.glucose)));
   const tooltipContentStyle = {
@@ -90,18 +102,41 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
     color: darkMode ? "#F9FAFB" : "#111827",
   };
 
+  useEffect(() => {
+    const loadRecords = async () => {
+      try {
+        const records = await clinicalApi.myRecords();
+        const appointments = (records.appointments as Array<unknown>) ?? [];
+        const reports = (records.reports as Array<unknown>) ?? [];
+        const medicationsCurrent = (records.medications_current as Array<unknown>) ?? [];
+        const timeline = (records.timeline as Array<{ summary?: string }>) ?? [];
+        const risksRaw = (records.risk_assessments as Array<{ summary?: string; score?: number }>) ?? [];
+        const risks = risksRaw.slice(0, 3).map((risk, index) => ({
+          title: risk.summary ?? t("services", "riskFallback", `Risk ${index + 1}`),
+          value: Math.max(0, Math.min(100, Math.round(Number(risk.score ?? 0)))),
+          color: ["#22C55E", "#EAB308", "#F97316"][index % 3],
+        }));
+        setSnapshot({
+          appointments: appointments.length,
+          reports: reports.length,
+          medicationsCurrent: medicationsCurrent.length,
+          timelineItems: timeline.map((item) => item.summary ?? "").filter(Boolean),
+          risks,
+        });
+      } catch {
+        setSnapshot(null);
+      }
+    };
+    void loadRecords();
+  }, []);
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <div className="flex justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-6 shadow-md">
         <div>
-          <h2 className="text-5xl font-bold">Visualizer</h2>
-          <p className="mt-2">
-            Visualizer helps you understand your healthcare data <br />
-            through clear charts and trends so you can quickly <br />
-            spot changes, patterns, and progress over time.
-          </p>
+          <h2 className="text-5xl font-bold">{t("navbar", "visualizer", "Visualizer")}</h2>
         </div>
-        <img src={visualizerImg} alt="Visualizer" className="h-70 w-70" loading="lazy" />
+        <img src={visualizerImg} alt={t("navbar", "visualizer", "Visualizer")} className="h-70 w-70" loading="lazy" />
       </div>
 
       <div className="bg-white dark:bg-black min-h-screen px-6 py-8">
@@ -122,7 +157,7 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 rounded-2xl border-2 border-[#0B3C5D] bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-5 transition-all duration-300 hover:shadow-lg">
               <div className="flex flex-wrap gap-2 items-center justify-between">
-                <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">Vitals Trend</h3>
+                <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">{t("services", "vitalsTrend", "Vitals Trend")}</h3>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setChartView("weekly")}
@@ -132,7 +167,7 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
                         : "bg-white dark:bg-black text-[#0B3C5D] dark:text-white hover:bg-[#0B3C5D] hover:text-white"
                     }`}
                   >
-                    Weekly
+                    {t("services", "weekly", "Weekly")}
                   </button>
                   <button
                     onClick={() => setChartView("monthly")}
@@ -142,12 +177,12 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
                         : "bg-white dark:bg-black text-[#0B3C5D] dark:text-white hover:bg-[#0B3C5D] hover:text-white"
                     }`}
                   >
-                    Monthly
+                    {t("services", "monthly", "Monthly")}
                   </button>
                 </div>
               </div>
               <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">
-                Interactive comparison of blood pressure and glucose values.
+                {t("services", "vitalsSubtitle", "Interactive comparison of blood pressure and glucose values.")}
               </p>
 
               <div className="h-80 mt-5">
@@ -162,14 +197,14 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
                       itemStyle={tooltipItemStyle}
                     />
                     <Legend />
-                    <Bar dataKey="bloodPressure" name="Blood Pressure" fill="#0B3C5D" radius={[8, 8, 0, 0]} />
-                    <Bar dataKey="glucose" name="Glucose" fill="#38BDF8" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="bloodPressure" name={t("services", "bloodPressure", "Blood Pressure")} fill="#0B3C5D" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="glucose" name={t("services", "glucose", "Glucose")} fill="#38BDF8" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
               <div className="mt-5 rounded-xl border border-[#0B3C5D]/30 dark:border-white/20 bg-white dark:bg-black/30 p-3">
-                <p className="text-sm font-semibold text-[#0B3C5D] dark:text-white">Detailed Breakdown</p>
+                <p className="text-sm font-semibold text-[#0B3C5D] dark:text-white">{t("services", "detailedBreakdown", "Detailed Breakdown")}</p>
                 <div className="mt-3 space-y-2">
                   {activeBarData.map((item) => (
                     <div key={item.label} className="grid grid-cols-12 gap-2 items-center">
@@ -196,19 +231,19 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-4 text-xs">
+                    <span className="flex items-center gap-2 text-[#0B3C5D] dark:text-gray-200">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#0B3C5D]" /> {t("services", "bloodPressure", "Blood Pressure")}
+                    </span>
                   <span className="flex items-center gap-2 text-[#0B3C5D] dark:text-gray-200">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#0B3C5D]" /> Blood Pressure
-                  </span>
-                  <span className="flex items-center gap-2 text-[#0B3C5D] dark:text-gray-200">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#38BDF8]" /> Glucose
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#38BDF8]" /> {t("services", "glucose", "Glucose")}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="rounded-2xl border-2 border-[#0B3C5D] bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-5 transition-all duration-300 hover:shadow-lg">
-              <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">Risk Distribution</h3>
-              <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">Hover slices to inspect category weight.</p>
+              <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">{t("services", "riskDistribution", "Risk Distribution")}</h3>
+              <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">{t("services", "hoverSlicesHint", "Hover slices to inspect category weight.")}</p>
 
               <div className="h-64 mt-4">
                 <ResponsiveContainer width="100%" height="100%">
@@ -273,8 +308,8 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="rounded-2xl border-2 border-[#0B3C5D] bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-5 transition-all duration-300 hover:shadow-lg">
-              <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">Care Activity vs Target</h3>
-              <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">Progress against monthly care goals.</p>
+              <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">{t("services", "careActivityVsTarget", "Care Activity vs Target")}</h3>
+              <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">{t("services", "monthlyCareGoals", "Progress against monthly care goals.")}</p>
 
               <div className="mt-5 space-y-4">
                 {activityComparison.map((item) => {
@@ -297,9 +332,9 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
             </div>
 
             <div className="rounded-2xl border-2 border-[#0B3C5D] bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-5 transition-all duration-300 hover:shadow-lg">
-              <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">Sleep vs Glucose (Scatter)</h3>
+              <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">{t("services", "sleepVsGlucose", "Sleep vs Glucose (Scatter)")}</h3>
               <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">
-                Each point shows one day; larger bubbles indicate higher risk score.
+                {t("services", "scatterHint", "Each point shows one day; larger bubbles indicate higher risk score.")}
               </p>
 
               <div className="h-72 mt-4">
@@ -309,7 +344,7 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
                     <XAxis
                       type="number"
                       dataKey="sleepHours"
-                      name="Sleep"
+                      name={t("services", "sleep", "Sleep")}
                       domain={[5.5, 8.5]}
                       tickFormatter={(value) => `${value}h`}
                       stroke={darkMode ? "#E5E7EB" : "#0B3C5D"}
@@ -317,7 +352,7 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
                     <YAxis
                       type="number"
                       dataKey="glucose"
-                      name="Glucose"
+                      name={t("services", "glucose", "Glucose")}
                       domain={[100, 125]}
                       tickFormatter={(value) => `${value}`}
                       stroke={darkMode ? "#E5E7EB" : "#0B3C5D"}
@@ -336,36 +371,39 @@ const Visualizer = ({ darkMode = false }: VisualizerProps) => {
                       }}
                       labelFormatter={(_, payload) => {
                         if (!payload || !payload.length) return "";
-                        return `Day: ${payload[0].payload.day}`;
+                        return `${t("services", "dayLabel", "Day")}: ${payload[0].payload.day}`;
                       }}
                     />
-                    <Scatter name="Daily Correlation" data={correlationPoints} fill="#0B3C5D" fillOpacity={0.9} />
+                    <Scatter name={t("services", "dailyCorrelation", "Daily Correlation")} data={correlationPoints} fill="#0B3C5D" fillOpacity={0.9} />
                   </ScatterChart>
                 </ResponsiveContainer>
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-[#0B3C5D] dark:text-white">
                 <span className="inline-flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-[#0B3C5D]" /> Daily Correlation
+                  <span className="h-3 w-3 rounded-full bg-[#0B3C5D]" /> {t("services", "dailyCorrelation", "Daily Correlation")}
                 </span>
-                <span className="text-[#6B7280] dark:text-gray-300">X-axis: Sleep (hours)</span>
-                <span className="text-[#6B7280] dark:text-gray-300">Y-axis: Glucose (mg/dL)</span>
+                <span className="text-[#6B7280] dark:text-gray-300">{t("services", "xAxisSleep", "X-axis: Sleep (hours)")}</span>
+                <span className="text-[#6B7280] dark:text-gray-300">{t("services", "yAxisGlucose", "Y-axis: Glucose (mg/dL)")}</span>
               </div>
             </div>
           </div>
 
           <div className="rounded-2xl border-2 border-[#0B3C5D] bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-5 transition-all duration-300 hover:shadow-lg">
-            <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">Clinical Snapshot</h3>
-            <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">Recent highlights from unified records.</p>
+            <h3 className="text-xl font-bold text-[#0B3C5D] dark:text-white">{t("services", "clinicalSnapshot", "Clinical Snapshot")}</h3>
+            <p className="text-sm mt-1 text-[#6B7280] dark:text-gray-300">{t("services", "recentHighlights", "Recent highlights from patient records.")}</p>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-              {[
-                "Latest CBC report is within normal range.",
-                "Blood pressure trend is improving steadily.",
-                "Medication adherence remained above 90% this month.",
-                "Next physician appointment is scheduled in 5 days.",
-                "Hydration and activity goals need slight improvement.",
-              ].map((insight) => (
+              {(snapshot?.timelineItems?.length
+                ? snapshot.timelineItems
+                : [
+                    t("services", "snapshot1", "Latest CBC report is within normal range."),
+                    t("services", "snapshot2", "Blood pressure trend is improving steadily."),
+                    t("services", "snapshot3", "Medication adherence remained above 90% this month."),
+                    t("services", "snapshot4", "Next physician appointment is scheduled in 5 days."),
+                    t("services", "snapshot5", "Hydration and activity goals need slight improvement."),
+                  ]
+              ).map((insight) => (
                 <div
                   key={insight}
                   className="rounded-xl border border-[#0B3C5D]/30 dark:border-white/20 bg-white dark:bg-black/30 px-3 py-2 text-sm text-[#374151] dark:text-gray-200"
