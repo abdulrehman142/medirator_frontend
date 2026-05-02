@@ -1,7 +1,7 @@
 import "./index.css";
 import { useState, Suspense, lazy } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Layout from "./components/Layout";
@@ -64,6 +64,13 @@ const AppLayoutWrapper = ({
   darkMode: boolean;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const location = useLocation();
+  const isMedibotPage = location.pathname === "/medibot" || location.pathname === "/contact";
+  
+  if (isMedibotPage) {
+    return <Outlet />;
+  }
+  
   return (
     <Layout darkMode={darkMode} setDarkMode={setDarkMode}>
       <Outlet />
@@ -248,8 +255,8 @@ const AppRouter = ({
             </Route>
             <Route path="/help-and-guidance" element={<Visualizer darkMode={darkMode} />} />
             <Route path="/how-it-works" element={<HowitWorks />} />
-            <Route path="/medibot" element={<Medibot />} />
-            <Route path="/contact" element={<Medibot />} />
+            <Route path="/medibot" element={<Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}><Medibot /></Suspense>} />
+            <Route path="/contact" element={<Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}><Medibot /></Suspense>} />
             <Route path="/login" element={<Login darkMode={darkMode} />} />
             <Route path="/register" element={<Register darkMode={darkMode} />} />
             <Route path="/faqs" element={<FAQs />} />

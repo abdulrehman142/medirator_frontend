@@ -1,0 +1,1 @@
+import{y as t}from"./index-Drz20z3z.js";const a={async create(a){const{data:n}=await t.post("/appointments",a);return n},async update(a,n){const{data:s}=await t.patch(`/appointments/${a}`,n);return s},async list(a){const{data:n}=await t.get("/appointments",{params:a});return n}};export{a};
