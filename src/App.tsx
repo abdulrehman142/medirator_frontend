@@ -23,6 +23,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Services = lazy(() => import("./pages/services/Services"));
 const FamilyHistory = lazy(() => import("./pages/services/FamilyHistory"));
+const AIRiskAnalysis = lazy(() => import("./pages/services/AIRiskAnalysis"));
 const Salts = lazy(() => import("./pages/services/Salts"));
 const HealthRisks = lazy(() => import("./pages/services/HealthRisks"));
 const Appointments = lazy(() => import("./pages/services/Appointments"));
@@ -235,6 +236,7 @@ const AppRouter = ({
               />
               <Route path="/doctor/pages/notes-reports" element={<DoctorNotesReportsPage darkMode={darkMode} />} />
               <Route path="/doctor/pages/family-tree" element={<FamilyHistory darkMode={darkMode} />} />
+              <Route path="/doctor/pages/ai-risk-analysis" element={<AIRiskAnalysis darkMode={darkMode} />} />
             </Route>
           </Route>
 
@@ -243,6 +245,7 @@ const AppRouter = ({
             <Route element={<ProtectedRoute allowedRoles={["patient"]} />}>
               <Route path="/services" element={<Services darkMode={darkMode} />} />
               <Route path="/family-history" element={<FamilyHistory darkMode={darkMode} />} />
+              <Route path="/ai-risk-analysis" element={<AIRiskAnalysis darkMode={darkMode} />} />
               <Route path="/medical-history" element={<Navigate to="/family-history" replace />} />
               <Route path="/salts" element={<Salts darkMode={darkMode} />} />
               <Route path="/health-risks" element={<HealthRisks darkMode={darkMode} />} />
