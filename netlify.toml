@@ -1,9 +1,7 @@
 [build]
-  command = "npm run build"
+  # No build step required — publishing prebuilt `dist` dropped into repo root
+  command = "echo 'Using prebuilt dist; no build required'"
   publish = "dist"
-
-[build.environment]
-  NODE_VERSION = "22"
 
 [[redirects]]
   from = "/*"
