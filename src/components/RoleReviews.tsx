@@ -50,7 +50,13 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
   const [composerText, setComposerText] = useState("");
   const [composerMessage, setComposerMessage] = useState<string | null>(null);
 
-  const reviews = useMemo(() => [...remoteReviews, ...seedReviews.map((item) => ({ ...item, source: "seed" as const }))], [remoteReviews, seedReviews]);
+  const reviews = useMemo(
+    () => [
+      ...remoteReviews,
+      ...seedReviews.map((item) => ({ ...item, source: "seed" as const })),
+    ],
+    [remoteReviews, seedReviews],
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -65,7 +71,7 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
             rating: item.score,
             source: "user",
             userId: item.user_id,
-          }))
+          })),
         );
       } catch {
         setRemoteReviews([]);
@@ -101,7 +107,9 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
 
   const handlePrev = () => {
     if (reviews.length === 0) return;
-    setCurrentIndex((prevIndex) => (prevIndex === 0 ? reviews.length - 1 : prevIndex - 1));
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? reviews.length - 1 : prevIndex - 1,
+    );
   };
 
   const handleNext = () => {
@@ -127,21 +135,38 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
 
   const handleSubmit = async () => {
     if (!user) {
-      setComposerMessage(t("reviews", "signInMessage", "Please sign in to submit a review."));
+      setComposerMessage(
+        t("reviews", "signInMessage", "Please sign in to submit a review."),
+      );
       return;
     }
     if (composerRating === 0) {
-      setComposerMessage(t("reviews", "chooseRatingMessage", "Please choose a rating before submitting."));
+      setComposerMessage(
+        t(
+          "reviews",
+          "chooseRatingMessage",
+          "Please choose a rating before submitting.",
+        ),
+      );
       return;
     }
     const text = composerText.trim();
     if (!text) {
-      setComposerMessage(t("reviews", "writeReviewMessage", "Please write a short review before submitting."));
+      setComposerMessage(
+        t(
+          "reviews",
+          "writeReviewMessage",
+          "Please write a short review before submitting.",
+        ),
+      );
       return;
     }
     try {
       if (editingId) {
-        const updated = await feedbackApi.update(editingId, { score: composerRating, comment: text });
+        const updated = await feedbackApi.update(editingId, {
+          score: composerRating,
+          comment: text,
+        });
         setRemoteReviews((prev) =>
           prev.map((item) =>
             item.id === editingId
@@ -150,10 +175,12 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
                   text: updated.comment,
                   rating: updated.score,
                 }
-              : item
-          )
+              : item,
+          ),
         );
-        setComposerMessage(t("reviews", "updatedMessage", "Your review was updated."));
+        setComposerMessage(
+          t("reviews", "updatedMessage", "Your review was updated."),
+        );
       } else {
         const created = await feedbackApi.create({
           target_type: role,
@@ -171,21 +198,28 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
         };
         setRemoteReviews((prev) => [nextItem, ...prev]);
         setCurrentIndex(0);
-        setComposerMessage(t("reviews", "addedMessage", "Your review was added."));
+        setComposerMessage(
+          t("reviews", "addedMessage", "Your review was added."),
+        );
       }
       setComposerRating(0);
       setComposerText("");
       setEditingId(null);
       setIsComposerOpen(false);
     } catch {
-      setComposerMessage(t("reviews", "unableToSaveMessage", "Unable to save review right now."));
+      setComposerMessage(
+        t("reviews", "unableToSaveMessage", "Unable to save review right now."),
+      );
     }
   };
 
   const renderStars = (rating: number) => (
     <div className="flex gap-1">
       {[...Array(5)].map((_, i) => (
-        <span key={i} className={`text-xl ${i < rating ? "text-[#0B3C5D] dark:text-white" : "text-gray-300 dark:text-gray-700"}`}>
+        <span
+          key={i}
+          className={`text-xl ${i < rating ? "text-[#0B3C5D] dark:text-white" : "text-gray-300 dark:text-gray-700"}`}
+        >
           ★
         </span>
       ))}
@@ -196,7 +230,9 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
 
   return (
     <div className="w-full py-6 md:py-12 px-3 md:px-4 bg-white dark:bg-black">
-      <h2 className="text-2xl md:text-4xl font-ibm-plex-mono font-bold text-center mb-6 md:mb-12 text-[#0B3C5D] dark:text-white">{title}</h2>
+      <h2 className="text-2xl md:text-4xl font-ibm-plex-mono font-bold text-center mb-6 md:mb-12 text-[#0B3C5D] dark:text-white">
+        {title}
+      </h2>
 
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center gap-2 md:gap-4">
@@ -210,7 +246,10 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
           <div className="flex gap-2 md:gap-4 justify-center flex-wrap md:flex-nowrap">
             {visibleReviews.map((review, idx) => {
               const isCenter = visibleReviews.length === 1 || idx === 1;
-              const canEdit = review.source === "user" && user?.id && review.userId === user.id;
+              const canEdit =
+                review.source === "user" &&
+                user?.id &&
+                review.userId === user.id;
               return (
                 <div
                   key={review.id}
@@ -222,11 +261,20 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
                 >
                   <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
                     <div className="w-10 md:w-12 h-10 md:h-12 rounded-full flex items-center justify-center text-lg md:text-xl font-bold flex-shrink-0">
-                      <img src={manImg} alt="review-user" className="pl-1" loading="lazy" />
+                      <img
+                        src={manImg}
+                        alt="review-user"
+                        className="pl-1"
+                        loading="lazy"
+                      />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-[#0B3C5D] dark:text-white text-sm md:text-base">{review.name}</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{review.date}</p>
+                      <h3 className="font-semibold text-[#0B3C5D] dark:text-white text-sm md:text-base">
+                        {review.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {review.date}
+                      </p>
                     </div>
                     {canEdit && (
                       <button
@@ -234,13 +282,19 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
                         onClick={() => openEditComposer(review)}
                         className="rounded-full border border-[#0B3C5D] px-3 py-1 text-xs font-semibold text-[#0B3C5D] dark:text-white inline-flex items-center gap-1.5"
                       >
-                        <img src={editIcon} alt="Edit" className="h-3.5 w-3.5 object-contain" />
+                        <img
+                          src={editIcon}
+                          alt="Edit"
+                          className="h-3.5 w-3.5 object-contain"
+                        />
                         {t("reviews", "edit", "Edit")}
                       </button>
                     )}
                   </div>
 
-                  <p className="text-gray-600 dark:text-gray-300 mb-3 md:mb-4 min-h-[60px] md:min-h-[80px] text-xs md:text-sm leading-relaxed">{review.text}</p>
+                  <p className="text-gray-600 dark:text-gray-300 mb-3 md:mb-4 min-h-[60px] md:min-h-[80px] text-xs md:text-sm leading-relaxed">
+                    {review.text}
+                  </p>
                   <div className="flex gap-1">{renderStars(review.rating)}</div>
                 </div>
               );
@@ -275,7 +329,11 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
         {isComposerOpen && (
           <div className="mt-5 max-w-3xl mx-auto rounded-3xl border-4 border-[#0B3C5D] bg-white dark:bg-black p-4 md:p-5 shadow-xl">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg md:text-xl font-bold text-[#0B3C5D] dark:text-white">{editingId ? t("reviews", "editYourReview", "Edit your review") : t("reviews", "addYourReview", "Add your review")}</h3>
+              <h3 className="text-lg md:text-xl font-bold text-[#0B3C5D] dark:text-white">
+                {editingId
+                  ? t("reviews", "editYourReview", "Edit your review")
+                  : t("reviews", "addYourReview", "Add your review")}
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsComposerOpen(false)}
@@ -306,7 +364,11 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
               value={composerText}
               onChange={(event) => setComposerText(event.target.value)}
               className="mt-4 w-full min-h-[96px] rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-4 py-3 text-sm text-black dark:text-white focus:outline-none"
-              placeholder={t("reviews", "typeReviewPlaceholder", "Type your review here")}
+              placeholder={t(
+                "reviews",
+                "typeReviewPlaceholder",
+                "Type your review here",
+              )}
             />
 
             <div className="mt-4 flex items-center justify-end gap-3">
@@ -315,7 +377,9 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
                 onClick={handleSubmit}
                 className="rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90"
               >
-                {editingId ? t("reviews", "save", "Save") : t("reviews", "submitReview", "Submit Review")}
+                {editingId
+                  ? t("reviews", "save", "Save")
+                  : t("reviews", "submitReview", "Submit Review")}
               </button>
             </div>
           </div>
@@ -327,7 +391,9 @@ const RoleReviews = ({ role, title, seedReviews }: RoleReviewsProps) => {
               key={idx}
               onClick={() => setCurrentIndex(idx)}
               className={`w-2 md:w-3 h-2 md:h-3 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? "bg-[#0B3C5D] dark:bg-white w-6 md:w-8" : "bg-[#0B3C5D] dark:bg-white"
+                idx === currentIndex
+                  ? "bg-[#0B3C5D] dark:bg-white w-6 md:w-8"
+                  : "bg-[#0B3C5D] dark:bg-white"
               }`}
               aria-label={`${t("reviews", "goToReview", "Go to review")} ${idx + 1}`}
             />

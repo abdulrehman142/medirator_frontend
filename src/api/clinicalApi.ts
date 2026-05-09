@@ -62,21 +62,29 @@ export const clinicalApi = {
   },
 
   async timeline(patientId: string): Promise<TimelineItem[]> {
-    const { data } = await http.get<TimelineItem[]>(`/clinical/timeline/${patientId}`);
+    const { data } = await http.get<TimelineItem[]>(
+      `/clinical/timeline/${patientId}`,
+    );
     return data;
   },
 
   async listCurrentMedications(patientId?: string): Promise<MedicationItem[]> {
-    const { data } = await http.get<MedicationItem[]>("/clinical/medications/current", {
-      params: patientId ? { patient_id: patientId } : undefined,
-    });
+    const { data } = await http.get<MedicationItem[]>(
+      "/clinical/medications/current",
+      {
+        params: patientId ? { patient_id: patientId } : undefined,
+      },
+    );
     return data;
   },
 
   async listPastMedications(patientId?: string): Promise<MedicationItem[]> {
-    const { data } = await http.get<MedicationItem[]>("/clinical/medications/past", {
-      params: patientId ? { patient_id: patientId } : undefined,
-    });
+    const { data } = await http.get<MedicationItem[]>(
+      "/clinical/medications/past",
+      {
+        params: patientId ? { patient_id: patientId } : undefined,
+      },
+    );
     return data;
   },
 
@@ -90,25 +98,40 @@ export const clinicalApi = {
     start_date?: string;
     end_date?: string;
   }): Promise<MedicationItem> {
-    const { data } = await http.post<MedicationItem>("/clinical/medications", payload);
+    const { data } = await http.post<MedicationItem>(
+      "/clinical/medications",
+      payload,
+    );
     return data;
   },
 
   async updateMedication(
     medicationId: string,
-    payload: { status?: "current" | "past" | "inactive"; dosage?: string; instructions?: string; end_date?: string },
+    payload: {
+      status?: "current" | "past" | "inactive";
+      dosage?: string;
+      instructions?: string;
+      end_date?: string;
+    },
   ): Promise<MedicationItem> {
-    const { data } = await http.patch<MedicationItem>(`/clinical/medications/${medicationId}`, payload);
+    const { data } = await http.patch<MedicationItem>(
+      `/clinical/medications/${medicationId}`,
+      payload,
+    );
     return data;
   },
 
   async records(patientId: string): Promise<Record<string, unknown>> {
-    const { data } = await http.get<Record<string, unknown>>(`/clinical/records/${patientId}`);
+    const { data } = await http.get<Record<string, unknown>>(
+      `/clinical/records/${patientId}`,
+    );
     return data;
   },
 
   async myRecords(): Promise<Record<string, unknown>> {
-    const { data } = await http.get<Record<string, unknown>>("/clinical/records/me");
+    const { data } = await http.get<Record<string, unknown>>(
+      "/clinical/records/me",
+    );
     return data;
   },
 };

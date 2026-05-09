@@ -41,7 +41,13 @@ const SocialIcon: React.FC<SocialIconProps> = ({
   iconSizeClassName,
 }) => {
   const [hovered, setHovered] = useState(false);
-  const src = darkMode ? (hovered ? darkHover : darkImg) : hovered ? lightHover : lightImg;
+  const src = darkMode
+    ? hovered
+      ? darkHover
+      : darkImg
+    : hovered
+      ? lightHover
+      : lightImg;
 
   return (
     <div
@@ -68,7 +74,7 @@ const DoctorFooter = ({ darkMode, setDarkMode, links }: DoctorFooterProps) => {
 
   const firstColumn = links.slice(0, 3);
   const secondColumn = links.slice(3, 5);
-  const thirdColumn = links.slice(5,6);
+  const thirdColumn = links.slice(5, 6);
 
   return (
     <div className={darkMode ? "dark" : ""}>
@@ -109,7 +115,9 @@ const DoctorFooter = ({ darkMode, setDarkMode, links }: DoctorFooterProps) => {
             >
               <div
                 className={`absolute top-1 left-1 w-4 h-4 rounded-full transform transition-transform duration-300 ${
-                  darkMode ? "translate-x-[16px] bg-[#484C5B]" : "translate-x-0 bg-gray-200"
+                  darkMode
+                    ? "translate-x-[16px] bg-[#484C5B]"
+                    : "translate-x-0 bg-gray-200"
                 }`}
               ></div>
               <img
@@ -124,7 +132,11 @@ const DoctorFooter = ({ darkMode, setDarkMode, links }: DoctorFooterProps) => {
 
             <div className="m-2 flex flex-col">
               <div className="flex xl:justify-end gap-x-4">
-                <a href="https://www.instagram.com/mediratorinfo2026/" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://www.instagram.com/mediratorinfo2026/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <SocialIcon
                     darkMode={darkMode}
                     lightImg={instagram}
@@ -136,7 +148,11 @@ const DoctorFooter = ({ darkMode, setDarkMode, links }: DoctorFooterProps) => {
                     iconSizeClassName="w-5 h-5"
                   />
                 </a>
-                <a href="https://www.youtube.com/@Medirator" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://www.youtube.com/@Medirator"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <SocialIcon
                     darkMode={darkMode}
                     lightImg={youtube}
@@ -148,7 +164,11 @@ const DoctorFooter = ({ darkMode, setDarkMode, links }: DoctorFooterProps) => {
                     iconSizeClassName={socialIconSizeClassName}
                   />
                 </a>
-                <a href="https://discord.gg/vVDHBGH5" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://discord.gg/vVDHBGH5"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <SocialIcon
                     darkMode={darkMode}
                     lightImg={discord}

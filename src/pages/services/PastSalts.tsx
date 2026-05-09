@@ -60,9 +60,12 @@ const PastSalts = ({ darkMode = false }: PastSaltsProps) => {
             </div>
           )}
 
-          <h2 className="text-4xl font-bold text-[#0B3C5D] dark:text-white">Patient Past Salts</h2>
+          <h2 className="text-4xl font-bold text-[#0B3C5D] dark:text-white">
+            Patient Past Salts
+          </h2>
           <p className="mt-2 text-[#4B5563] dark:text-gray-300">
-            Previously used salts and discontinued medications for patient history review.
+            Previously used salts and discontinued medications for patient
+            history review.
           </p>
 
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -71,11 +74,15 @@ const PastSalts = ({ darkMode = false }: PastSaltsProps) => {
                 key={`${salt.name}-${salt.period}`}
                 className="rounded-xl border border-[#0B3C5D]/30 dark:border-white/20 bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-4"
               >
-                <div className="font-semibold text-[#0B3C5D] dark:text-white">{salt.name}</div>
+                <div className="font-semibold text-[#0B3C5D] dark:text-white">
+                  {salt.name}
+                </div>
                 <div className="text-sm text-[#4B5563] dark:text-gray-300 mt-1">
                   {salt.dose} • {salt.frequency}
                 </div>
-                <div className="text-xs mt-2 text-[#6B7280] dark:text-gray-400">{salt.period}</div>
+                <div className="text-xs mt-2 text-[#6B7280] dark:text-gray-400">
+                  {salt.period}
+                </div>
               </div>
             ))}
             {patientPastSalts.length === 0 && !apiError && (

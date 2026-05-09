@@ -7,11 +7,6 @@ import doctor from "/medirator_images/doctor.png";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 
-
-
-
-
-
 interface RegisterProps {
   darkMode?: boolean;
 }
@@ -32,15 +27,27 @@ const Register = ({ darkMode = false }: RegisterProps) => {
   const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   const roleOptions = [
-    { value: "patient" as const, label: t("auth", "patient", "Patient"), icon: patient },
-    { value: "doctor" as const, label: t("auth", "doctor", "Doctor"), icon: doctor },
+    {
+      value: "patient" as const,
+      label: t("auth", "patient", "Patient"),
+      icon: patient,
+    },
+    {
+      value: "doctor" as const,
+      label: t("auth", "doctor", "Doctor"),
+      icon: doctor,
+    },
   ];
 
-  const selectedRole = roleOptions.find((option) => option.value === role) ?? roleOptions[0];
+  const selectedRole =
+    roleOptions.find((option) => option.value === role) ?? roleOptions[0];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
+      if (
+        roleDropdownRef.current &&
+        !roleDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsRoleDropdownOpen(false);
       }
     };
@@ -57,26 +64,53 @@ const Register = ({ darkMode = false }: RegisterProps) => {
     setSuccess(false);
     setLoading(true);
 
-    if (!role || !name.trim() || !email.trim() || !phone.trim() || !password.trim() || !confirmPassword.trim()) {
-      setError(t("auth", "registrationDetailsRequired", "Please fill all registration details."));
+    if (
+      !role ||
+      !name.trim() ||
+      !email.trim() ||
+      !phone.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
+      setError(
+        t(
+          "auth",
+          "registrationDetailsRequired",
+          "Please fill all registration details.",
+        ),
+      );
       setLoading(false);
       return;
     }
 
     if (!validateEmail(email)) {
-      setError(t("auth", "invalidEmail", "Please enter a valid email address."));
+      setError(
+        t("auth", "invalidEmail", "Please enter a valid email address."),
+      );
       setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(t("auth", "passwordMismatch", "Password and confirm password must match."));
+      setError(
+        t(
+          "auth",
+          "passwordMismatch",
+          "Password and confirm password must match.",
+        ),
+      );
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError(t("auth", "passwordTooShort", "Password should be at least 6 characters."));
+      setError(
+        t(
+          "auth",
+          "passwordTooShort",
+          "Password should be at least 6 characters.",
+        ),
+      );
       setLoading(false);
       return;
     }
@@ -91,7 +125,14 @@ const Register = ({ darkMode = false }: RegisterProps) => {
       });
 
       if (!registerResult.ok) {
-        setError(registerResult.error ?? t("auth", "registrationFailed", "Registration failed. Please try again."));
+        setError(
+          registerResult.error ??
+            t(
+              "auth",
+              "registrationFailed",
+              "Registration failed. Please try again.",
+            ),
+        );
         setLoading(false);
         return;
       }
@@ -103,7 +144,13 @@ const Register = ({ darkMode = false }: RegisterProps) => {
       setPassword("");
       setConfirmPassword("");
     } catch {
-      setError(t("auth", "registrationFailed", "Registration failed. Please try again."));
+      setError(
+        t(
+          "auth",
+          "registrationFailed",
+          "Registration failed. Please try again.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -123,18 +170,32 @@ const Register = ({ darkMode = false }: RegisterProps) => {
             {t("auth", "registerTitle", "Create your account")}
           </div>
           <div className="p-2 m-2 text-sm text-[#8e8e93] md:text-base">
-            {t("auth", "registerSubtitle", "Register as Patient or Doctor to get personalized healthcare access.")}
+            {t(
+              "auth",
+              "registerSubtitle",
+              "Register as Patient or Doctor to get personalized healthcare access.",
+            )}
           </div>
         </div>
 
         <div className="w-full max-w-4xl m-2 md:m-4 px-3 md:px-4 md:px-8 py-6 md:py-8 relative z-10">
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-8">
-            {error && <div className="mb-4 text-red-500 text-sm md:text-base">{error}</div>}
-            {success && <div className="mb-4 text-green-600 text-sm md:text-base">{t("auth", "registerSuccess", "Registration successful.")}</div>}
+            {error && (
+              <div className="mb-4 text-red-500 text-sm md:text-base">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 text-green-600 text-sm md:text-base">
+                {t("auth", "registerSuccess", "Registration successful.")}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
               <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "role", "Role")}</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                  {t("auth", "role", "Role")}
+                </label>
                 <div className="relative" ref={roleDropdownRef}>
                   <button
                     type="button"
@@ -142,7 +203,12 @@ const Register = ({ darkMode = false }: RegisterProps) => {
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white text-sm flex items-center justify-between"
                   >
                     <span className="flex items-center gap-2">
-                      <img src={selectedRole.icon} alt={selectedRole.label} className="w-5 h-5 object-cover rounded" loading="lazy" />
+                      <img
+                        src={selectedRole.icon}
+                        alt={selectedRole.label}
+                        className="w-5 h-5 object-cover rounded"
+                        loading="lazy"
+                      />
                       {selectedRole.label}
                     </span>
                     <img
@@ -156,7 +222,9 @@ const Register = ({ darkMode = false }: RegisterProps) => {
                   {isRoleDropdownOpen && (
                     <div
                       className={`absolute left-0 mt-2 w-full flex flex-col shadow-lg rounded-2xl p-2 border-2 z-50 ${
-                        darkMode ? "bg-black border-[#0B3C5D]" : "bg-white border-[#0B3C5D]"
+                        darkMode
+                          ? "bg-black border-[#0B3C5D]"
+                          : "bg-white border-[#0B3C5D]"
                       }`}
                     >
                       {roleOptions.map((option) => (
@@ -173,7 +241,12 @@ const Register = ({ darkMode = false }: RegisterProps) => {
                               : "bg-white hover:bg-[#0B3C5D] text-black hover:text-white"
                           }`}
                         >
-                          <img src={option.icon} alt={option.label} className="w-5 h-5 object-cover rounded" loading="lazy" />
+                          <img
+                            src={option.icon}
+                            alt={option.label}
+                            className="w-5 h-5 object-cover rounded"
+                            loading="lazy"
+                          />
                           {option.label}
                         </button>
                       ))}
@@ -184,18 +257,26 @@ const Register = ({ darkMode = false }: RegisterProps) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "fullName", "Full Name")}</label>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    {t("auth", "fullName", "Full Name")}
+                  </label>
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                    placeholder={t("auth", "fullNamePlaceholder", "Your full name")}
+                    placeholder={t(
+                      "auth",
+                      "fullNamePlaceholder",
+                      "Your full name",
+                    )}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "phone", "Phone")}</label>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    {t("auth", "phone", "Phone")}
+                  </label>
                   <input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -207,7 +288,9 @@ const Register = ({ darkMode = false }: RegisterProps) => {
               </div>
 
               <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "email", "Email")}</label>
+                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                  {t("auth", "email", "Email")}
+                </label>
                 <input
                   type="email"
                   value={email}
@@ -220,7 +303,9 @@ const Register = ({ darkMode = false }: RegisterProps) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <div>
-                <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "password", "Password")}</label>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    {t("auth", "password", "Password")}
+                  </label>
                   <input
                     type="password"
                     value={password}
@@ -232,13 +317,19 @@ const Register = ({ darkMode = false }: RegisterProps) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">{t("auth", "confirmPassword", "Confirm Password")}</label>
+                  <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
+                    {t("auth", "confirmPassword", "Confirm Password")}
+                  </label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                    placeholder={t("auth", "confirmPasswordPlaceholder", "Confirm password")}
+                    placeholder={t(
+                      "auth",
+                      "confirmPasswordPlaceholder",
+                      "Confirm password",
+                    )}
                     required
                   />
                 </div>
@@ -250,10 +341,16 @@ const Register = ({ darkMode = false }: RegisterProps) => {
                   disabled={loading}
                   className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 w-full md:w-auto text-sm disabled:opacity-50"
                 >
-                  {loading ? t("auth", "registering", "Registering...") : t("auth", "registerButton", "Register")}
+                  {loading
+                    ? t("auth", "registering", "Registering...")
+                    : t("auth", "registerButton", "Register")}
                 </button>
                 <div className="text-xs md:text-sm text-black dark:text-gray-300 text-center md:text-right">
-                  {t("auth", "recordsSecure", "Your account helps keep records and care secure.")}
+                  {t(
+                    "auth",
+                    "recordsSecure",
+                    "Your account helps keep records and care secure.",
+                  )}
                 </div>
               </div>
             </form>

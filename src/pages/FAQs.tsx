@@ -2,7 +2,6 @@ import helpImg from "/medirator_images/help.png";
 import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 
-
 const FAQs = () => {
   const { t } = useLanguage();
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -14,7 +13,7 @@ const FAQs = () => {
       answer: t(
         "faq",
         "answer1",
-        "Medirator is a digital healthcare assistant that helps you manage your family history, salts information, health risks, appointments, test reports, and records in one secure place."
+        "Medirator is a digital healthcare assistant that helps you manage your family history, salts information, health risks, appointments, test reports, and records in one secure place.",
       ),
     },
     {
@@ -23,7 +22,7 @@ const FAQs = () => {
       answer: t(
         "faq",
         "answer2",
-        "Open the app, choose a feature such as Family History or Appointments, and follow the guided steps. You can also use the search bar on the home page to jump directly to a service."
+        "Open the app, choose a feature such as Family History or Appointments, and follow the guided steps. You can also use the search bar on the home page to jump directly to a service.",
       ),
     },
     {
@@ -32,52 +31,72 @@ const FAQs = () => {
       answer: t(
         "faq",
         "answer3",
-        "Yes. Medirator applies privacy and security controls including protected access and secure handling of sensitive information."
+        "Yes. Medirator applies privacy and security controls including protected access and secure handling of sensitive information.",
       ),
     },
     {
       id: 4,
-      question: t("faq", "question4", "Can Medirator help me track medications and salts?"),
+      question: t(
+        "faq",
+        "question4",
+        "Can Medirator help me track medications and salts?",
+      ),
       answer: t(
         "faq",
         "answer4",
-        "Yes. The Salts and related record features help you track your medication information and avoid duplication issues."
+        "Yes. The Salts and related record features help you track your medication information and avoid duplication issues.",
       ),
     },
     {
       id: 5,
-      question: t("faq", "question5", "Can I manage appointments in Medirator?"),
+      question: t(
+        "faq",
+        "question5",
+        "Can I manage appointments in Medirator?",
+      ),
       answer: t(
         "faq",
         "answer5",
-        "Yes. You can view, organize, and update appointment-related information from the Appointments section."
+        "Yes. You can view, organize, and update appointment-related information from the Appointments section.",
       ),
     },
     {
       id: 6,
-      question: t("faq", "question6", "How does Medirator support proactive care?"),
+      question: t(
+        "faq",
+        "question6",
+        "How does Medirator support proactive care?",
+      ),
       answer: t(
         "faq",
         "answer6",
-        "Medirator includes Health Risks support to help identify concerns early so you can plan timely follow-up with healthcare professionals."
+        "Medirator includes Health Risks support to help identify concerns early so you can plan timely follow-up with healthcare professionals.",
       ),
     },
     {
       id: 7,
-      question: t("faq", "question7", "Can I access all my records in one place?"),
+      question: t(
+        "faq",
+        "question7",
+        "Can I access all my records in one place?",
+      ),
       answer: t(
         "faq",
         "answer7",
-        "Yes. Medirator brings your key health information together to make it easier to review and share when needed."
+        "Yes. Medirator brings your key health information together to make it easier to review and share when needed.",
       ),
     },
     {
       id: 8,
-      question: t("faq", "question8", "Is Medirator easy to use for non-technical users?"),
+      question: t(
+        "faq",
+        "question8",
+        "Is Medirator easy to use for non-technical users?",
+      ),
       answer: t(
         "faq",
         "answer8",
-        "Yes. Medirator is designed with simple navigation and Visualizer support so both patients and families can use it comfortably."
+        "Yes. Medirator is designed with simple navigation and Visualizer support so both patients and families can use it comfortably.",
       ),
     },
     {
@@ -86,7 +105,7 @@ const FAQs = () => {
       answer: t(
         "faq",
         "answer9",
-        "Medirator offers: Family History, Salts, Health Risks, Appointments, Test Reports, and Visualizer."
+        "Medirator offers: Family History, Salts, Health Risks, Appointments, Test Reports, and Visualizer.",
       ),
     },
   ];
@@ -104,7 +123,12 @@ const FAQs = () => {
             {t("faq", "title", "FAQs")}
           </h2>
         </div>
-        <img src={helpImg} alt={t("faq", "bannerAlt", "Banner")} className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
+        <img
+          src={helpImg}
+          alt={t("faq", "bannerAlt", "Banner")}
+          className="h-40 md:h-70 w-40 md:w-70"
+          loading="lazy"
+        />
       </div>
 
       {/* FAQ Container */}
@@ -137,11 +161,15 @@ const FAQs = () => {
               {/* Answer - Collapsible Content with Smooth Animation */}
               <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  expandedId === faq.id ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  expandedId === faq.id
+                    ? "max-h-96 opacity-100"
+                    : "max-h-0 opacity-0"
                 }`}
               >
                 <div className="p-3 md:p-4 border-2 border-gray-300">
-                  <p className="text-sm md:text-base text-black dark:text-white">{faq.answer}</p>
+                  <p className="text-sm md:text-base text-black dark:text-white">
+                    {faq.answer}
+                  </p>
                 </div>
               </div>
             </div>

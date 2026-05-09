@@ -19,9 +19,17 @@ const DoctorLayout = ({
 }: DoctorLayoutProps) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <DoctorNavbar darkMode={darkMode} setDarkMode={setDarkMode} links={navLinks} />
+      <DoctorNavbar
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        links={navLinks}
+      />
       <main className="flex-1">{children}</main>
-      <DoctorFooter darkMode={darkMode} setDarkMode={setDarkMode} links={footerLinks} />
+      <DoctorFooter
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        links={footerLinks}
+      />
     </div>
   );
 };

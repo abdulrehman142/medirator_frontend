@@ -27,7 +27,9 @@ const CurrentSalts = ({ darkMode = false }: CurrentSaltsProps) => {
             name: item.medication_name,
             dose: item.dosage,
             frequency: item.instructions,
-            startedOn: new Date(item.start_date ?? item.created_at).toLocaleDateString(),
+            startedOn: new Date(
+              item.start_date ?? item.created_at,
+            ).toLocaleDateString(),
           })),
         );
         setApiError(null);
@@ -58,9 +60,12 @@ const CurrentSalts = ({ darkMode = false }: CurrentSaltsProps) => {
             </div>
           )}
 
-          <h2 className="text-4xl font-bold text-[#0B3C5D] dark:text-white">Patient Current Salts</h2>
+          <h2 className="text-4xl font-bold text-[#0B3C5D] dark:text-white">
+            Patient Current Salts
+          </h2>
           <p className="mt-2 text-[#4B5563] dark:text-gray-300">
-            Active salts with ongoing dose and frequency details for current treatment.
+            Active salts with ongoing dose and frequency details for current
+            treatment.
           </p>
 
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -69,7 +74,9 @@ const CurrentSalts = ({ darkMode = false }: CurrentSaltsProps) => {
                 key={`${salt.name}-${salt.startedOn}`}
                 className="rounded-xl border border-[#0B3C5D]/30 dark:border-white/20 bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-4"
               >
-                <div className="font-semibold text-[#0B3C5D] dark:text-white">{salt.name}</div>
+                <div className="font-semibold text-[#0B3C5D] dark:text-white">
+                  {salt.name}
+                </div>
                 <div className="text-sm text-[#4B5563] dark:text-gray-300 mt-1">
                   {salt.dose} • {salt.frequency}
                 </div>

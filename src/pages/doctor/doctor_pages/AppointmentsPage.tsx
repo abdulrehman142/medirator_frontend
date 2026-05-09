@@ -12,7 +12,12 @@ interface AppointmentsPageProps {
   darkMode?: boolean;
 }
 
-type AppointmentStatus = "Confirmed" | "Pending" | "Cancelled" | "Completed" | "Missed";
+type AppointmentStatus =
+  | "Confirmed"
+  | "Pending"
+  | "Cancelled"
+  | "Completed"
+  | "Missed";
 type AppointmentFilter = "today" | "week";
 
 interface Appointment {
@@ -45,7 +50,9 @@ const formatIsoTo12Hour = (isoDateTime: string) => {
   return `${normalizedHours}:${minutes} ${suffix}`;
 };
 
-const mapApiStatusToUiStatus = (status: ApiAppointment["status"]): AppointmentStatus => {
+const mapApiStatusToUiStatus = (
+  status: ApiAppointment["status"],
+): AppointmentStatus => {
   if (status === "completed") {
     return "Completed";
   }
@@ -77,14 +84,21 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
   const { user } = useAuth();
   const { patients } = useDoctorPatient();
   const todayDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const [appointmentFilter, setAppointmentFilter] = useState<AppointmentFilter>("today");
-  const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>(initialUpcomingAppointments);
-  const [pastAppointments, setPastAppointments] = useState<Appointment[]>(initialPastAppointments);
+  const [appointmentFilter, setAppointmentFilter] =
+    useState<AppointmentFilter>("today");
+  const [upcomingAppointments, setUpcomingAppointments] = useState<
+    Appointment[]
+  >(initialUpcomingAppointments);
+  const [pastAppointments, setPastAppointments] = useState<Appointment[]>(
+    initialPastAppointments,
+  );
   const [apiError, setApiError] = useState<string | null>(null);
   const [patientIdInput, setPatientIdInput] = useState("");
   const [dateInput, setDateInput] = useState(todayDate);
   const [timeInput, setTimeInput] = useState("09:00");
-  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
+  const [editingAppointmentId, setEditingAppointmentId] = useState<
+    string | null
+  >(null);
   const [editDateInput, setEditDateInput] = useState("");
   const [editTimeInput, setEditTimeInput] = useState("");
 
@@ -99,18 +113,25 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
 
         const mappedAppointments = response.map((apiAppointment) => {
           const mapped = mapApiAppointment(apiAppointment);
-          const matchedPatient = patients.find((patient) => patient.id === apiAppointment.patient_id);
+          const matchedPatient = patients.find(
+            (patient) => patient.id === apiAppointment.patient_id,
+          );
           return {
             ...mapped,
             patientName: matchedPatient?.name ?? mapped.patientName,
-            patientDisplayId: matchedPatient?.displayId ?? mapped.patientDisplayId,
+            patientDisplayId:
+              matchedPatient?.displayId ?? mapped.patientDisplayId,
           };
         });
         const nextUpcoming = mappedAppointments.filter(
-          (appointment) => appointment.status !== "Completed" && appointment.status !== "Cancelled",
+          (appointment) =>
+            appointment.status !== "Completed" &&
+            appointment.status !== "Cancelled",
         );
         const nextPast = mappedAppointments.filter(
-          (appointment) => appointment.status === "Completed" || appointment.status === "Cancelled",
+          (appointment) =>
+            appointment.status === "Completed" ||
+            appointment.status === "Cancelled",
         );
 
         setUpcomingAppointments(nextUpcoming);
@@ -126,7 +147,9 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
 
   const filteredUpcomingAppointments = useMemo(() => {
     if (appointmentFilter === "today") {
-      return upcomingAppointments.filter((appointment) => appointment.date === todayDate);
+      return upcomingAppointments.filter(
+        (appointment) => appointment.date === todayDate,
+      );
     }
 
     return upcomingAppointments;
@@ -158,7 +181,9 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
   };
 
   const handleScheduleAppointment = async () => {
-    const selectedPatient = patients.find((patient) => patient.id === patientIdInput);
+    const selectedPatient = patients.find(
+      (patient) => patient.id === patientIdInput,
+    );
 
     if (!selectedPatient || !dateInput || !timeInput || !user?.id) {
       return;
@@ -174,15 +199,30 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
       const response = await appointmentsApi.list();
       const mappedAppointments = response.map((apiAppointment) => {
         const mapped = mapApiAppointment(apiAppointment);
-        const matchedPatient = patients.find((patient) => patient.id === apiAppointment.patient_id);
+        const matchedPatient = patients.find(
+          (patient) => patient.id === apiAppointment.patient_id,
+        );
         return {
           ...mapped,
           patientName: matchedPatient?.name ?? mapped.patientName,
-          patientDisplayId: matchedPatient?.displayId ?? mapped.patientDisplayId,
+          patientDisplayId:
+            matchedPatient?.displayId ?? mapped.patientDisplayId,
         };
       });
-      setUpcomingAppointments(mappedAppointments.filter((appointment) => appointment.status !== "Completed" && appointment.status !== "Cancelled"));
-      setPastAppointments(mappedAppointments.filter((appointment) => appointment.status === "Completed" || appointment.status === "Cancelled"));
+      setUpcomingAppointments(
+        mappedAppointments.filter(
+          (appointment) =>
+            appointment.status !== "Completed" &&
+            appointment.status !== "Cancelled",
+        ),
+      );
+      setPastAppointments(
+        mappedAppointments.filter(
+          (appointment) =>
+            appointment.status === "Completed" ||
+            appointment.status === "Cancelled",
+        ),
+      );
       setPatientIdInput("");
       setTimeInput("09:00");
       setApiError(null);
@@ -192,7 +232,9 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
   };
 
   const handleReschedule = (appointmentId: string) => {
-    const selectedAppointment = upcomingAppointments.find((appointment) => appointment.id === appointmentId);
+    const selectedAppointment = upcomingAppointments.find(
+      (appointment) => appointment.id === appointmentId,
+    );
 
     if (!selectedAppointment) {
       return;
@@ -204,8 +246,15 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
     const [timeValue, suffix] = selectedAppointment.time.split(" ");
     const [hourPart, minutePart] = timeValue.split(":");
     const hour = Number(hourPart);
-    const normalizedHour = suffix === "PM" && hour !== 12 ? hour + 12 : suffix === "AM" && hour === 12 ? 0 : hour;
-    setEditTimeInput(`${String(normalizedHour).padStart(2, "0")}:${minutePart}`);
+    const normalizedHour =
+      suffix === "PM" && hour !== 12
+        ? hour + 12
+        : suffix === "AM" && hour === 12
+          ? 0
+          : hour;
+    setEditTimeInput(
+      `${String(normalizedHour).padStart(2, "0")}:${minutePart}`,
+    );
   };
 
   const handleSaveReschedule = async (appointmentId: string) => {
@@ -266,7 +315,9 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
   };
 
   const handleStartConsultation = async (appointmentId: string) => {
-    const selectedAppointment = upcomingAppointments.find((appointment) => appointment.id === appointmentId);
+    const selectedAppointment = upcomingAppointments.find(
+      (appointment) => appointment.id === appointmentId,
+    );
 
     if (!selectedAppointment) {
       return;
@@ -274,8 +325,13 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
 
     try {
       await appointmentsApi.update(appointmentId, { status: "completed" });
-      setUpcomingAppointments((current) => current.filter((appointment) => appointment.id !== appointmentId));
-      setPastAppointments((current) => [{ ...selectedAppointment, status: "Completed" }, ...current]);
+      setUpcomingAppointments((current) =>
+        current.filter((appointment) => appointment.id !== appointmentId),
+      );
+      setPastAppointments((current) => [
+        { ...selectedAppointment, status: "Completed" },
+        ...current,
+      ]);
       setApiError(null);
     } catch {
       setApiError("Unable to mark appointment as completed.");
@@ -283,7 +339,9 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
   };
 
   const handleOpenPatientProfile = (appointment: Appointment) => {
-    navigate(`/doctor/pages/patient-management?patient=${encodeURIComponent(appointment.patientId)}`);
+    navigate(
+      `/doctor/pages/patient-management?patient=${encodeURIComponent(appointment.patientId)}`,
+    );
   };
 
   const selectedPatient = useMemo(
@@ -312,7 +370,12 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
             Appointments
           </h2>
         </div>
-        <img src={appointmentImg} alt="Banner" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
+        <img
+          src={appointmentImg}
+          alt="Banner"
+          className="h-40 md:h-70 w-40 md:w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="dark:bg-black px-3 md:px-6 py-6 space-y-4 font-sans">
@@ -351,25 +414,34 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
 
         <section className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Weekly Summary</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+              Weekly Summary
+            </h3>
           </div>
           <div className="mt-5 flex justify-center">
             <div className="w-full max-w-5xl rounded-2xl border border-[#0B3C5D]/30 bg-gradient-to-b from-white to-[#f8fbff] dark:from-black dark:to-[#07101a] p-4 md:p-6">
               <div className="flex items-end justify-between gap-2 h-56 md:h-64">
                 {weekDays.map((day) => {
-              const count = calendarCounts.get(day) ?? 0;
+                  const count = calendarCounts.get(day) ?? 0;
                   const fillHeight = `${Math.max(12, count * 30)}%`;
 
-              return (
-                    <div key={day} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
+                  return (
+                    <div
+                      key={day}
+                      className="flex-1 flex flex-col items-center justify-end gap-2 h-full"
+                    >
                       <div className="flex items-end justify-center h-full w-full max-w-12 rounded-t-2xl border border-[#0B3C5D]/20 bg-white/70 dark:bg-black/40 overflow-hidden">
                         <div
                           className={`w-full rounded-t-2xl ${count > 0 ? "bg-[#0B3C5D]" : "bg-gray-200 dark:bg-gray-700"}`}
                           style={{ height: fillHeight }}
                         />
                       </div>
-                      <div className="text-sm font-semibold text-[#0B3C5D] dark:text-white">{day}</div>
-                      <div className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">{count}</div>
+                      <div className="text-sm font-semibold text-[#0B3C5D] dark:text-white">
+                        {day}
+                      </div>
+                      <div className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
+                        {count}
+                      </div>
                     </div>
                   );
                 })}
@@ -390,7 +462,9 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6">
-            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Upcoming Appointments</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+              Upcoming Appointments
+            </h3>
             <div className="mt-4 space-y-3">
               {filteredUpcomingAppointments.map((appointment) => (
                 <div
@@ -399,12 +473,17 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <div className="font-semibold">{appointment.patientName}</div>
+                      <div className="font-semibold">
+                        {appointment.patientName}
+                      </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {appointment.patientDisplayId} • {appointment.date} • {appointment.time}
+                        {appointment.patientDisplayId} • {appointment.date} •{" "}
+                        {appointment.time}
                       </div>
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(appointment.status)}`}>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(appointment.status)}`}
+                    >
                       {appointment.status}
                     </span>
                   </div>
@@ -416,13 +495,17 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
                           <input
                             type="date"
                             value={editDateInput}
-                            onChange={(event) => setEditDateInput(event.target.value)}
+                            onChange={(event) =>
+                              setEditDateInput(event.target.value)
+                            }
                             className="rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-3 py-2 text-sm text-black dark:text-white"
                           />
                           <input
                             type="time"
                             value={editTimeInput}
-                            onChange={(event) => setEditTimeInput(event.target.value)}
+                            onChange={(event) =>
+                              setEditTimeInput(event.target.value)
+                            }
                             className="rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-3 py-2 text-sm text-black dark:text-white"
                           />
                         </div>
@@ -478,14 +561,20 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
               ))}
               {filteredUpcomingAppointments.length === 0 && (
                 <div className="rounded-2xl border border-[#0B3C5D] p-3 text-sm text-gray-500 dark:text-gray-400">
-                  {t("auth", "noAppointmentsInThisFilter", "No appointments in this filter.")}
+                  {t(
+                    "auth",
+                    "noAppointmentsInThisFilter",
+                    "No appointments in this filter.",
+                  )}
                 </div>
               )}
             </div>
           </div>
 
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6">
-            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "pastAppointments", "Past Appointments")}</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+              {t("auth", "pastAppointments", "Past Appointments")}
+            </h3>
             <div className="mt-4 space-y-3">
               {pastAppointments.map((appointment) => (
                 <div
@@ -494,12 +583,17 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <div className="font-semibold">{appointment.patientName}</div>
+                      <div className="font-semibold">
+                        {appointment.patientName}
+                      </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {appointment.patientDisplayId} • {appointment.date} • {appointment.time}
+                        {appointment.patientDisplayId} • {appointment.date} •{" "}
+                        {appointment.time}
                       </div>
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(appointment.status)}`}>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(appointment.status)}`}
+                    >
                       {appointment.status}
                     </span>
                   </div>
@@ -510,7 +604,9 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
         </section>
 
         <section className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6">
-          <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">➕ Schedule Appointment</h3>
+          <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+            ➕ Schedule Appointment
+          </h3>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
             <select
               value={patientIdInput}
@@ -518,7 +614,11 @@ const AppointmentsPage = ({ darkMode = false }: AppointmentsPageProps) => {
               className="rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-3 py-2 text-sm text-black dark:text-white"
             >
               <option value="">Select registered patient</option>
-              {patients.length === 0 && <option value="" disabled>No registered patients available</option>}
+              {patients.length === 0 && (
+                <option value="" disabled>
+                  No registered patients available
+                </option>
+              )}
               {patients.map((patient) => (
                 <option key={patient.id} value={patient.id}>
                   {patient.name} - {patient.displayId}

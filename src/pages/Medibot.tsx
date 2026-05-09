@@ -41,10 +41,15 @@ export default function Medibot() {
   const [loading, setLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [voiceState, setVoiceState] = useState<"idle" | "listening" | "processing">("idle");
+  const [voiceState, setVoiceState] = useState<
+    "idle" | "listening" | "processing"
+  >("idle");
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [voiceHint, setVoiceHint] = useState<string | null>(null);
-  const [modelPreference, setModelPreference] = useState<"gemini" | "xrayas">("gemini");
+  const [interimTranscript, setInterimTranscript] = useState<string>("");
+  const [modelPreference, setModelPreference] = useState<"gemini" | "xrayas">(
+    "gemini",
+  );
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
   const [draftIsVoice, setDraftIsVoice] = useState(false);
 
@@ -71,7 +76,10 @@ export default function Medibot() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+      if (
+        modelDropdownRef.current &&
+        !modelDropdownRef.current.contains(event.target as Node)
+      ) {
         setModelDropdownOpen(false);
       }
     };
@@ -88,7 +96,10 @@ export default function Medibot() {
   useEffect(() => {
     if (chatRef.current) {
       setTimeout(() => {
-        chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
+        chatRef.current?.scrollTo({
+          top: chatRef.current.scrollHeight,
+          behavior: "smooth",
+        });
       }, 100);
     }
   }, [messages, loading]);
@@ -131,7 +142,10 @@ export default function Medibot() {
     try {
       const res = await fetch("http://localhost:8000/api/v1/chat/sessions", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ title }),
       });
       if (!res.ok) return null;
@@ -150,9 +164,12 @@ export default function Medibot() {
     activeSessionLoadRef.current = sessionId;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/chat/sessions/${sessionId}/messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/v1/chat/sessions/${sessionId}/messages`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (!res.ok) {
         if (activeSessionLoadRef.current === sessionId) {
           setMessages([]);
@@ -195,15 +212,21 @@ export default function Medibot() {
 
     const token = tokenStore.getAccessToken();
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/chat/sessions/${sessionId}`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle }),
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/v1/chat/sessions/${sessionId}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title: newTitle }),
+        },
+      );
       if (!res.ok) throw new Error("rename failed");
 
       setSessions((s) =>
-        s.map((it) => (it.id === sessionId ? { ...it, title: newTitle } : it))
+        s.map((it) => (it.id === sessionId ? { ...it, title: newTitle } : it)),
       );
     } catch (err) {
       console.error("Failed to rename:", err);
@@ -216,10 +239,13 @@ export default function Medibot() {
 
     const token = tokenStore.getAccessToken();
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/chat/sessions/${sessionId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/v1/chat/sessions/${sessionId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (!res.ok) throw new Error("delete failed");
 
       const remaining = sessions.filter((it) => it.id !== sessionId);
@@ -286,7 +312,10 @@ export default function Medibot() {
       // Send message to backend
       const form = new FormData();
       form.append("chat_id", chatId);
-      form.append("message", trimmedText || `Uploaded ${outgoingFiles.length} file(s)`);
+      form.append(
+        "message",
+        trimmedText || `Uploaded ${outgoingFiles.length} file(s)`,
+      );
       form.append("is_voice", String(Boolean(isVoice)));
       form.append("model_preference", modelPreference);
       outgoingFiles.forEach((f) => form.append("files", f));
@@ -302,7 +331,8 @@ export default function Medibot() {
       if (!res.ok) throw new Error(payload?.detail || "Send failed");
 
       const assistantReply = payload?.data?.assistant_reply || "";
-      const assistantId = payload?.data?.message_id || `local-assistant-${Date.now()}`;
+      const assistantId =
+        payload?.data?.message_id || `local-assistant-${Date.now()}`;
 
       if (currentChatIdRef.current === activeTargetChatId) {
         setMessages((prev) => [
@@ -327,7 +357,7 @@ export default function Medibot() {
           if (session.title !== "New Chat") return session;
           const nextTitle = (trimmedText || "New Chat").slice(0, 60);
           return { ...session, title: nextTitle || "New Chat" };
-        })
+        }),
       );
     } catch (err) {
       console.error("Failed to send message:", err);
@@ -375,7 +405,9 @@ export default function Medibot() {
   };
 
   const startVoiceInput = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setVoiceError("Microphone access required");
       return;
@@ -388,8 +420,6 @@ export default function Medibot() {
       stopVoiceInput(true);
       return;
     }
-
-
 
     voiceBaseTextRef.current = input.trim();
 
@@ -409,7 +439,11 @@ export default function Medibot() {
       let finalTranscript = "";
       let liveTranscript = "";
 
-      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+      for (
+        let index = event.resultIndex;
+        index < event.results.length;
+        index += 1
+      ) {
         const result = event.results[index];
         const chunk = result?.[0]?.transcript ?? "";
         if (!chunk) continue;
@@ -420,7 +454,8 @@ export default function Medibot() {
         }
       }
 
-      const spokenText = `${voiceBaseTextRef.current}${voiceBaseTextRef.current ? " " : ""}${(finalTranscript + liveTranscript).trim()}`.trim();
+      const spokenText =
+        `${voiceBaseTextRef.current}${voiceBaseTextRef.current ? " " : ""}${(finalTranscript + liveTranscript).trim()}`.trim();
       if (spokenText) {
         setInput(spokenText);
         setDraftIsVoice(true);
@@ -430,7 +465,11 @@ export default function Medibot() {
 
     recognition.onerror = (event: any) => {
       const errorCode = String(event?.error || "").toLowerCase();
-      if (errorCode === "not-allowed" || errorCode === "service-not-allowed" || errorCode === "audio-capture") {
+      if (
+        errorCode === "not-allowed" ||
+        errorCode === "service-not-allowed" ||
+        errorCode === "audio-capture"
+      ) {
         setVoiceError("Microphone access required");
       } else if (errorCode === "no-speech") {
         setVoiceError("Try speaking again");
@@ -459,9 +498,13 @@ export default function Medibot() {
   };
 
   return (
-    <div className={`flex h-screen ${darkMode ? "bg-gradient-to-br from-black via-slate-900 to-black text-white" : "bg-gradient-to-br from-slate-50 via-blue-50 to-blue-100 text-black"}`}>
+    <div
+      className={`flex h-screen ${darkMode ? "bg-gradient-to-br from-black via-slate-900 to-black text-white" : "bg-gradient-to-br from-slate-50 via-blue-50 to-blue-100 text-black"}`}
+    >
       {/* Sidebar - Fixed */}
-      <aside className={`w-72 h-screen overflow-y-auto border-r ${darkMode ? "border-white/5 bg-white/3" : "border-blue-200 bg-white/40"} p-4 flex flex-col flex-shrink-0`}>
+      <aside
+        className={`w-72 h-screen overflow-y-auto border-r ${darkMode ? "border-white/5 bg-white/3" : "border-blue-200 bg-white/40"} p-4 flex flex-col flex-shrink-0`}
+      >
         <div className="flex items-center justify-between gap-2 mb-4">
           {/* Back Button */}
           <button
@@ -510,7 +553,11 @@ export default function Medibot() {
 
         <div className="flex-1 overflow-y-auto space-y-2">
           {sessions.length === 0 ? (
-            <p className={`text-xs ${darkMode ? "text-white/40" : "text-black/40"}`}>No chats yet</p>
+            <p
+              className={`text-xs ${darkMode ? "text-white/40" : "text-black/40"}`}
+            >
+              No chats yet
+            </p>
           ) : (
             sessions.map((session) => (
               <div
@@ -522,8 +569,8 @@ export default function Medibot() {
                       ? "bg-white/10 text-white"
                       : "bg-blue-300 text-blue-900"
                     : darkMode
-                    ? "hover:bg-white/5 text-white/70"
-                    : "hover:bg-blue-100 text-black/70"
+                      ? "hover:bg-white/5 text-white/70"
+                      : "hover:bg-blue-100 text-black/70"
                 }`}
               >
                 <div className="flex justify-between items-center gap-2">
@@ -560,7 +607,9 @@ export default function Medibot() {
       {/* Main chat area - Flex column with scrollable messages */}
       <main className="flex-1 flex flex-col">
         {/* Header */}
-        <header className={`border-b ${darkMode ? "border-white/5 bg-white/3" : "border-blue-200 bg-white/40"} p-4 flex items-center justify-between`}>
+        <header
+          className={`border-b ${darkMode ? "border-white/5 bg-white/3" : "border-blue-200 bg-white/40"} p-4 flex items-center justify-between`}
+        >
           <div className="flex items-center gap-3">
             <img src={bot} alt="medibot" className="w-8 h-8 rounded-full" />
             <div>
@@ -577,9 +626,13 @@ export default function Medibot() {
         >
           <div className="max-w-2xl mx-auto space-y-3">
             {messages.length === 0 && (
-              <div className={`text-center py-12 ${darkMode ? "text-white/40" : "text-black/40"}`}>
+              <div
+                className={`text-center py-12 ${darkMode ? "text-white/40" : "text-black/40"}`}
+              >
                 <div className="text-sm">No messages yet</div>
-                <div className="text-xs mt-2">Send a message to start the conversation</div>
+                <div className="text-xs mt-2">
+                  Send a message to start the conversation
+                </div>
               </div>
             )}
 
@@ -595,8 +648,8 @@ export default function Medibot() {
                         ? "bg-blue-600 text-white"
                         : "bg-blue-500 text-white"
                       : darkMode
-                      ? "bg-white/10 text-white"
-                      : "bg-white text-black"
+                        ? "bg-white/10 text-white"
+                        : "bg-white text-black"
                   }`}
                   style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
                 >
@@ -611,16 +664,25 @@ export default function Medibot() {
                           <div
                             key={`${m.id}-${index}`}
                             className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] ${
-                              darkMode ? "bg-white/10 text-white" : "bg-slate-100 text-slate-800"
+                              darkMode
+                                ? "bg-white/10 text-white"
+                                : "bg-slate-100 text-slate-800"
                             }`}
                           >
                             <span>📎</span>
                             {fileUrl ? (
-                              <a href={fileUrl} target="_blank" rel="noreferrer" className="underline truncate max-w-[140px]">
+                              <a
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="underline truncate max-w-[140px]"
+                              >
                                 {fileName}
                               </a>
                             ) : (
-                              <span className="truncate max-w-[140px]">{fileName}</span>
+                              <span className="truncate max-w-[140px]">
+                                {fileName}
+                              </span>
                             )}
                           </div>
                         );
@@ -632,7 +694,9 @@ export default function Medibot() {
             ))}
 
             {loading && (
-              <div className={`text-sm ${darkMode ? "text-white/50" : "text-black/50"}`}>
+              <div
+                className={`text-sm ${darkMode ? "text-white/50" : "text-black/50"}`}
+              >
                 <span className="animate-pulse">Medibot is thinking...</span>
               </div>
             )}
@@ -647,8 +711,8 @@ export default function Medibot() {
           }}
           className={`border-t ${darkMode ? "border-white/10 bg-black/20" : "border-blue-200 bg-blue-100/40"} p-4 backdrop-blur-xl`}
           style={{
-            WebkitBackdropFilter: 'blur(8px)',
-            backdropFilter: 'blur(8px)'
+            WebkitBackdropFilter: "blur(8px)",
+            backdropFilter: "blur(8px)",
           }}
         >
           <div className="max-w-3xl mx-auto space-y-3">
@@ -659,13 +723,17 @@ export default function Medibot() {
                   <div
                     key={idx}
                     className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs whitespace-nowrap ${
-                      darkMode ? "bg-white/20 text-white" : "bg-blue-200 text-blue-900"
+                      darkMode
+                        ? "bg-white/20 text-white"
+                        : "bg-blue-200 text-blue-900"
                     }`}
                   >
                     <span className="truncate max-w-[150px]">{file.name}</span>
                     <button
                       type="button"
-                      onClick={() => setSelectedFiles((p) => p.filter((_, j) => j !== idx))}
+                      onClick={() =>
+                        setSelectedFiles((p) => p.filter((_, j) => j !== idx))
+                      }
                       className="ml-1 opacity-70 hover:opacity-100"
                     >
                       ✕
@@ -676,17 +744,22 @@ export default function Medibot() {
             )}
 
             {modelPreference === "xrayas" && (
-              <div className={`text-xs px-3 py-2 rounded-md border ${
-                darkMode
-                  ? "bg-blue-500/20 border-blue-500/50 text-blue-200"
-                  : "bg-blue-100 border-blue-300 text-blue-800"
-              }`}>
-                ℹ️ XRayAS analyzes chest x-ray images. Upload a single x-ray image and the model will return a screening prediction.
+              <div
+                className={`text-xs px-3 py-2 rounded-md border ${
+                  darkMode
+                    ? "bg-blue-500/20 border-blue-500/50 text-blue-200"
+                    : "bg-blue-100 border-blue-300 text-blue-800"
+                }`}
+              >
+                ℹ️ XRayAS analyzes chest x-ray images. Upload a single x-ray
+                image and the model will return a screening prediction.
               </div>
             )}
 
             {(voiceError || voiceHint) && (
-              <div className={`text-xs px-1 ${voiceError ? "text-red-500" : darkMode ? "text-white/60" : "text-slate-600"}`}>
+              <div
+                className={`text-xs px-1 ${voiceError ? "text-red-500" : darkMode ? "text-white/60" : "text-slate-600"}`}
+              >
                 {voiceError || voiceHint}
               </div>
             )}
@@ -708,7 +781,10 @@ export default function Medibot() {
                 hidden
                 onChange={(e) => {
                   if (e.target.files) {
-                    setSelectedFiles((p) => [...p, ...Array.from(e.target.files!)]);
+                    setSelectedFiles((p) => [
+                      ...p,
+                      ...Array.from(e.target.files!),
+                    ]);
                   }
                 }}
               />
@@ -773,16 +849,16 @@ export default function Medibot() {
                   type="button"
                   onClick={() => setModelDropdownOpen((prev) => !prev)}
                   className={`flex items-center gap-2 rounded-md shadow-lg p-2 border-2 transition-all duration-200 w-52 ${
-                    darkMode ? "bg-black border-[#0B3C5D]" : "bg-[#0B3C5D] border-[#0B3C5D]"
+                    darkMode
+                      ? "bg-black border-[#0B3C5D]"
+                      : "bg-[#0B3C5D] border-[#0B3C5D]"
                   }`}
                   title="Model preference"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className="w-2 h-2 rounded-full bg-white flex-shrink-0" />
                     <div className="font-ibm-plex-mono text-sm truncate text-left text-white">
-                      {modelPreference === "xrayas"
-                        ? "xrayIT"
-                        : "Medibot"}
+                      {modelPreference === "xrayas" ? "xrayIT" : "Medibot"}
                     </div>
                   </div>
                   <span className="text-white text-xs flex-shrink-0">▾</span>
@@ -791,7 +867,9 @@ export default function Medibot() {
                 {modelDropdownOpen && (
                   <div
                     className={`absolute left-0 bottom-full mb-2 z-20 flex flex-col shadow-lg rounded-md p-2 border-2 w-56 ${
-                      darkMode ? "bg-black border-[#0B3C5D]" : "bg-[#0B3C5D] border-[#0B3C5D]"
+                      darkMode
+                        ? "bg-black border-[#0B3C5D]"
+                        : "bg-[#0B3C5D] border-[#0B3C5D]"
                     }`}
                   >
                     {[
@@ -802,7 +880,9 @@ export default function Medibot() {
                         key={option.value}
                         type="button"
                         onClick={() => {
-                          setModelPreference(option.value as "gemini" | "xrayas");
+                          setModelPreference(
+                            option.value as "gemini" | "xrayas",
+                          );
                           setInput("");
                           setModelDropdownOpen(false);
                         }}
@@ -812,19 +892,21 @@ export default function Medibot() {
                               ? "bg-[#0B3C5D] text-white"
                               : "bg-white text-black"
                             : darkMode
-                            ? "bg-[#0B3C5D] hover:bg-gray-800 text-white hover:text-white"
-                            : "bg-white hover:bg-gray-800 text-black hover:text-white"
+                              ? "bg-[#0B3C5D] hover:bg-gray-800 text-white hover:text-white"
+                              : "bg-white hover:bg-gray-800 text-black hover:text-white"
                         }`}
                       >
                         <div className="w-2 h-2 rounded-full bg-current flex-shrink-0" />
-                        <div className="font-ibm-plex-mono text-sm truncate">{option.label}</div>
+                        <div className="font-ibm-plex-mono text-sm truncate">
+                          {option.label}
+                        </div>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-                      <button
+              <button
                 type="button"
                 onClick={startVoiceInput}
                 disabled={modelPreference === "xrayas"}
@@ -835,13 +917,19 @@ export default function Medibot() {
                       ? "border-red-400 bg-red-500/20"
                       : "border-red-500 bg-red-100"
                     : darkMode
-                    ? "border-white/20 hover:bg-white/10 disabled:opacity-50"
-                    : "border-blue-300 hover:bg-blue-200 disabled:opacity-50"
+                      ? "border-white/20 hover:bg-white/10 disabled:opacity-50"
+                      : "border-blue-300 hover:bg-blue-200 disabled:opacity-50"
                 }`}
-                title={voiceState === "listening" ? "Stop voice input" : "Start voice input"}
+                title={
+                  voiceState === "listening"
+                    ? "Stop voice input"
+                    : "Start voice input"
+                }
               >
                 <img src={voiceIcon} className="h-5 w-5" />
-                {voiceState === "listening" && <span className="absolute inset-0 rounded-full border border-red-400 animate-ping opacity-60" />}
+                {voiceState === "listening" && (
+                  <span className="absolute inset-0 rounded-full border border-red-400 animate-ping opacity-60" />
+                )}
               </button>
 
               {/* 📎 UPLOAD BUTTON */}
@@ -865,7 +953,9 @@ export default function Medibot() {
               {/* 📩 SEND */}
               <button
                 type="submit"
-                disabled={loading || (!input.trim() && selectedFiles.length === 0)}
+                disabled={
+                  loading || (!input.trim() && selectedFiles.length === 0)
+                }
                 className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors ${
                   darkMode
                     ? "border-white/20 hover:bg-white/10 disabled:opacity-50"

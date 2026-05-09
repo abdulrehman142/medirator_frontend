@@ -80,19 +80,47 @@ const DISEASE_GROUPS = [
   },
   {
     label: "Respiratory",
-    diseases: ["asthma", "copd", "bronchitis", "pneumonia", "tuberculosis", "lung infection"],
+    diseases: [
+      "asthma",
+      "copd",
+      "bronchitis",
+      "pneumonia",
+      "tuberculosis",
+      "lung infection",
+    ],
   },
   {
     label: "Neuro",
-    diseases: ["alzheimers", "parkinsons", "epilepsy", "migraine", "dementia", "multiple sclerosis"],
+    diseases: [
+      "alzheimers",
+      "parkinsons",
+      "epilepsy",
+      "migraine",
+      "dementia",
+      "multiple sclerosis",
+    ],
   },
   {
     label: "Mental",
-    diseases: ["depression", "anxiety", "bipolar disorder", "schizophrenia", "ocd", "ptsd"],
+    diseases: [
+      "depression",
+      "anxiety",
+      "bipolar disorder",
+      "schizophrenia",
+      "ocd",
+      "ptsd",
+    ],
   },
   {
     label: "Organ",
-    diseases: ["kidney disease", "kidney failure", "liver disease", "fatty liver", "cirrhosis", "hepatitis"],
+    diseases: [
+      "kidney disease",
+      "kidney failure",
+      "liver disease",
+      "fatty liver",
+      "cirrhosis",
+      "hepatitis",
+    ],
   },
   {
     label: "Autoimmune",
@@ -100,11 +128,22 @@ const DISEASE_GROUPS = [
   },
   {
     label: "Genetic",
-    diseases: ["thalassemia", "sickle cell anemia", "hemophilia", "cystic fibrosis"],
+    diseases: [
+      "thalassemia",
+      "sickle cell anemia",
+      "hemophilia",
+      "cystic fibrosis",
+    ],
   },
   {
     label: "Hormonal",
-    diseases: ["thyroid", "hypothyroidism", "hyperthyroidism", "pcos", "hormonal imbalance"],
+    diseases: [
+      "thyroid",
+      "hypothyroidism",
+      "hyperthyroidism",
+      "pcos",
+      "hormonal imbalance",
+    ],
   },
   {
     label: "Other",
@@ -138,7 +177,8 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
   const [searchParams] = useSearchParams();
   const patientFromQuery = searchParams.get("patient")?.trim() ?? "";
   const isDoctorView = Boolean(patientFromQuery);
-  const legacyFamilyStorageKey = !isDoctorView && user?.id ? `medirator_family_history_${user.id}` : null;
+  const legacyFamilyStorageKey =
+    !isDoctorView && user?.id ? `medirator_family_history_${user.id}` : null;
   const [familyMembers, setFamilyMembers] = useState<FamilyMemberRecord[]>([]);
   const [relationship, setRelationship] = useState("GrandFather(Father Side)");
   const [isRelationshipMenuOpen, setIsRelationshipMenuOpen] = useState(false);
@@ -151,17 +191,27 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
   const [isEditMode, setIsEditMode] = useState(true);
   const [siblingStartIndex, setSiblingStartIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [viewport, setViewport] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
   const [message, setMessage] = useState<string | null>(null);
   const relationshipMenuRef = useRef<HTMLDivElement>(null);
   const diseaseMenuRef = useRef<HTMLDivElement>(null);
-  const normalizeMember = (member: Partial<FamilyMemberRecord>, index: number): FamilyMemberRecord => ({
+  const normalizeMember = (
+    member: Partial<FamilyMemberRecord>,
+    index: number,
+  ): FamilyMemberRecord => ({
     id: member.id ?? `${Date.now()}-${index}`,
     relationship: member.relationship ?? "",
     name: member.name ?? member.displayName ?? "",
     age: member.age ?? "",
     disease: member.disease ?? "",
-    displayName: member.displayName ?? member.name ?? member.relationship ?? "Family Member",
+    displayName:
+      member.displayName ??
+      member.name ??
+      member.relationship ??
+      "Family Member",
   });
 
   const handleExpandFullscreen = () => {
@@ -201,10 +251,16 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (relationshipMenuRef.current && !relationshipMenuRef.current.contains(event.target as Node)) {
+      if (
+        relationshipMenuRef.current &&
+        !relationshipMenuRef.current.contains(event.target as Node)
+      ) {
         setIsRelationshipMenuOpen(false);
       }
-      if (diseaseMenuRef.current && !diseaseMenuRef.current.contains(event.target as Node)) {
+      if (
+        diseaseMenuRef.current &&
+        !diseaseMenuRef.current.contains(event.target as Node)
+      ) {
         setIsDiseaseMenuOpen(false);
       }
     };
@@ -238,10 +294,16 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
           className="w-16 h-16 rounded-full bg-gray-100 border border-gray-200 object-cover"
           loading="lazy"
         />
-        <div className="mt-1 text-sm font-semibold text-white text-center break-words leading-tight">{name}</div>
-        <div className="text-[11px] uppercase tracking-wide text-white">{gender}</div>
+        <div className="mt-1 text-sm font-semibold text-white text-center break-words leading-tight">
+          {name}
+        </div>
+        <div className="text-[11px] uppercase tracking-wide text-white">
+          {gender}
+        </div>
         <div className="text-[11px] text-white text-center">Age: {age}</div>
-        <div className="text-[11px] text-white text-center break-words leading-tight w-full">Disease: {disease}</div>
+        <div className="text-[11px] text-white text-center break-words leading-tight w-full">
+          Disease: {disease}
+        </div>
       </div>
     </div>
   );
@@ -255,15 +317,24 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
     const hydrateTree = async () => {
       try {
         if (isDoctorView && patientFromQuery) {
-          const patientProfile = await usersApi.getPatientProfileForDoctor(patientFromQuery);
-          let tree = (patientProfile?.family_tree ?? []).map((member, index) => normalizeMember(member, index));
+          const patientProfile =
+            await usersApi.getPatientProfileForDoctor(patientFromQuery);
+          let tree = (patientProfile?.family_tree ?? []).map((member, index) =>
+            normalizeMember(member, index),
+          );
           if (tree.length === 0) {
             try {
-              const rawLocalTree = localStorage.getItem(`medirator_family_history_${patientFromQuery}`);
+              const rawLocalTree = localStorage.getItem(
+                `medirator_family_history_${patientFromQuery}`,
+              );
               if (rawLocalTree) {
-                const parsedLocalTree = JSON.parse(rawLocalTree) as Array<Partial<FamilyMemberRecord>>;
+                const parsedLocalTree = JSON.parse(rawLocalTree) as Array<
+                  Partial<FamilyMemberRecord>
+                >;
                 tree = Array.isArray(parsedLocalTree)
-                  ? parsedLocalTree.map((member, index) => normalizeMember(member, index))
+                  ? parsedLocalTree.map((member, index) =>
+                      normalizeMember(member, index),
+                    )
                   : [];
               }
             } catch {
@@ -276,7 +347,9 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
         }
 
         const myProfile = await usersApi.getMyPatientProfile();
-        const tree = (myProfile?.family_tree ?? []).map((member, index) => normalizeMember(member, index));
+        const tree = (myProfile?.family_tree ?? []).map((member, index) =>
+          normalizeMember(member, index),
+        );
         if (tree.length > 0) {
           setFamilyMembers(tree);
           setIsEditMode(false);
@@ -286,9 +359,13 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
         if (legacyFamilyStorageKey) {
           const rawLegacyTree = localStorage.getItem(legacyFamilyStorageKey);
           if (rawLegacyTree) {
-            const parsedLegacyTree = JSON.parse(rawLegacyTree) as Array<Partial<FamilyMemberRecord>>;
+            const parsedLegacyTree = JSON.parse(rawLegacyTree) as Array<
+              Partial<FamilyMemberRecord>
+            >;
             const migratedTree = Array.isArray(parsedLegacyTree)
-              ? parsedLegacyTree.map((member, index) => normalizeMember(member, index))
+              ? parsedLegacyTree.map((member, index) =>
+                  normalizeMember(member, index),
+                )
               : [];
             if (migratedTree.length > 0 && user?.id) {
               setFamilyMembers(migratedTree);
@@ -303,7 +380,8 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
                 allergies: myProfile?.allergies,
                 chronic_diseases: myProfile?.chronic_diseases,
                 emergency_contact: myProfile?.emergency_contact,
-                family_history: myProfile?.family_history ?? myProfile?.medical_history,
+                family_history:
+                  myProfile?.family_history ?? myProfile?.medical_history,
                 family_tree: migratedTree,
               });
               setMessage("Family tree saved.");
@@ -337,9 +415,13 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
       return;
     }
     setFamilyMembers((current) => {
-      const working = editingMemberId ? current.filter((member) => member.id !== editingMemberId) : current;
+      const working = editingMemberId
+        ? current.filter((member) => member.id !== editingMemberId)
+        : current;
       const relationshipCount = current.filter(
-        (member) => member.id !== editingMemberId && normalizeLabel(member.relationship) === normalizeLabel(relationship),
+        (member) =>
+          member.id !== editingMemberId &&
+          normalizeLabel(member.relationship) === normalizeLabel(relationship),
       ).length;
       if (isUniqueRelationship(relationship) && relationshipCount > 0) {
         setMessage(`${relationship} is unique and already exists in the tree.`);
@@ -348,7 +430,8 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
 
       const nextCount = relationshipCount + 1;
       const numberedLabel =
-        normalizeLabel(relationship) === "sister" || normalizeLabel(relationship) === "brother"
+        normalizeLabel(relationship) === "sister" ||
+        normalizeLabel(relationship) === "brother"
           ? `${relationship} ${nextCount}`
           : relationship;
       const finalLabel = memberName.trim() || numberedLabel;
@@ -378,14 +461,16 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
       DISEASE_OPTION_SET.has(normalizeLabel(member.disease))
         ? normalizeLabel(member.disease)
         : normalizeLabel(member.disease) === NONE_DISEASE_VALUE
-        ? NONE_DISEASE_VALUE
-        : NONE_DISEASE_VALUE,
+          ? NONE_DISEASE_VALUE
+          : NONE_DISEASE_VALUE,
     );
     setMessage(null);
   };
 
   const handleDeleteMember = (memberId: string) => {
-    setFamilyMembers((current) => current.filter((member) => member.id !== memberId));
+    setFamilyMembers((current) =>
+      current.filter((member) => member.id !== memberId),
+    );
     if (editingMemberId === memberId) {
       resetForm();
     }
@@ -409,7 +494,8 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
         allergies: currentProfile?.allergies,
         chronic_diseases: currentProfile?.chronic_diseases,
         emergency_contact: currentProfile?.emergency_contact,
-        family_history: currentProfile?.family_history ?? currentProfile?.medical_history,
+        family_history:
+          currentProfile?.family_history ?? currentProfile?.medical_history,
         family_tree: familyMembers,
       });
       setMessage("Family tree saved.");
@@ -436,7 +522,11 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
     for (const member of familyMembers) {
       if (member.id === editingMemberId) continue;
       if (!isUniqueRelationship(member.relationship)) continue;
-      if ((member.name ?? "").trim() && (member.age ?? "").trim() && (member.disease ?? "").trim()) {
+      if (
+        (member.name ?? "").trim() &&
+        (member.age ?? "").trim() &&
+        (member.disease ?? "").trim()
+      ) {
         completed.add(normalizeLabel(member.relationship));
       }
     }
@@ -516,7 +606,13 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
       gender: "female" as Gender,
       imageSrc: genderImages.female,
     },
-    you: { name: "You", age: "-", disease: "-", gender: "male" as Gender, imageSrc: genderImages.male },
+    you: {
+      name: "You",
+      age: "-",
+      disease: "-",
+      gender: "male" as Gender,
+      imageSrc: genderImages.male,
+    },
   };
 
   const siblingPool = useMemo(() => {
@@ -544,7 +640,10 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
         normalizeLabel(visibleSiblingPool[0]?.relationship ?? "") === "brother"
           ? ("male" as Gender)
           : ("female" as Gender),
-      imageSrc: normalizeLabel(visibleSiblingPool[0]?.relationship ?? "") === "brother" ? genderImages.male : genderImages.female,
+      imageSrc:
+        normalizeLabel(visibleSiblingPool[0]?.relationship ?? "") === "brother"
+          ? genderImages.male
+          : genderImages.female,
     },
     {
       name: visibleSiblingPool[1]?.name ?? "Sibling 2",
@@ -554,7 +653,10 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
         normalizeLabel(visibleSiblingPool[1]?.relationship ?? "") === "brother"
           ? ("male" as Gender)
           : ("female" as Gender),
-      imageSrc: normalizeLabel(visibleSiblingPool[1]?.relationship ?? "") === "brother" ? genderImages.male : genderImages.female,
+      imageSrc:
+        normalizeLabel(visibleSiblingPool[1]?.relationship ?? "") === "brother"
+          ? genderImages.male
+          : genderImages.female,
     },
   ];
 
@@ -577,7 +679,12 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
             whenever needed.
           </p>
         </div>
-        <img src={medicalHistory} alt="Family History" className="h-70 w-70" loading="lazy" />
+        <img
+          src={medicalHistory}
+          alt="Family History"
+          className="h-70 w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="bg-white dark:bg-black px-3 md:px-6 py-6 text-black dark:text-white min-h-screen">
@@ -600,7 +707,12 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
                 onClick={handleExpandFullscreen}
                 className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 text-sm transition-all duration-300 flex items-center gap-2"
               >
-                <img src={expandIcon} alt="Full Screen" className="w-5 h-5 object-cover rounded" loading="lazy" />
+                <img
+                  src={expandIcon}
+                  alt="Full Screen"
+                  className="w-5 h-5 object-cover rounded"
+                  loading="lazy"
+                />
                 Expand
               </button>
               {!isEditMode && !isDoctorView ? (
@@ -613,7 +725,12 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
                   className="rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-4 py-2 text-sm text-white"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <img src={editIcon} alt="Edit" className="w-4 h-4 object-cover rounded" loading="lazy" />
+                    <img
+                      src={editIcon}
+                      alt="Edit"
+                      className="w-4 h-4 object-cover rounded"
+                      loading="lazy"
+                    />
                     Edit
                   </span>
                 </button>
@@ -637,7 +754,9 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
           )}
 
           <section className="rounded-3xl border-4 border-[#0B3C5D] bg-white dark:bg-black p-5 md:p-8 shadow-lg">
-            <div className={`grid grid-cols-1 ${isEditMode ? "lg:grid-cols-[1fr_320px]" : ""} gap-6 items-start`}>
+            <div
+              className={`grid grid-cols-1 ${isEditMode ? "lg:grid-cols-[1fr_320px]" : ""} gap-6 items-start`}
+            >
               <div
                 className={
                   isFullscreen
@@ -647,32 +766,95 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
               >
                 <div
                   className={`relative w-[1360px] h-[940px] ${isFullscreen ? "origin-top" : "mx-auto min-w-[1360px]"}`}
-                  style={isFullscreen ? { transform: `scale(${fitScale})` } : undefined}
+                  style={
+                    isFullscreen
+                      ? { transform: `scale(${fitScale})` }
+                      : undefined
+                  }
                 >
                   <div className="absolute h-[2px] bg-[#0B3C5D] w-[280px] top-[215px] left-[120px]" />
                   <div className="absolute h-[2px] bg-[#0B3C5D] w-[280px] top-[215px] left-[960px]" />
                   <div className="absolute w-[2px] h-[110px] bg-[#0B3C5D] top-[215px] left-[260px]" />
                   <div className="absolute w-[2px] h-[110px] bg-[#0B3C5D] top-[215px] left-[1100px]" />
-                  <div className="absolute text-[#0B3C5D] text-xs top-[320px] left-[255px]">▼</div>
-                  <div className="absolute text-[#0B3C5D] text-xs top-[320px] left-[1095px]">▼</div>
+                  <div className="absolute text-[#0B3C5D] text-xs top-[320px] left-[255px]">
+                    ▼
+                  </div>
+                  <div className="absolute text-[#0B3C5D] text-xs top-[320px] left-[1095px]">
+                    ▼
+                  </div>
 
                   <div className="absolute h-[2px] bg-[#0B3C5D] w-[440px] top-[550px] left-[470px]" />
                   <div className="absolute w-[2px] h-[86px] bg-[#0B3C5D] top-[550px] left-[690px]" />
-                  <div className="absolute text-[#0B3C5D] text-xs top-[632px] left-[685px]">▼</div>
+                  <div className="absolute text-[#0B3C5D] text-xs top-[632px] left-[685px]">
+                    ▼
+                  </div>
                   <div className="absolute w-[2px] h-[86px] bg-[#0B3C5D] top-[550px] left-[530px]" />
-                  <div className="absolute text-[#0B3C5D] text-xs top-[632px] left-[525px]">▼</div>
+                  <div className="absolute text-[#0B3C5D] text-xs top-[632px] left-[525px]">
+                    ▼
+                  </div>
                   <div className="absolute w-[2px] h-[86px] bg-[#0B3C5D] top-[550px] left-[850px]" />
-                  <div className="absolute text-[#0B3C5D] text-xs top-[632px] left-[845px]">▼</div>
+                  <div className="absolute text-[#0B3C5D] text-xs top-[632px] left-[845px]">
+                    ▼
+                  </div>
 
-                  <PersonCard name={templatePeople.grandFatherFatherSide.name} age={templatePeople.grandFatherFatherSide.age} disease={templatePeople.grandFatherFatherSide.disease} gender={templatePeople.grandFatherFatherSide.gender} imageSrc={templatePeople.grandFatherFatherSide.imageSrc} className="top-[120px] left-[20px]" />
-                  <PersonCard name={templatePeople.grandMotherFatherSide.name} age={templatePeople.grandMotherFatherSide.age} disease={templatePeople.grandMotherFatherSide.disease} gender={templatePeople.grandMotherFatherSide.gender} imageSrc={templatePeople.grandMotherFatherSide.imageSrc} className="top-[120px] left-[300px]" />
-                  <PersonCard name={templatePeople.grandFatherMotherSide.name} age={templatePeople.grandFatherMotherSide.age} disease={templatePeople.grandFatherMotherSide.disease} gender={templatePeople.grandFatherMotherSide.gender} imageSrc={templatePeople.grandFatherMotherSide.imageSrc} className="top-[120px] left-[860px]" />
-                  <PersonCard name={templatePeople.grandMotherMotherSide.name} age={templatePeople.grandMotherMotherSide.age} disease={templatePeople.grandMotherMotherSide.disease} gender={templatePeople.grandMotherMotherSide.gender} imageSrc={templatePeople.grandMotherMotherSide.imageSrc} className="top-[120px] left-[1140px]" />
+                  <PersonCard
+                    name={templatePeople.grandFatherFatherSide.name}
+                    age={templatePeople.grandFatherFatherSide.age}
+                    disease={templatePeople.grandFatherFatherSide.disease}
+                    gender={templatePeople.grandFatherFatherSide.gender}
+                    imageSrc={templatePeople.grandFatherFatherSide.imageSrc}
+                    className="top-[120px] left-[20px]"
+                  />
+                  <PersonCard
+                    name={templatePeople.grandMotherFatherSide.name}
+                    age={templatePeople.grandMotherFatherSide.age}
+                    disease={templatePeople.grandMotherFatherSide.disease}
+                    gender={templatePeople.grandMotherFatherSide.gender}
+                    imageSrc={templatePeople.grandMotherFatherSide.imageSrc}
+                    className="top-[120px] left-[300px]"
+                  />
+                  <PersonCard
+                    name={templatePeople.grandFatherMotherSide.name}
+                    age={templatePeople.grandFatherMotherSide.age}
+                    disease={templatePeople.grandFatherMotherSide.disease}
+                    gender={templatePeople.grandFatherMotherSide.gender}
+                    imageSrc={templatePeople.grandFatherMotherSide.imageSrc}
+                    className="top-[120px] left-[860px]"
+                  />
+                  <PersonCard
+                    name={templatePeople.grandMotherMotherSide.name}
+                    age={templatePeople.grandMotherMotherSide.age}
+                    disease={templatePeople.grandMotherMotherSide.disease}
+                    gender={templatePeople.grandMotherMotherSide.gender}
+                    imageSrc={templatePeople.grandMotherMotherSide.imageSrc}
+                    className="top-[120px] left-[1140px]"
+                  />
 
-                  <PersonCard name={templatePeople.father.name} age={templatePeople.father.age} disease={templatePeople.father.disease} gender={templatePeople.father.gender} imageSrc={templatePeople.father.imageSrc} className="top-[340px] left-[170px]" />
-                  <PersonCard name={templatePeople.mother.name} age={templatePeople.mother.age} disease={templatePeople.mother.disease} gender={templatePeople.mother.gender} imageSrc={templatePeople.mother.imageSrc} className="top-[340px] left-[970px]" />
+                  <PersonCard
+                    name={templatePeople.father.name}
+                    age={templatePeople.father.age}
+                    disease={templatePeople.father.disease}
+                    gender={templatePeople.father.gender}
+                    imageSrc={templatePeople.father.imageSrc}
+                    className="top-[340px] left-[170px]"
+                  />
+                  <PersonCard
+                    name={templatePeople.mother.name}
+                    age={templatePeople.mother.age}
+                    disease={templatePeople.mother.disease}
+                    gender={templatePeople.mother.gender}
+                    imageSrc={templatePeople.mother.imageSrc}
+                    className="top-[340px] left-[970px]"
+                  />
 
-                  <PersonCard name={siblingCards[0].name} age={siblingCards[0].age} disease={siblingCards[0].disease} gender={siblingCards[0].gender} imageSrc={siblingCards[0].imageSrc} className="top-[650px] left-[440px]" />
+                  <PersonCard
+                    name={siblingCards[0].name}
+                    age={siblingCards[0].age}
+                    disease={siblingCards[0].disease}
+                    gender={siblingCards[0].gender}
+                    imageSrc={siblingCards[0].imageSrc}
+                    className="top-[650px] left-[440px]"
+                  />
                   <PersonCard
                     name={youMember?.name ?? templatePeople.you.name}
                     age={youMember?.age ?? templatePeople.you.age}
@@ -681,12 +863,23 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
                     imageSrc={templatePeople.you.imageSrc}
                     className="top-[650px] left-[600px]"
                   />
-                  <PersonCard name={siblingCards[1].name} age={siblingCards[1].age} disease={siblingCards[1].disease} gender={siblingCards[1].gender} imageSrc={siblingCards[1].imageSrc} className="top-[650px] left-[760px]" />
+                  <PersonCard
+                    name={siblingCards[1].name}
+                    age={siblingCards[1].age}
+                    disease={siblingCards[1].disease}
+                    gender={siblingCards[1].gender}
+                    imageSrc={siblingCards[1].imageSrc}
+                    className="top-[650px] left-[760px]"
+                  />
                   {siblingPool.length > 2 && (
                     <div className="absolute top-[840px] left-[560px] flex items-center gap-3">
                       <button
                         type="button"
-                        onClick={() => setSiblingStartIndex((current) => Math.max(0, current - 2))}
+                        onClick={() =>
+                          setSiblingStartIndex((current) =>
+                            Math.max(0, current - 2),
+                          )
+                        }
                         className="inline-flex items-center justify-center rounded-2xl border border-[#0B3C5D] px-3 py-1.5 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-black dark:text-white hover:bg-[#0B3C5D] hover:text-white"
                       >
                         Prev Siblings
@@ -695,7 +888,9 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
                         type="button"
                         onClick={() =>
                           setSiblingStartIndex((current) =>
-                            current + 2 < siblingPool.length ? current + 2 : current,
+                            current + 2 < siblingPool.length
+                              ? current + 2
+                              : current,
                           )
                         }
                         className="inline-flex items-center justify-center rounded-2xl border border-[#0B3C5D] px-3 py-1.5 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-black dark:text-white hover:bg-[#0B3C5D] hover:text-white"
@@ -707,121 +902,43 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
                 </div>
               </div>
 
-              {isEditMode && !isDoctorView ? <div className="rounded-2xl border border-[#0B3C5D]/60 p-4 bg-white dark:bg-black">
-                <h4 className="text-lg font-semibold text-[#0B3C5D] dark:text-white">Add New Member</h4>
-                <div className="mt-3 space-y-3">
-                  <label className="block text-sm">
-                    <span className="font-semibold">Relationship</span>
-                    <div ref={relationshipMenuRef} className="relative mt-1">
-                      <button
-                        type="button"
-                        onClick={() => setIsRelationshipMenuOpen((current) => !current)}
-                        className="w-full flex items-center justify-between rounded-md border-2 border-[#0B3C5D] bg-white px-3 py-2 font-ibm-plex-mono text-sm text-black shadow-lg transition-all duration-200 hover:bg-gray-50 dark:bg-black dark:text-white dark:hover:bg-gray-900"
-                      >
-                        <span className="truncate">{relationship}</span>
-                        <span className={`ml-3 text-xs transition-transform duration-200 ${isRelationshipMenuOpen ? "rotate-180" : ""}`}>
-                          ▼
-                        </span>
-                      </button>
+              {isEditMode && !isDoctorView ? (
+                <div className="rounded-2xl border border-[#0B3C5D]/60 p-4 bg-white dark:bg-black">
+                  <h4 className="text-lg font-semibold text-[#0B3C5D] dark:text-white">
+                    Add New Member
+                  </h4>
+                  <div className="mt-3 space-y-3">
+                    <label className="block text-sm">
+                      <span className="font-semibold">Relationship</span>
+                      <div ref={relationshipMenuRef} className="relative mt-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsRelationshipMenuOpen((current) => !current)
+                          }
+                          className="w-full flex items-center justify-between rounded-md border-2 border-[#0B3C5D] bg-white px-3 py-2 font-ibm-plex-mono text-sm text-black shadow-lg transition-all duration-200 hover:bg-gray-50 dark:bg-black dark:text-white dark:hover:bg-gray-900"
+                        >
+                          <span className="truncate">{relationship}</span>
+                          <span
+                            className={`ml-3 text-xs transition-transform duration-200 ${isRelationshipMenuOpen ? "rotate-180" : ""}`}
+                          >
+                            ▼
+                          </span>
+                        </button>
 
-                      {isRelationshipMenuOpen && (
-                        <div className="absolute left-0 top-full z-50 mt-2 w-full max-h-72 overflow-auto rounded-md border-2 border-[#0B3C5D] bg-[#0B3C5D] p-3 shadow-lg dark:bg-black">
-                          <div className="mb-6 last:mb-0">
-                            <div className="space-y-3">
-                              {availableRelationshipOptions.map((option) => {
-                                const isSelected = relationship === option;
-                                return (
-                                  <button
-                                    key={option}
-                                    type="button"
-                                    onClick={() => {
-                                      setRelationship(option);
-                                      setIsRelationshipMenuOpen(false);
-                                    }}
-                                    className={`my-1 flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-all duration-200 ${
-                                      isSelected
-                                        ? "bg-white text-black hover:bg-gray-800 hover:text-white"
-                                        : "bg-white text-black hover:bg-gray-800 hover:text-white"
-                                    }`}
-                                  >
-                                    <span className="inline-flex h-2 w-2 shrink-0 rounded-full bg-[#0B3C5D]" />
-                                    <span className="font-ibm-plex-mono text-sm truncate">{option}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </label>
-                  <label className="block text-sm">
-                    <span className="font-semibold">Name</span>
-                    <input
-                      value={memberName}
-                      onChange={(event) => setMemberName(event.target.value)}
-                      placeholder="Enter name"
-                      className="mt-1 w-full rounded-md border-2 border-[#0B3C5D] bg-white dark:bg-black px-3 py-2"
-                    />
-                  </label>
-                  <label className="block text-sm">
-                    <span className="font-semibold">Age</span>
-                    <input
-                      value={memberAge}
-                      onChange={(event) => setMemberAge(event.target.value)}
-                      placeholder="Enter age or dead"
-                      className="mt-1 w-full rounded-md border-2 border-[#0B3C5D] bg-white dark:bg-black px-3 py-2"
-                    />
-                  </label>
-                  <label className="block text-sm">
-                    <span className="font-semibold">Disease</span>
-                    <div ref={diseaseMenuRef} className="relative mt-1">
-                      <button
-                        type="button"
-                        onClick={() => setIsDiseaseMenuOpen((current) => !current)}
-                        className="w-full flex items-center justify-between rounded-md border-2 border-[#0B3C5D] bg-white px-3 py-2 font-ibm-plex-mono text-sm text-black shadow-lg transition-all duration-200 hover:bg-gray-50 dark:bg-black dark:text-white dark:hover:bg-gray-900"
-                      >
-                        <span className="truncate">{diseaseSelection === NONE_DISEASE_VALUE ? "None" : diseaseLabel(diseaseSelection)}</span>
-                        <span className={`ml-3 text-xs transition-transform duration-200 ${isDiseaseMenuOpen ? "rotate-180" : ""}`}>
-                          ▼
-                        </span>
-                      </button>
-
-                      {isDiseaseMenuOpen && (
-                        <div className="absolute left-0 top-full z-50 mt-2 w-full max-h-72 overflow-auto rounded-md border-2 border-[#0B3C5D] bg-[#0B3C5D] p-3 shadow-lg dark:bg-black">
-                          <div className="mb-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDiseaseSelection(NONE_DISEASE_VALUE);
-                                setMemberDisease(NONE_DISEASE_VALUE);
-                                setIsDiseaseMenuOpen(false);
-                              }}
-                              className={`my-1 flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-all duration-200 ${
-                                diseaseSelection === NONE_DISEASE_VALUE ? "bg-white text-black hover:bg-gray-800 hover:text-white" : "bg-white text-black hover:bg-gray-800 hover:text-white"
-                              }`}
-                            >
-                              <span className="inline-flex h-2 w-2 shrink-0 rounded-full bg-[#0B3C5D]" />
-                              <span className="font-ibm-plex-mono text-sm truncate">None</span>
-                            </button>
-                          </div>
-
-                          {DISEASE_GROUPS.map((group) => (
-                            <div key={group.label} className="mb-6 last:mb-0">
-                              <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
-                                {group.label}
-                              </div>
+                        {isRelationshipMenuOpen && (
+                          <div className="absolute left-0 top-full z-50 mt-2 w-full max-h-72 overflow-auto rounded-md border-2 border-[#0B3C5D] bg-[#0B3C5D] p-3 shadow-lg dark:bg-black">
+                            <div className="mb-6 last:mb-0">
                               <div className="space-y-3">
-                                {group.diseases.map((disease) => {
-                                  const isSelected = diseaseSelection === disease;
+                                {availableRelationshipOptions.map((option) => {
+                                  const isSelected = relationship === option;
                                   return (
                                     <button
-                                      key={disease}
+                                      key={option}
                                       type="button"
                                       onClick={() => {
-                                        setDiseaseSelection(disease);
-                                        setMemberDisease(disease);
-                                        setIsDiseaseMenuOpen(false);
+                                        setRelationship(option);
+                                        setIsRelationshipMenuOpen(false);
                                       }}
                                       className={`my-1 flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-all duration-200 ${
                                         isSelected
@@ -830,75 +947,190 @@ const FamilyHistory = ({ darkMode = false }: FamilyHistoryProps) => {
                                       }`}
                                     >
                                       <span className="inline-flex h-2 w-2 shrink-0 rounded-full bg-[#0B3C5D]" />
-                                      <span className="font-ibm-plex-mono text-sm truncate">{diseaseLabel(disease)}</span>
+                                      <span className="font-ibm-plex-mono text-sm truncate">
+                                        {option}
+                                      </span>
                                     </button>
                                   );
                                 })}
                               </div>
                             </div>
-                          ))}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                    <label className="block text-sm">
+                      <span className="font-semibold">Name</span>
+                      <input
+                        value={memberName}
+                        onChange={(event) => setMemberName(event.target.value)}
+                        placeholder="Enter name"
+                        className="mt-1 w-full rounded-md border-2 border-[#0B3C5D] bg-white dark:bg-black px-3 py-2"
+                      />
+                    </label>
+                    <label className="block text-sm">
+                      <span className="font-semibold">Age</span>
+                      <input
+                        value={memberAge}
+                        onChange={(event) => setMemberAge(event.target.value)}
+                        placeholder="Enter age or dead"
+                        className="mt-1 w-full rounded-md border-2 border-[#0B3C5D] bg-white dark:bg-black px-3 py-2"
+                      />
+                    </label>
+                    <label className="block text-sm">
+                      <span className="font-semibold">Disease</span>
+                      <div ref={diseaseMenuRef} className="relative mt-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsDiseaseMenuOpen((current) => !current)
+                          }
+                          className="w-full flex items-center justify-between rounded-md border-2 border-[#0B3C5D] bg-white px-3 py-2 font-ibm-plex-mono text-sm text-black shadow-lg transition-all duration-200 hover:bg-gray-50 dark:bg-black dark:text-white dark:hover:bg-gray-900"
+                        >
+                          <span className="truncate">
+                            {diseaseSelection === NONE_DISEASE_VALUE
+                              ? "None"
+                              : diseaseLabel(diseaseSelection)}
+                          </span>
+                          <span
+                            className={`ml-3 text-xs transition-transform duration-200 ${isDiseaseMenuOpen ? "rotate-180" : ""}`}
+                          >
+                            ▼
+                          </span>
+                        </button>
 
-                        </div>
-                      )}
-                    </div>
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={handleUpsertMember}
-                      className="rounded-2xl border border-[#0B3C5D] px-4 py-2 text-sm"
-                    >
-                      {editingMemberId ? "Update" : "Add"}
-                    </button>
-                    {editingMemberId && (
+                        {isDiseaseMenuOpen && (
+                          <div className="absolute left-0 top-full z-50 mt-2 w-full max-h-72 overflow-auto rounded-md border-2 border-[#0B3C5D] bg-[#0B3C5D] p-3 shadow-lg dark:bg-black">
+                            <div className="mb-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDiseaseSelection(NONE_DISEASE_VALUE);
+                                  setMemberDisease(NONE_DISEASE_VALUE);
+                                  setIsDiseaseMenuOpen(false);
+                                }}
+                                className={`my-1 flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-all duration-200 ${
+                                  diseaseSelection === NONE_DISEASE_VALUE
+                                    ? "bg-white text-black hover:bg-gray-800 hover:text-white"
+                                    : "bg-white text-black hover:bg-gray-800 hover:text-white"
+                                }`}
+                              >
+                                <span className="inline-flex h-2 w-2 shrink-0 rounded-full bg-[#0B3C5D]" />
+                                <span className="font-ibm-plex-mono text-sm truncate">
+                                  None
+                                </span>
+                              </button>
+                            </div>
+
+                            {DISEASE_GROUPS.map((group) => (
+                              <div key={group.label} className="mb-6 last:mb-0">
+                                <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+                                  {group.label}
+                                </div>
+                                <div className="space-y-3">
+                                  {group.diseases.map((disease) => {
+                                    const isSelected =
+                                      diseaseSelection === disease;
+                                    return (
+                                      <button
+                                        key={disease}
+                                        type="button"
+                                        onClick={() => {
+                                          setDiseaseSelection(disease);
+                                          setMemberDisease(disease);
+                                          setIsDiseaseMenuOpen(false);
+                                        }}
+                                        className={`my-1 flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-all duration-200 ${
+                                          isSelected
+                                            ? "bg-white text-black hover:bg-gray-800 hover:text-white"
+                                            : "bg-white text-black hover:bg-gray-800 hover:text-white"
+                                        }`}
+                                      >
+                                        <span className="inline-flex h-2 w-2 shrink-0 rounded-full bg-[#0B3C5D]" />
+                                        <span className="font-ibm-plex-mono text-sm truncate">
+                                          {diseaseLabel(disease)}
+                                        </span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                    <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={resetForm}
-                        className="rounded-2xl border border-gray-400 px-4 py-2 text-sm"
+                        onClick={handleUpsertMember}
+                        className="rounded-2xl border border-[#0B3C5D] px-4 py-2 text-sm"
                       >
-                        Cancel
+                        {editingMemberId ? "Update" : "Add"}
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void saveTree();
-                      }}
-                      className="rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-4 py-2 text-sm text-white"
-                    >
-                      Save Tree
-                    </button>
+                      {editingMemberId && (
+                        <button
+                          type="button"
+                          onClick={resetForm}
+                          className="rounded-2xl border border-gray-400 px-4 py-2 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void saveTree();
+                        }}
+                        className="rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-4 py-2 text-sm text-white"
+                      >
+                        Save Tree
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-5 space-y-2 max-h-56 overflow-auto border-t border-[#0B3C5D]/30 pt-3">
+                    {familyMembers.map((member) => (
+                      <div
+                        key={member.id}
+                        className="rounded-xl border border-[#0B3C5D]/40 p-2 text-xs"
+                      >
+                        <div className="font-semibold">
+                          {member.relationship}: {member.name}
+                        </div>
+                        <div>
+                          Age: {member.age} | Disease: {member.disease}
+                        </div>
+                        <div className="mt-1 flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditMember(member)}
+                            className="inline-flex items-center gap-1 rounded-2xl border border-[#0B3C5D] px-3 py-1 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-black dark:text-white hover:bg-[#0B3C5D] hover:text-white"
+                          >
+                            <img
+                              src={editIcon}
+                              alt="Edit"
+                              className="h-3.5 w-3.5 object-contain"
+                            />
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMember(member.id)}
+                            className="inline-flex items-center gap-1 rounded-2xl border border-red-600 px-3 py-1 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-700"
+                          >
+                            <img
+                              src={deleteIcon}
+                              alt="Delete"
+                              className="h-3.5 w-3.5 object-contain"
+                            />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="mt-5 space-y-2 max-h-56 overflow-auto border-t border-[#0B3C5D]/30 pt-3">
-                  {familyMembers.map((member) => (
-                    <div key={member.id} className="rounded-xl border border-[#0B3C5D]/40 p-2 text-xs">
-                      <div className="font-semibold">
-                        {member.relationship}: {member.name}
-                      </div>
-                      <div>Age: {member.age} | Disease: {member.disease}</div>
-                      <div className="mt-1 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleEditMember(member)}
-                          className="inline-flex items-center gap-1 rounded-2xl border border-[#0B3C5D] px-3 py-1 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-black dark:text-white hover:bg-[#0B3C5D] hover:text-white"
-                        >
-                          <img src={editIcon} alt="Edit" className="h-3.5 w-3.5 object-contain" />
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteMember(member.id)}
-                          className="inline-flex items-center gap-1 rounded-2xl border border-red-600 px-3 py-1 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-700"
-                        >
-                          <img src={deleteIcon} alt="Delete" className="h-3.5 w-3.5 object-contain" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div> : null}
+              ) : null}
             </div>
           </section>
         </div>

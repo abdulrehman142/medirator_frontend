@@ -1,5 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import axios from "axios";
 import { authApi } from "../api/authApi";
 import { tokenStore } from "../auth/tokenStore";
@@ -30,7 +37,11 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   authReady: boolean;
   login: (nextUser: AuthUser) => void;
-  loginWithCredentials: (input: { email: string; password: string; role: UserRole }) => Promise<AuthResult>;
+  loginWithCredentials: (input: {
+    email: string;
+    password: string;
+    role: UserRole;
+  }) => Promise<AuthResult>;
   registerAccount: (input: RegisterAccountInput) => Promise<AuthResult>;
   logout: () => Promise<void>;
 }
@@ -90,7 +101,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     tokenStore.clear();
   };
 
-  const loginWithCredentials = async (input: { email: string; password: string; role: UserRole }): Promise<AuthResult> => {
+  const loginWithCredentials = async (input: {
+    email: string;
+    password: string;
+    role: UserRole;
+  }): Promise<AuthResult> => {
     try {
       await authApi.login({
         email: input.email.trim().toLowerCase(),
@@ -101,10 +116,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (currentUser.role !== input.role) {
         await logout();
-        return { ok: false, error: "Selected role does not match this account." };
+        return {
+          ok: false,
+          error: "Selected role does not match this account.",
+        };
       }
 
-      login({ id: currentUser.id, email: currentUser.email, role: currentUser.role });
+      login({
+        id: currentUser.id,
+        email: currentUser.email,
+        role: currentUser.role,
+      });
       return { ok: true };
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -117,7 +139,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const registerAccount = async (input: RegisterAccountInput): Promise<AuthResult> => {
+  const registerAccount = async (
+    input: RegisterAccountInput,
+  ): Promise<AuthResult> => {
     try {
       await authApi.register({
         email: input.email.trim().toLowerCase(),
@@ -128,7 +152,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       return { ok: true };
     } catch {
-      return { ok: false, error: "Registration failed. Please try a different email." };
+      return {
+        ok: false,
+        error: "Registration failed. Please try a different email.",
+      };
     }
   };
 
@@ -143,7 +170,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const currentUser = await authApi.me();
-        login({ id: currentUser.id, email: currentUser.email, role: currentUser.role });
+        login({
+          id: currentUser.id,
+          email: currentUser.email,
+          role: currentUser.role,
+        });
       } catch {
         await logout();
       } finally {
@@ -164,7 +195,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       registerAccount,
       logout,
     }),
-    [authReady, user]
+    [authReady, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

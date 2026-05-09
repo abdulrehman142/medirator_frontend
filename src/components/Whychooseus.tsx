@@ -8,13 +8,6 @@ import manageschedulesIcon from "/medirator_images/manageschedules.png";
 import simpleinterfaceIcon from "/medirator_images/simpleinterface.png";
 import { useLanguage } from "../context/LanguageContext";
 
-
-
-
-
-
-
-  
 interface DropdownProps {
   darkMode: boolean;
 }
@@ -41,7 +34,11 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              {t("whyChooseUs", "point1", "Access patient history, medications, and family medical background.")}
+              {t(
+                "whyChooseUs",
+                "point1",
+                "Access patient history, medications, and family medical background.",
+              )}
             </div>
           </div>
           <div className="flex items-center">
@@ -52,7 +49,11 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              {t("whyChooseUs", "point2", "Predict health risks for proactive care.")}
+              {t(
+                "whyChooseUs",
+                "point2",
+                "Predict health risks for proactive care.",
+              )}
             </div>
           </div>
           <div className="flex items-center">
@@ -63,7 +64,11 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              {t("whyChooseUs", "point3", "Protect sensitive information with encryption and access control.")}
+              {t(
+                "whyChooseUs",
+                "point3",
+                "Protect sensitive information with encryption and access control.",
+              )}
             </div>
           </div>
           <div className="flex items-center">
@@ -74,7 +79,11 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-             {t("whyChooseUs", "point4", "Avoid duplication and harmful drug interactions.")}
+              {t(
+                "whyChooseUs",
+                "point4",
+                "Avoid duplication and harmful drug interactions.",
+              )}
             </div>
           </div>
           <div className="flex items-center">
@@ -85,7 +94,11 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-             {t("whyChooseUs", "point5", "Manage schedules, records, tests, and appointments in one place.")}
+              {t(
+                "whyChooseUs",
+                "point5",
+                "Manage schedules, records, tests, and appointments in one place.",
+              )}
             </div>
           </div>
           <div className="flex items-center">
@@ -96,7 +109,11 @@ const Whychooseus = ({ darkMode }: DropdownProps) => {
               loading="lazy"
             />
             <div className="pl-0 ml-0 p-2 m-2 text-xl dark:text-white">
-              {t("whyChooseUs", "point6", "Simplified interfaces for doctors and patients.")}
+              {t(
+                "whyChooseUs",
+                "point6",
+                "Simplified interfaces for doctors and patients.",
+              )}
             </div>
           </div>
         </div>

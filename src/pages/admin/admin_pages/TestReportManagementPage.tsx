@@ -18,20 +18,26 @@ interface ReportRecord {
   date: string;
 }
 
-const TestReportManagementPage = ({ darkMode = false }: TestReportManagementPageProps) => {
+const TestReportManagementPage = ({
+  darkMode = false,
+}: TestReportManagementPageProps) => {
   const { t } = useLanguage();
   const [apiError, setApiError] = useState<string | null>(null);
   const [reports, setReports] = useState<ReportRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [patientNameMap, setPatientNameMap] = useState<Record<string, string>>({});
+  const [patientNameMap, setPatientNameMap] = useState<Record<string, string>>(
+    {},
+  );
 
   const filteredReports = useMemo(
     () =>
       reports.filter(
         (report) =>
-          report.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          report.patientName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           report.patientId.toLowerCase().includes(searchQuery.toLowerCase()),
       ),
     [reports, searchQuery],
@@ -61,7 +67,9 @@ const TestReportManagementPage = ({ darkMode = false }: TestReportManagementPage
     setDeletingId(reportId);
     try {
       await reportsApi.remove(reportId);
-      setReports((current) => current.filter((report) => report.id !== reportId));
+      setReports((current) =>
+        current.filter((report) => report.id !== reportId),
+      );
       setApiError(null);
     } catch {
       setApiError("Delete failed.");
@@ -120,9 +128,16 @@ const TestReportManagementPage = ({ darkMode = false }: TestReportManagementPage
     <div className={darkMode ? "dark" : ""}>
       <div className="flex flex-col md:flex-row justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-4 shadow-md gap-4">
         <div>
-          <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">Test Report Management</h2>
+          <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">
+            Test Report Management
+          </h2>
         </div>
-        <img src={testResultsImg} alt="Test Report Management" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
+        <img
+          src={testResultsImg}
+          alt="Test Report Management"
+          className="h-40 md:h-70 w-40 md:w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="dark:bg-black px-3 md:px-6 py-6 space-y-4 font-sans text-black dark:text-white">
@@ -134,7 +149,9 @@ const TestReportManagementPage = ({ darkMode = false }: TestReportManagementPage
 
         <section className="rounded-2xl border-4 border-[#0B3C5D] bg-white dark:bg-black p-4 md:p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Reports List</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+              Reports List
+            </h3>
             <input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
@@ -167,8 +184,14 @@ const TestReportManagementPage = ({ darkMode = false }: TestReportManagementPage
                           disabled={downloadingId === report.id}
                           className="inline-flex items-center gap-1 rounded-2xl border border-[#0B3C5D] px-3 py-1.5 disabled:opacity-50"
                         >
-                          <img src={downloadIcon} alt={t("auth", "download", "Download")} className="h-3.5 w-3.5 object-contain" />
-                          {downloadingId === report.id ? t("auth", "downloading", "Downloading...") : t("auth", "download", "Download")}
+                          <img
+                            src={downloadIcon}
+                            alt={t("auth", "download", "Download")}
+                            className="h-3.5 w-3.5 object-contain"
+                          />
+                          {downloadingId === report.id
+                            ? t("auth", "downloading", "Downloading...")
+                            : t("auth", "download", "Download")}
                         </button>
                         <button
                           type="button"
@@ -176,7 +199,11 @@ const TestReportManagementPage = ({ darkMode = false }: TestReportManagementPage
                           disabled={deletingId === report.id}
                           className="inline-flex items-center gap-1 rounded-2xl border border-red-600 text-red-600 px-3 py-1.5 disabled:opacity-50"
                         >
-                          <img src={deleteIcon} alt="Delete" className="h-3.5 w-3.5 object-contain" />
+                          <img
+                            src={deleteIcon}
+                            alt="Delete"
+                            className="h-3.5 w-3.5 object-contain"
+                          />
                           {deletingId === report.id ? "Deleting..." : "Delete"}
                         </button>
                       </div>

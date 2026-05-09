@@ -6,7 +6,6 @@ import { usersApi } from "../../api/usersApi";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
-
 interface AppointmentsProps {
   darkMode?: boolean;
 }
@@ -45,19 +44,36 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
-  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
-  const [submissionMode, setSubmissionMode] = useState<"create" | "update" | null>(null);
+  const [editingAppointmentId, setEditingAppointmentId] = useState<
+    string | null
+  >(null);
+  const [submissionMode, setSubmissionMode] = useState<
+    "create" | "update" | null
+  >(null);
   const [allAppointments, setAllAppointments] = useState<
-    Array<{ id: string; reason: string; date: string; time: string; scheduledFor: string; status: string; doctorId: string }>
+    Array<{
+      id: string;
+      reason: string;
+      date: string;
+      time: string;
+      scheduledFor: string;
+      status: string;
+      doctorId: string;
+    }>
   >([]);
-  const [dismissedRejectedIds, setDismissedRejectedIds] = useState<string[]>([]);
+  const [dismissedRejectedIds, setDismissedRejectedIds] = useState<string[]>(
+    [],
+  );
 
   const validateEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
 
   useEffect(() => {
     const loadPatient = async () => {
       try {
-        const [me, patientProfile] = await Promise.all([usersApi.me(), usersApi.getMyPatientProfile()]);
+        const [me, patientProfile] = await Promise.all([
+          usersApi.me(),
+          usersApi.getMyPatientProfile(),
+        ]);
         setName(me.full_name);
         setEmail(me.email);
         setPhone(patientProfile?.phone ?? "");
@@ -69,7 +85,9 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
     const loadDoctors = async () => {
       try {
         const response = await usersApi.listRegisteredDoctors();
-        const nextDoctors = Array.isArray(response) ? response.map(normalizeDoctorOption).filter((doctor) => doctor.id) : [];
+        const nextDoctors = Array.isArray(response)
+          ? response.map(normalizeDoctorOption).filter((doctor) => doctor.id)
+          : [];
         setDoctorOptions(nextDoctors);
         setDoctorId((current) => current || nextDoctors[0]?.id || "");
       } catch {
@@ -88,7 +106,10 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
             id: appointment.id,
             reason: appointment.reason,
             date: new Date(appointment.scheduled_for).toLocaleDateString(),
-            time: new Date(appointment.scheduled_for).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            time: new Date(appointment.scheduled_for).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
             scheduledFor: appointment.scheduled_for,
             status: appointment.status,
             doctorId: appointment.doctor_id,
@@ -157,7 +178,11 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
       setAppointmentDate(formattedDate.toISOString().split("T")[0]);
     }
 
-    setAppointmentTime(appointment.time.length === 5 ? appointment.time : appointment.time.slice(0, 5));
+    setAppointmentTime(
+      appointment.time.length === 5
+        ? appointment.time
+        : appointment.time.slice(0, 5),
+    );
     setError(null);
     setSuccess(false);
     setSubmissionMode(null);
@@ -201,19 +226,33 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
       !doctorId.trim() ||
       !reason.trim()
     ) {
-      setError(t("auth", "appointmentDetailsRequired", "Please fill all appointment details."));
+      setError(
+        t(
+          "auth",
+          "appointmentDetailsRequired",
+          "Please fill all appointment details.",
+        ),
+      );
       setLoading(false);
       return;
     }
 
     if (!user?.id) {
-      setError(t("auth", "loginAgainMissingIdentity", "Please login again. User identity is missing."));
+      setError(
+        t(
+          "auth",
+          "loginAgainMissingIdentity",
+          "Please login again. User identity is missing.",
+        ),
+      );
       setLoading(false);
       return;
     }
 
     if (!validateEmail(email)) {
-      setError(t("auth", "invalidEmail", "Please enter a valid email address."));
+      setError(
+        t("auth", "invalidEmail", "Please enter a valid email address."),
+      );
       setLoading(false);
       return;
     }
@@ -247,7 +286,10 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
           id: appointment.id,
           reason: appointment.reason,
           date: new Date(appointment.scheduled_for).toLocaleDateString(),
-          time: new Date(appointment.scheduled_for).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          time: new Date(appointment.scheduled_for).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
           scheduledFor: appointment.scheduled_for,
           status: appointment.status,
           doctorId: appointment.doctor_id,
@@ -259,8 +301,16 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
         err instanceof Error
           ? err.message
           : editingAppointmentId
-            ? t("auth", "appointmentUpdateFailed", "Failed to update appointment. Please try again later.")
-            : t("auth", "appointmentFailed", "Failed to book appointment. Please try again later.");
+            ? t(
+                "auth",
+                "appointmentUpdateFailed",
+                "Failed to update appointment. Please try again later.",
+              )
+            : t(
+                "auth",
+                "appointmentFailed",
+                "Failed to book appointment. Please try again later.",
+              );
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -281,7 +331,11 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
             {t("auth", "bookYourAppointment", "Book your appointment")}
           </div>
           <div className="p-2 m-2 text-sm text-[#8e8e93] md:text-base">
-            {t("auth", "appointmentIntroLine1", "Choose a date and time to schedule your visit")}
+            {t(
+              "auth",
+              "appointmentIntroLine1",
+              "Choose a date and time to schedule your visit",
+            )}
             <br /> with the right doctor quickly and easily.
           </div>
         </div>
@@ -289,13 +343,22 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
         <div className="w-full max-w-4xl m-2 md:m-4 px-3 md:px-4 md:px-8 py-6 md:py-8 relative z-10">
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-8">
             {allAppointments
-              .filter((item) => item.status === "canceled" && !dismissedRejectedIds.includes(item.id))
+              .filter(
+                (item) =>
+                  item.status === "canceled" &&
+                  !dismissedRejectedIds.includes(item.id),
+              )
               .map((item) => (
                 <div
                   key={item.id}
                   className="mb-3 rounded-2xl border border-red-500 bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/20 dark:text-red-300"
                 >
-                  {t("auth", "appointmentRejected", "Appointment rejected/declined:")} {item.reason} ({item.date})
+                  {t(
+                    "auth",
+                    "appointmentRejected",
+                    "Appointment rejected/declined:",
+                  )}{" "}
+                  {item.reason} ({item.date})
                   <button
                     type="button"
                     className="ml-3 underline"
@@ -303,25 +366,44 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
                       if (!user?.id) return;
                       const next = [...dismissedRejectedIds, item.id];
                       setDismissedRejectedIds(next);
-                      localStorage.setItem(`medirator_dismissed_rejected_${user.id}`, JSON.stringify(next));
+                      localStorage.setItem(
+                        `medirator_dismissed_rejected_${user.id}`,
+                        JSON.stringify(next),
+                      );
                     }}
                   >
                     {t("auth", "dismiss", "Dismiss")}
                   </button>
                 </div>
               ))}
-            {error && <div className="mb-4 text-red-500 text-sm md:text-base">{error}</div>}
+            {error && (
+              <div className="mb-4 text-red-500 text-sm md:text-base">
+                {error}
+              </div>
+            )}
             {success && (
               <div className="mb-4 text-green-600 text-sm md:text-base">
                 {submissionMode === "update"
-                  ? t("auth", "appointmentUpdatedSuccessfully", "Appointment updated successfully.")
-                  : t("auth", "appointmentBookedSuccessfully", "Appointment booked successfully.")}
+                  ? t(
+                      "auth",
+                      "appointmentUpdatedSuccessfully",
+                      "Appointment updated successfully.",
+                    )
+                  : t(
+                      "auth",
+                      "appointmentBookedSuccessfully",
+                      "Appointment booked successfully.",
+                    )}
               </div>
             )}
 
             {editingAppointmentId && (
               <div className="mb-4 rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D]/10 px-4 py-3 text-sm text-[#0B3C5D] dark:text-white">
-                {t("auth", "editingAppointment", "Editing an existing appointment. Update the date or time, then save changes.")}
+                {t(
+                  "auth",
+                  "editingAppointment",
+                  "Editing an existing appointment. Update the date or time, then save changes.",
+                )}
                 <button
                   type="button"
                   className="ml-3 underline"
@@ -360,7 +442,11 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
-                    placeholder={t("auth", "emailPlaceholder", "you@example.com")}
+                    placeholder={t(
+                      "auth",
+                      "emailPlaceholder",
+                      "you@example.com",
+                    )}
                     required
                   />
                 </div>
@@ -391,21 +477,33 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
                     required
                     disabled={loadingDoctors}
                   >
-                    <option value="">{loadingDoctors ? t("auth", "loadingDoctors", "Loading doctors...") : t("auth", "selectDoctor", "Select doctor")}</option>
+                    <option value="">
+                      {loadingDoctors
+                        ? t("auth", "loadingDoctors", "Loading doctors...")
+                        : t("auth", "selectDoctor", "Select doctor")}
+                    </option>
                     {!loadingDoctors && doctorOptions.length === 0 && (
                       <option value="" disabled>
-                        {t("auth", "noRegisteredDoctors", "No registered doctors available")}
+                        {t(
+                          "auth",
+                          "noRegisteredDoctors",
+                          "No registered doctors available",
+                        )}
                       </option>
                     )}
                     {doctorOptions.map((doctorOption) => (
                       <option key={doctorOption.id} value={doctorOption.id}>
-                        {doctorOption.name} ({doctorOption.displayId ?? doctorOption.id}) - {doctorOption.specialization}
+                        {doctorOption.name} (
+                        {doctorOption.displayId ?? doctorOption.id}) -{" "}
+                        {doctorOption.specialization}
                       </option>
                     ))}
                   </select>
                   {selectedDoctor && (
                     <p className="mt-2 text-xs text-[#6B7280] dark:text-gray-400">
-                      {t("auth", "bookingWith", "Booking with")} {selectedDoctor.name} ({selectedDoctor.displayId ?? selectedDoctor.id})
+                      {t("auth", "bookingWith", "Booking with")}{" "}
+                      {selectedDoctor.name} (
+                      {selectedDoctor.displayId ?? selectedDoctor.id})
                     </p>
                   )}
                 </div>
@@ -422,7 +520,9 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
                     className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white focus:outline-none text-sm"
                     required
                   >
-                    <option value="">{t("auth", "selectDate", "Select date")}</option>
+                    <option value="">
+                      {t("auth", "selectDate", "Select date")}
+                    </option>
                     {dateOptions.map((dateOption) => (
                       <option key={dateOption.value} value={dateOption.value}>
                         {dateOption.label}
@@ -447,13 +547,17 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
 
               <div>
                 <label className="block text-xs md:text-sm text-black dark:text-white mb-1">
-                    {t("auth", "reasonForVisit", "Reason for Visit")}
+                  {t("auth", "reasonForVisit", "Reason for Visit")}
                 </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   className="w-full p-2 border rounded-2xl border-[#0B3C5D] bg-white dark:bg-black text-black dark:text-white min-h-[100px] md:min-h-[160px] focus:outline-none text-sm"
-                  placeholder={t("auth", "describeYourConcern", "Describe your concern")}
+                  placeholder={t(
+                    "auth",
+                    "describeYourConcern",
+                    "Describe your concern",
+                  )}
                   required
                 />
               </div>
@@ -473,25 +577,47 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
                       : t("auth", "bookAppointment", "Book Appointment")}
                 </button>
                 <div className="text-xs md:text-sm text-black dark:text-gray-300 text-center md:text-right">
-                  {t("auth", "needHelp", "Need help?")} <a href="mailto:mediratorinfo@gmail.com" className="underline">mediratorinfo@gmail.com</a>
+                  {t("auth", "needHelp", "Need help?")}{" "}
+                  <a
+                    href="mailto:mediratorinfo@gmail.com"
+                    className="underline"
+                  >
+                    mediratorinfo@gmail.com
+                  </a>
                 </div>
               </div>
             </form>
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-[#0B3C5D] p-4">
-                <h4 className="font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "currentAppointments", "Current Appointments")}</h4>
+                <h4 className="font-semibold text-[#0B3C5D] dark:text-white">
+                  {t("auth", "currentAppointments", "Current Appointments")}
+                </h4>
                 <ul className="mt-2 space-y-2 text-sm">
                   {allAppointments
-                    .filter((item) => item.status === "scheduled" || item.status === "rescheduled")
+                    .filter(
+                      (item) =>
+                        item.status === "scheduled" ||
+                        item.status === "rescheduled",
+                    )
                     .map((item) => (
-                      <li key={item.id} className="rounded-xl border border-[#0B3C5D] p-2">
+                      <li
+                        key={item.id}
+                        className="rounded-xl border border-[#0B3C5D] p-2"
+                      >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="truncate">{item.reason} - {item.date} {item.time}</div>
+                            <div className="truncate">
+                              {item.reason} - {item.date} {item.time}
+                            </div>
                             <div className="mt-1 text-xs text-[#4B5563] dark:text-gray-300">
-                              Doctor: {doctorInfoById.get(item.doctorId)?.name ?? "No available data"}{" "}
-                              ({doctorInfoById.get(item.doctorId)?.displayId ?? item.doctorId})
+                              Doctor:{" "}
+                              {doctorInfoById.get(item.doctorId)?.name ??
+                                "No available data"}{" "}
+                              (
+                              {doctorInfoById.get(item.doctorId)?.displayId ??
+                                item.doctorId}
+                              )
                             </div>
                           </div>
                           <button
@@ -499,7 +625,12 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
                             onClick={() => populateAppointmentForm(item)}
                             className="inline-flex items-center gap-2 rounded-xl border border-[#0B3C5D] bg-white px-3 py-2 text-xs font-semibold text-[#0B3C5D] transition-all duration-300 hover:bg-[#0B3C5D] hover:text-white dark:bg-black dark:text-white dark:hover:bg-[#0B3C5D]"
                           >
-                            <img src={editImg} alt={t("auth", "edit", "Edit")} className="h-4 w-4 object-contain" loading="lazy" />
+                            <img
+                              src={editImg}
+                              alt={t("auth", "edit", "Edit")}
+                              className="h-4 w-4 object-contain"
+                              loading="lazy"
+                            />
                             {t("auth", "edit", "Edit")}
                           </button>
                         </div>
@@ -508,16 +639,34 @@ const Appointments = ({ darkMode = false }: AppointmentsProps) => {
                 </ul>
               </div>
               <div className="rounded-2xl border border-[#0B3C5D] p-4">
-                <h4 className="font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "pastAppointments", "Past Appointments")}</h4>
+                <h4 className="font-semibold text-[#0B3C5D] dark:text-white">
+                  {t("auth", "pastAppointments", "Past Appointments")}
+                </h4>
                 <ul className="mt-2 space-y-2 text-sm">
                   {allAppointments
-                    .filter((item) => item.status === "completed" || item.status === "canceled")
+                    .filter(
+                      (item) =>
+                        item.status === "completed" ||
+                        item.status === "canceled",
+                    )
                     .map((item) => (
-                      <li key={item.id} className="rounded-xl border border-[#0B3C5D] p-2">
-                        {item.reason} - {item.date} ({item.status === "canceled" ? t("auth", "rejected", "Rejected") : t("auth", "completed", "Completed")})
+                      <li
+                        key={item.id}
+                        className="rounded-xl border border-[#0B3C5D] p-2"
+                      >
+                        {item.reason} - {item.date} (
+                        {item.status === "canceled"
+                          ? t("auth", "rejected", "Rejected")
+                          : t("auth", "completed", "Completed")}
+                        )
                         <div className="mt-1 text-xs text-[#4B5563] dark:text-gray-300">
-                          Doctor: {doctorInfoById.get(item.doctorId)?.name ?? "No available data"}{" "}
-                          ({doctorInfoById.get(item.doctorId)?.displayId ?? item.doctorId})
+                          Doctor:{" "}
+                          {doctorInfoById.get(item.doctorId)?.name ??
+                            "No available data"}{" "}
+                          (
+                          {doctorInfoById.get(item.doctorId)?.displayId ??
+                            item.doctorId}
+                          )
                         </div>
                       </li>
                     ))}

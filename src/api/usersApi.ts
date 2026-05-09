@@ -96,12 +96,19 @@ export const usersApi = {
   },
 
   async getMyPatientProfile(): Promise<PatientProfile | null> {
-    const { data } = await http.get<PatientProfile | null>("/users/patients/me");
+    const { data } = await http.get<PatientProfile | null>(
+      "/users/patients/me",
+    );
     return data;
   },
 
-  async upsertMyPatientProfile(payload: PatientProfile): Promise<PatientProfile> {
-    const { data } = await http.put<PatientProfile>("/users/patients/me", payload);
+  async upsertMyPatientProfile(
+    payload: PatientProfile,
+  ): Promise<PatientProfile> {
+    const { data } = await http.put<PatientProfile>(
+      "/users/patients/me",
+      payload,
+    );
     return data;
   },
 
@@ -111,7 +118,10 @@ export const usersApi = {
   },
 
   async upsertMyDoctorProfile(payload: DoctorProfile): Promise<DoctorProfile> {
-    const { data } = await http.put<DoctorProfile>("/users/doctors/me", payload);
+    const { data } = await http.put<DoctorProfile>(
+      "/users/doctors/me",
+      payload,
+    );
     return data;
   },
 
@@ -125,8 +135,12 @@ export const usersApi = {
     return data;
   },
 
-  async getPatientProfileForDoctor(patientUserId: string): Promise<DoctorPatientProfileView | null> {
-    const { data } = await http.get<DoctorPatientProfileView | null>(`/users/patients/${patientUserId}/profile`);
+  async getPatientProfileForDoctor(
+    patientUserId: string,
+  ): Promise<DoctorPatientProfileView | null> {
+    const { data } = await http.get<DoctorPatientProfileView | null>(
+      `/users/patients/${patientUserId}/profile`,
+    );
     return data;
   },
 };

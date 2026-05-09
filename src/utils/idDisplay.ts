@@ -1,4 +1,5 @@
-const compactId = (value: string) => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+const compactId = (value: string) =>
+  value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
 
 export const toPatientDisplayId = (value: string) => {
   if (!value) return value;

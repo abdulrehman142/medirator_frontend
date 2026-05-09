@@ -1,9 +1,5 @@
 import { http } from "./http";
-import {
-  extractList,
-  mapDoctor,
-  mapPatient,
-} from "./adminApiHelpers";
+import { extractList, mapDoctor, mapPatient } from "./adminApiHelpers";
 
 export interface DashboardMetrics {
   total_users: number;
@@ -23,7 +19,11 @@ export interface AdminAnalyticsResponse {
   appointment_trends: Array<{ label: string; value: number }>;
   completed_appointment_trends?: Array<{ label: string; value: number }>;
   peak_usage_times: Array<{ hour: number; label: string; count: number }>;
-  most_active_doctors: Array<{ doctor_id: string; name: string; completed_appointments: number }>;
+  most_active_doctors: Array<{
+    doctor_id: string;
+    name: string;
+    completed_appointments: number;
+  }>;
   recent_activity: string[];
   alerts?: string[];
 }
@@ -92,8 +92,12 @@ export const adminApi = {
     return data;
   },
 
-  async completedAppointments(limit = 10): Promise<CompletedAppointmentsResponse> {
-    const { data } = await http.get<CompletedAppointmentsResponse>(`/admin/completed-appointments?limit=${limit}`);
+  async completedAppointments(
+    limit = 10,
+  ): Promise<CompletedAppointmentsResponse> {
+    const { data } = await http.get<CompletedAppointmentsResponse>(
+      `/admin/completed-appointments?limit=${limit}`,
+    );
     return data;
   },
 
@@ -103,7 +107,10 @@ export const adminApi = {
     return rows.map(mapDoctor);
   },
 
-  async updateDoctor(doctorId: string, payload: Partial<AdminDoctor>): Promise<AdminDoctor> {
+  async updateDoctor(
+    doctorId: string,
+    payload: Partial<AdminDoctor>,
+  ): Promise<AdminDoctor> {
     const requestPayload = {
       ...payload,
       status: payload.status,
@@ -112,8 +119,17 @@ export const adminApi = {
       verification_status: payload.verification,
     };
 
-    const { data } = await http.patch<unknown>(`/admin/doctors/${doctorId}`, requestPayload);
-    const rows = extractList(data, ["doctor", "doctors", "results", "items", "data"]);
+    const { data } = await http.patch<unknown>(
+      `/admin/doctors/${doctorId}`,
+      requestPayload,
+    );
+    const rows = extractList(data, [
+      "doctor",
+      "doctors",
+      "results",
+      "items",
+      "data",
+    ]);
     if (rows.length > 0) {
       return mapDoctor(rows[0]);
     }

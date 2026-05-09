@@ -71,7 +71,7 @@ export default function ChatFileUpload({
       >
         {uploading ? "Uploading..." : "Upload"}
       </button>
-      <div style={{ display: "flex", gap: 8 }}> 
+      <div style={{ display: "flex", gap: 8 }}>
         {files.map((f) => (
           <div key={f.name} style={{ fontSize: 12 }}>
             {f.name}

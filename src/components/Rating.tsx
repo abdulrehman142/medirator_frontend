@@ -11,7 +11,7 @@ const Rating = () => {
       text: t(
         "rating",
         "review1",
-        "I can now view my family history, medications, and family background in one place without confusion."
+        "I can now view my family history, medications, and family background in one place without confusion.",
       ),
       date: "12-01-2026 11:20",
       rating: 5,
@@ -22,7 +22,7 @@ const Rating = () => {
       text: t(
         "rating",
         "review2",
-        "The risk alerts helped me act early on my health issues and schedule follow-up care on time."
+        "The risk alerts helped me act early on my health issues and schedule follow-up care on time.",
       ),
       date: "03-02-2026 16:45",
       rating: 5,
@@ -33,7 +33,7 @@ const Rating = () => {
       text: t(
         "rating",
         "review3",
-        "I feel safe sharing records because my personal information is protected with strong privacy controls."
+        "I feel safe sharing records because my personal information is protected with strong privacy controls.",
       ),
       date: "18-03-2026 09:12",
       rating: 5,
@@ -44,7 +44,7 @@ const Rating = () => {
       text: t(
         "rating",
         "review4",
-        "It helped me avoid repeated tests and flagged medication conflicts before they became a problem."
+        "It helped me avoid repeated tests and flagged medication conflicts before they became a problem.",
       ),
       date: "27-04-2026 13:58",
       rating: 5,
@@ -55,7 +55,7 @@ const Rating = () => {
       text: t(
         "rating",
         "review5",
-        "Managing appointments, test reports, and medical records in one dashboard saves me a lot of time."
+        "Managing appointments, test reports, and medical records in one dashboard saves me a lot of time.",
       ),
       date: "09-05-2026 18:33",
       rating: 5,
@@ -66,7 +66,7 @@ const Rating = () => {
       text: t(
         "rating",
         "review6",
-        "The interface is simple and clear, so I can use it easily even without technical knowledge."
+        "The interface is simple and clear, so I can use it easily even without technical knowledge.",
       ),
       date: "22-06-2026 10:10",
       rating: 5,

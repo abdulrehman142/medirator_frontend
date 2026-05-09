@@ -39,8 +39,14 @@ export const feedbackApi = {
     return data;
   },
 
-  async update(feedbackId: string, payload: FeedbackUpdatePayload): Promise<FeedbackPublic> {
-    const { data } = await http.patch<FeedbackPublic>(`/feedback/${feedbackId}`, payload);
+  async update(
+    feedbackId: string,
+    payload: FeedbackUpdatePayload,
+  ): Promise<FeedbackPublic> {
+    const { data } = await http.patch<FeedbackPublic>(
+      `/feedback/${feedbackId}`,
+      payload,
+    );
     return data;
   },
 };

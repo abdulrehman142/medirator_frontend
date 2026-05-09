@@ -4,7 +4,8 @@ import { tokenStore } from "../auth/tokenStore";
 import { getStoredLanguage } from "../i18n";
 import type { TokenPair } from "../types/api";
 
-const apiBaseURL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const apiBaseURL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
 
 export const http = axios.create({
   baseURL: apiBaseURL,
@@ -35,7 +36,12 @@ http.interceptors.request.use((config) => {
   config.headers["Accept-Language"] = language;
   config.headers["X-Language"] = language;
 
-  if (config.data && typeof config.data === "object" && !(config.data instanceof FormData) && !Array.isArray(config.data)) {
+  if (
+    config.data &&
+    typeof config.data === "object" &&
+    !(config.data instanceof FormData) &&
+    !Array.isArray(config.data)
+  ) {
     config.data = {
       ...config.data,
       lang: language,
@@ -48,7 +54,9 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const original = error.config as (typeof error.config & { _retry?: boolean }) | undefined;
+    const original = error.config as
+      | (typeof error.config & { _retry?: boolean })
+      | undefined;
 
     if (error.response?.status !== 401 || !original || original._retry) {
       return Promise.reject(error);
@@ -74,9 +82,12 @@ http.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const refreshResp = await axios.post<TokenPair>(`${apiBaseURL}/auth/refresh`, {
-        refresh_token: sessionStorage.getItem("medirator_refresh_token"),
-      });
+      const refreshResp = await axios.post<TokenPair>(
+        `${apiBaseURL}/auth/refresh`,
+        {
+          refresh_token: sessionStorage.getItem("medirator_refresh_token"),
+        },
+      );
 
       const newToken = refreshResp.data.access_token;
       tokenStore.setAccessToken(newToken);
@@ -95,5 +106,5 @@ http.interceptors.response.use(
     } finally {
       isRefreshing = false;
     }
-  }
+  },
 );

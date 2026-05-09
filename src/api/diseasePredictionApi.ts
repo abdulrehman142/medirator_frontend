@@ -19,12 +19,19 @@ export interface SymptomListResponse {
 
 export const diseasePredictionApi = {
   async getSymptoms(): Promise<SymptomListResponse> {
-    const { data } = await http.get<SymptomListResponse>("/symptom-predictor/symptoms");
+    const { data } = await http.get<SymptomListResponse>(
+      "/symptom-predictor/symptoms",
+    );
     return data;
   },
 
-  async predictDisease(request: DiseasePredictionRequest): Promise<DiseasePredictionResponse> {
-    const { data } = await http.post<DiseasePredictionResponse>("/symptom-predictor/predict-disease", request);
+  async predictDisease(
+    request: DiseasePredictionRequest,
+  ): Promise<DiseasePredictionResponse> {
+    const { data } = await http.post<DiseasePredictionResponse>(
+      "/symptom-predictor/predict-disease",
+      request,
+    );
     return data;
   },
 };

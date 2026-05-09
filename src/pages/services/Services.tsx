@@ -7,12 +7,6 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import symptomImg from "/medirator_images/predictive.png";
 
-
-
-
-
-
-
 interface ServicesProps {
   darkMode?: boolean;
 }
@@ -27,7 +21,11 @@ const Services = ({ darkMode = false }: ServicesProps) => {
             {t("servicesPage", "title", "Services")}
           </div>
           <div className="text-sm md:text-md text-[#8e8e93] dark:text-gray-400 p-1 m-1">
-            {t("servicesPage", "subtitle", "Choose from our wide range of services")}
+            {t(
+              "servicesPage",
+              "subtitle",
+              "Choose from our wide range of services",
+            )}
           </div>
         </div>
         <div className="flex flex-col">
@@ -113,7 +111,6 @@ const Services = ({ darkMode = false }: ServicesProps) => {
               </button>
             </Link>
           </div>
-
         </div>
       </div>
     </div>

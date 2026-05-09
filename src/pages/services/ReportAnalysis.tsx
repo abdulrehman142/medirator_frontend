@@ -48,9 +48,14 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
   const [reports, setReports] = useState<UiReport[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [availableDoctors, setAvailableDoctors] = useState<Array<{ id: string; displayId: string; name: string; specialization: string }>>(
-    [],
-  );
+  const [availableDoctors, setAvailableDoctors] = useState<
+    Array<{
+      id: string;
+      displayId: string;
+      name: string;
+      specialization: string;
+    }>
+  >([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const reportType = "Lab Report";
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -76,7 +81,9 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
     const loadDoctors = async () => {
       try {
         const response = await usersApi.listRegisteredDoctors();
-        const nextDoctors = Array.isArray(response) ? response.map(normalizeDoctorOption).filter((doctor) => doctor.id) : [];
+        const nextDoctors = Array.isArray(response)
+          ? response.map(normalizeDoctorOption).filter((doctor) => doctor.id)
+          : [];
         setAvailableDoctors(nextDoctors);
         setSelectedDoctorId(nextDoctors[0]?.id ?? "");
       } catch {
@@ -91,17 +98,35 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
 
   const handleUpload = async () => {
     if (!user?.id) {
-      setApiError(t("auth", "loginAgainBeforeUploading", "Please login again before uploading reports."));
+      setApiError(
+        t(
+          "auth",
+          "loginAgainBeforeUploading",
+          "Please login again before uploading reports.",
+        ),
+      );
       return;
     }
 
     if (!selectedFile) {
-      setApiError(t("auth", "chooseFileToUpload", "Choose a PDF or image file to upload."));
+      setApiError(
+        t(
+          "auth",
+          "chooseFileToUpload",
+          "Choose a PDF or image file to upload.",
+        ),
+      );
       return;
     }
 
     if (!selectedDoctorId) {
-      setApiError(t("auth", "selectDoctorToShare", "Select a registered doctor to share this report with."));
+      setApiError(
+        t(
+          "auth",
+          "selectDoctorToShare",
+          "Select a registered doctor to share this report with.",
+        ),
+      );
       return;
     }
 
@@ -135,7 +160,13 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
           },
         });
       } catch {
-        setApiError(t("auth", "reportUploadFailed", "Report upload failed. The backend needs a file upload endpoint."));
+        setApiError(
+          t(
+            "auth",
+            "reportUploadFailed",
+            "Report upload failed. The backend needs a file upload endpoint.",
+          ),
+        );
         setUploading(false);
         return;
       }
@@ -172,7 +203,9 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
     setDeletingReportId(reportId);
     try {
       await reportsApi.remove(reportId);
-      setReports((current) => current.filter((report) => report.id !== reportId));
+      setReports((current) =>
+        current.filter((report) => report.id !== reportId),
+      );
       setApiError(null);
     } catch {
       setApiError(t("auth", "noAvailableData", "No available data."));
@@ -185,9 +218,16 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
     <div className={darkMode ? "dark" : ""}>
       <div className="flex justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-6 shadow-md">
         <div>
-          <h2 className="text-5xl font-bold">{t("auth", "reportAnalysis", "Report Analysis")}</h2>
+          <h2 className="text-5xl font-bold">
+            {t("auth", "reportAnalysis", "Report Analysis")}
+          </h2>
         </div>
-        <img src={testResultsImg} alt={t("auth", "reportAnalysis", "Report Analysis")} className="h-70 w-70" loading="lazy" />
+        <img
+          src={testResultsImg}
+          alt={t("auth", "reportAnalysis", "Report Analysis")}
+          className="h-70 w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="bg-white dark:bg-black px-6 py-8 min-h-screen">
@@ -214,7 +254,11 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
                 }`}
               >
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 dark:bg-black/40">
-                  <img src={uploadIcon} alt="Upload" className="h-9 w-9 object-contain opacity-80" />
+                  <img
+                    src={uploadIcon}
+                    alt="Upload"
+                    className="h-9 w-9 object-contain opacity-80"
+                  />
                 </div>
                 <input
                   ref={fileInputRef}
@@ -222,13 +266,19 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
                   type="file"
                   accept="application/pdf,image/*"
                   className="hidden"
-                  onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+                  onChange={(event) =>
+                    setSelectedFile(event.target.files?.[0] ?? null)
+                  }
                 />
                 <label
                   htmlFor="report-upload-input"
                   className="mx-auto mt-2 inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-8 py-3 text-base font-semibold text-white shadow-md transition-all duration-300 hover:opacity-90"
                 >
-                  <img src={uploadIcon} alt="Upload icon" className="h-5 w-5 object-contain brightness-0 invert" />
+                  <img
+                    src={uploadIcon}
+                    alt="Upload icon"
+                    className="h-5 w-5 object-contain brightness-0 invert"
+                  />
                   Upload
                 </label>
                 {selectedFile && (
@@ -240,7 +290,11 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
                       type="button"
                       onClick={clearSelectedFile}
                       className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#0B3C5D] text-xs font-bold leading-none transition-all duration-200 hover:bg-[#0B3C5D] hover:text-white"
-                      aria-label={t("auth", "removeSelectedFile", "Remove selected file")}
+                      aria-label={t(
+                        "auth",
+                        "removeSelectedFile",
+                        "Remove selected file",
+                      )}
                     >
                       ×
                     </button>
@@ -255,15 +309,22 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
                   onChange={(event) => setSelectedDoctorId(event.target.value)}
                   className="mt-2 w-full rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-4 py-3 text-sm focus:outline-none"
                 >
-                  <option value="">{t("auth", "selectDoctor", "Select doctor")}</option>
+                  <option value="">
+                    {t("auth", "selectDoctor", "Select doctor")}
+                  </option>
                   {availableDoctors.length === 0 && (
                     <option value="" disabled>
-                      {t("auth", "noRegisteredDoctors", "No registered doctors available")}
+                      {t(
+                        "auth",
+                        "noRegisteredDoctors",
+                        "No registered doctors available",
+                      )}
                     </option>
                   )}
                   {availableDoctors.map((doctor) => (
                     <option key={doctor.id} value={doctor.id}>
-                      {doctor.name} ({doctor.displayId || doctor.id}) - {doctor.specialization}
+                      {doctor.name} ({doctor.displayId || doctor.id}) -{" "}
+                      {doctor.specialization}
                     </option>
                   ))}
                 </select>
@@ -276,14 +337,22 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
                   disabled={uploading}
                   className="rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-10 py-3 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90 disabled:opacity-50"
                 >
-                  {uploading ? t("auth", "uploading", "Uploading...") : t("auth", "uploadReport", "Upload Report")}
+                  {uploading
+                    ? t("auth", "uploading", "Uploading...")
+                    : t("auth", "uploadReport", "Upload Report")}
                 </button>
               </div>
             </div>
           </section>
 
           <div className="mt-6">
-            <div className="mb-2 text-xs font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "uploadedDocumentHistory", "Uploaded Document History")}</div>
+            <div className="mb-2 text-xs font-semibold text-[#0B3C5D] dark:text-white">
+              {t(
+                "auth",
+                "uploadedDocumentHistory",
+                "Uploaded Document History",
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-5">
               {reports.map((report) => (
                 <div
@@ -292,8 +361,12 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                     <div>
-                      <h4 className="text-xl font-semibold text-[#0B3C5D] dark:text-white">{report.fileName}</h4>
-                      <div className="mt-3 text-sm text-[#4B5563] dark:text-gray-300">Date: {report.date}</div>
+                      <h4 className="text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                        {report.fileName}
+                      </h4>
+                      <div className="mt-3 text-sm text-[#4B5563] dark:text-gray-300">
+                        Date: {report.date}
+                      </div>
                       <div className="mt-4">
                         <button
                           type="button"
@@ -301,21 +374,38 @@ const ReportAnalysis = ({ darkMode = false }: ReportAnalysisProps) => {
                           disabled={deletingReportId === report.id}
                           className="inline-flex items-center gap-2 rounded-2xl border border-red-600 px-3 py-2 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-700 disabled:opacity-50"
                         >
-                          <img src={deleteIcon} alt="Delete" className="h-3.5 w-3.5 object-contain" />
-                          {deletingReportId === report.id ? "Deleting..." : "Delete"}
+                          <img
+                            src={deleteIcon}
+                            alt="Delete"
+                            className="h-3.5 w-3.5 object-contain"
+                          />
+                          {deletingReportId === report.id
+                            ? "Deleting..."
+                            : "Delete"}
                         </button>
                       </div>
                     </div>
                     <div className="pl-0 lg:pl-4">
-                      <h5 className="text-lg font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "doctorNotes", "Doctor Notes")}</h5>
-                      <p className="mt-2 text-sm text-[#4B5563] dark:text-gray-300">{report.doctorNote || t("auth", "underReview", "Under review")}</p>
+                      <h5 className="text-lg font-semibold text-[#0B3C5D] dark:text-white">
+                        {t("auth", "doctorNotes", "Doctor Notes")}
+                      </h5>
+                      <p className="mt-2 text-sm text-[#4B5563] dark:text-gray-300">
+                        {report.doctorNote ||
+                          t("auth", "underReview", "Under review")}
+                      </p>
                     </div>
                   </div>
                 </div>
               ))}
               {reports.length === 0 && !apiError && (
                 <div className="rounded-2xl border-2 border-[#0B3C5D]/30 dark:border-white/20 bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-5 text-sm text-[#4B5563] dark:text-gray-300">
-                  {loading ? t("auth", "loadingReports", "Loading reports...") : t("auth", "noReportsFound", "No reports found for this patient.")}
+                  {loading
+                    ? t("auth", "loadingReports", "Loading reports...")
+                    : t(
+                        "auth",
+                        "noReportsFound",
+                        "No reports found for this patient.",
+                      )}
                 </div>
               )}
             </div>

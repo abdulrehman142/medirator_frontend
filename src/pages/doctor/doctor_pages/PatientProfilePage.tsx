@@ -20,12 +20,25 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { patients, setPatients, selectedPatient, selectedPatientId, selectPatientById } = useDoctorPatient();
-  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string>("");
-  const [downloadingDocumentId, setDownloadingDocumentId] = useState<string | null>(null);
+  const {
+    patients,
+    setPatients,
+    selectedPatient,
+    selectedPatientId,
+    selectPatientById,
+  } = useDoctorPatient();
+  const [selectedDocumentTitle, setSelectedDocumentTitle] =
+    useState<string>("");
+  const [downloadingDocumentId, setDownloadingDocumentId] = useState<
+    string | null
+  >(null);
   const [reportNoteDraft, setReportNoteDraft] = useState("");
-  const [savingReportNoteId, setSavingReportNoteId] = useState<string | null>(null);
-  const [deletingReportNoteId, setDeletingReportNoteId] = useState<string | null>(null);
+  const [savingReportNoteId, setSavingReportNoteId] = useState<string | null>(
+    null,
+  );
+  const [deletingReportNoteId, setDeletingReportNoteId] = useState<
+    string | null
+  >(null);
   const [noteActionError, setNoteActionError] = useState<string | null>(null);
   const [isEditingReportNote, setIsEditingReportNote] = useState(false);
   const [hydratedProfile, setHydratedProfile] = useState<{
@@ -43,17 +56,38 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
   const [hasSavedFamilyTree, setHasSavedFamilyTree] = useState(false);
 
   const selectedDocument = useMemo(
-    () => selectedPatient.uploadedDocuments.find((document) => document.title === selectedDocumentTitle),
+    () =>
+      selectedPatient.uploadedDocuments.find(
+        (document) => document.title === selectedDocumentTitle,
+      ),
     [selectedDocumentTitle, selectedPatient.uploadedDocuments],
   );
 
   const medicalInfo = useMemo(
     () => [
-      { label: "Blood Group", value: hydratedProfile?.bloodGroup ?? selectedPatient.bloodGroup },
-      { label: "Allergies", value: hydratedProfile?.allergies ?? selectedPatient.allergies },
-      { label: "Chronic Diseases", value: hydratedProfile?.chronicDiseases ?? selectedPatient.chronicDiseases },
-      { label: "Emergency Contact", value: hydratedProfile?.emergencyContact ?? selectedPatient.emergencyContact },
-      { label: "Family History", value: hydratedProfile?.medicalHistory ?? selectedPatient.medicalHistory },
+      {
+        label: "Blood Group",
+        value: hydratedProfile?.bloodGroup ?? selectedPatient.bloodGroup,
+      },
+      {
+        label: "Allergies",
+        value: hydratedProfile?.allergies ?? selectedPatient.allergies,
+      },
+      {
+        label: "Chronic Diseases",
+        value:
+          hydratedProfile?.chronicDiseases ?? selectedPatient.chronicDiseases,
+      },
+      {
+        label: "Emergency Contact",
+        value:
+          hydratedProfile?.emergencyContact ?? selectedPatient.emergencyContact,
+      },
+      {
+        label: "Family History",
+        value:
+          hydratedProfile?.medicalHistory ?? selectedPatient.medicalHistory,
+      },
     ],
     [hydratedProfile, selectedPatient],
   );
@@ -62,9 +96,21 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
     () => [
       { label: "Name", value: hydratedProfile?.name ?? selectedPatient.name },
       { label: "Age", value: hydratedProfile?.age ?? selectedPatient.age },
-      { label: "Gender", value: hydratedProfile?.gender ?? selectedPatient.gender },
-      { label: "Contact", value: hydratedProfile?.contact ?? selectedPatient.contact },
-      { label: "Patient ID", value: hydratedProfile?.patientId ?? selectedPatient.displayId ?? selectedPatient.id },
+      {
+        label: "Gender",
+        value: hydratedProfile?.gender ?? selectedPatient.gender,
+      },
+      {
+        label: "Contact",
+        value: hydratedProfile?.contact ?? selectedPatient.contact,
+      },
+      {
+        label: "Patient ID",
+        value:
+          hydratedProfile?.patientId ??
+          selectedPatient.displayId ??
+          selectedPatient.id,
+      },
     ],
     [hydratedProfile, selectedPatient],
   );
@@ -77,12 +123,16 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
 
   // PATIENT SCOPE VALIDATION: Helper function to verify document belongs to current patient
   const isDocumentForCurrentPatient = (documentId: string): boolean => {
-    return selectedPatient.uploadedDocuments.some((doc) => doc.id === documentId);
+    return selectedPatient.uploadedDocuments.some(
+      (doc) => doc.id === documentId,
+    );
   };
 
   // PATIENT SCOPE VALIDATION: Only allow opening documents that belong to current patient
   const handleOpenDocument = (documentTitle: string) => {
-    const document = selectedPatient.uploadedDocuments.find((doc) => doc.title === documentTitle);
+    const document = selectedPatient.uploadedDocuments.find(
+      (doc) => doc.title === documentTitle,
+    );
     if (!document) {
       setNoteActionError("Document not found for this patient.");
       return;
@@ -96,10 +146,16 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
     if (!reportId) {
       return;
     }
-    
+
     // PATIENT SCOPE VALIDATION: Ensure document belongs to selected patient
-    if (!selectedDocument || !selectedPatient.id || !isDocumentForCurrentPatient(reportId)) {
-      setNoteActionError("Invalid patient or document selection. Access denied.");
+    if (
+      !selectedDocument ||
+      !selectedPatient.id ||
+      !isDocumentForCurrentPatient(reportId)
+    ) {
+      setNoteActionError(
+        "Invalid patient or document selection. Access denied.",
+      );
       return;
     }
 
@@ -112,7 +168,7 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
         // Store patient_id in metadata to ensure cross-reference and prevent data leakage
         patient_id: selectedPatient.id,
       });
-      
+
       // PATIENT SCOPE VALIDATION: Only update documents for the current patient
       setPatients((currentPatients) =>
         currentPatients.map((patient) => {
@@ -153,10 +209,12 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
     if (!reportId) {
       return;
     }
-    
+
     // PATIENT SCOPE VALIDATION: Ensure document belongs to current patient
     if (!isDocumentForCurrentPatient(reportId) || !selectedPatient.id) {
-      setNoteActionError("Document does not belong to this patient. Access denied.");
+      setNoteActionError(
+        "Document does not belong to this patient. Access denied.",
+      );
       return;
     }
 
@@ -167,9 +225,12 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
       delete nextMetadata.doctor_note;
       // Ensure patient_id is preserved in metadata
       nextMetadata.patient_id = selectedPatient.id;
-      
-      const updatedReport = await reportsApi.updateMetadata(reportId, nextMetadata);
-      
+
+      const updatedReport = await reportsApi.updateMetadata(
+        reportId,
+        nextMetadata,
+      );
+
       // PATIENT SCOPE VALIDATION: Only update documents for the current patient
       setPatients((currentPatients) =>
         currentPatients.map((patient) => {
@@ -203,10 +264,12 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
     if (!documentId) {
       return;
     }
-    
+
     // PATIENT SCOPE VALIDATION: Ensure document belongs to current patient before download
     if (!isDocumentForCurrentPatient(documentId)) {
-      setNoteActionError("Cannot download: Document does not belong to this patient.");
+      setNoteActionError(
+        "Cannot download: Document does not belong to this patient.",
+      );
       return;
     }
 
@@ -262,47 +325,76 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
         return;
       }
       try {
-        const [profileResult, recordsResult, reportsResult] = await Promise.allSettled([
-          usersApi.getPatientProfileForDoctor(selectedPatient.id),
-          clinicalApi.records(selectedPatient.id),
-          reportsApi.list({ patient_id: selectedPatient.id }),
-        ]);
+        const [profileResult, recordsResult, reportsResult] =
+          await Promise.allSettled([
+            usersApi.getPatientProfileForDoctor(selectedPatient.id),
+            clinicalApi.records(selectedPatient.id),
+            reportsApi.list({ patient_id: selectedPatient.id }),
+          ]);
 
-        const profile = profileResult.status === "fulfilled" ? profileResult.value : null;
+        const profile =
+          profileResult.status === "fulfilled" ? profileResult.value : null;
         const backendTreeCount = profile?.family_tree?.length ?? 0;
         let localTreeCount = 0;
         try {
-          const rawLocalTree = localStorage.getItem(`medirator_family_history_${selectedPatient.id}`);
+          const rawLocalTree = localStorage.getItem(
+            `medirator_family_history_${selectedPatient.id}`,
+          );
           if (rawLocalTree) {
             const parsedLocalTree = JSON.parse(rawLocalTree) as unknown[];
-            localTreeCount = Array.isArray(parsedLocalTree) ? parsedLocalTree.length : 0;
+            localTreeCount = Array.isArray(parsedLocalTree)
+              ? parsedLocalTree.length
+              : 0;
           }
         } catch {
           localTreeCount = 0;
         }
         setHasSavedFamilyTree(backendTreeCount > 0 || localTreeCount > 0);
-        const recordsSnapshot = recordsResult.status === "fulfilled" ? recordsResult.value : {};
-        const reports = reportsResult.status === "fulfilled" ? reportsResult.value : [];
+        const recordsSnapshot =
+          recordsResult.status === "fulfilled" ? recordsResult.value : {};
+        const reports =
+          reportsResult.status === "fulfilled" ? reportsResult.value : [];
 
         const medicalHistorySnapshot =
-          (((recordsSnapshot.family_history as Record<string, unknown> | undefined) ??
-            (recordsSnapshot.medical_history as Record<string, unknown> | undefined))?.diagnosis as string | undefined) ??
-          "";
-        const chronicFromSnapshot =
-          ((((recordsSnapshot.family_history as Record<string, unknown> | undefined) ??
-            (recordsSnapshot.medical_history as Record<string, unknown> | undefined))?.chronic_conditions as string[] | undefined) ?? []).join(", ");
-        const allergiesFromSnapshot =
-          ((((recordsSnapshot.family_history as Record<string, unknown> | undefined) ??
-            (recordsSnapshot.medical_history as Record<string, unknown> | undefined))?.allergies as string[] | undefined) ?? []).join(", ");
-        
+          ((
+            (recordsSnapshot.family_history as
+              | Record<string, unknown>
+              | undefined) ??
+            (recordsSnapshot.medical_history as
+              | Record<string, unknown>
+              | undefined)
+          )?.diagnosis as string | undefined) ?? "";
+        const chronicFromSnapshot = (
+          ((
+            (recordsSnapshot.family_history as
+              | Record<string, unknown>
+              | undefined) ??
+            (recordsSnapshot.medical_history as
+              | Record<string, unknown>
+              | undefined)
+          )?.chronic_conditions as string[] | undefined) ?? []
+        ).join(", ");
+        const allergiesFromSnapshot = (
+          ((
+            (recordsSnapshot.family_history as
+              | Record<string, unknown>
+              | undefined) ??
+            (recordsSnapshot.medical_history as
+              | Record<string, unknown>
+              | undefined)
+          )?.allergies as string[] | undefined) ?? []
+        ).join(", ");
+
         // PATIENT SCOPE VALIDATION: Filter reports to ensure they belong to current patient only
         const validReports = reports.filter((report) => {
           // Accept reports that belong to the current patient
           // Check both report.patient_id and metadata.patient_id for consistency
-          const reportPatientId = (report.patient_id as string) || (report.metadata?.patient_id as string);
+          const reportPatientId =
+            (report.patient_id as string) ||
+            (report.metadata?.patient_id as string);
           return reportPatientId === selectedPatient.id;
         });
-        
+
         const nextDocuments = validReports.map((report) => ({
           id: report.id,
           title: report.file_name || report.report_type,
@@ -322,10 +414,18 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
                   gender: profile?.gender ?? patient.gender,
                   contact: profile?.contact ?? patient.contact,
                   bloodGroup: profile?.blood_group ?? patient.bloodGroup,
-                  allergies: profile?.allergies ?? (allergiesFromSnapshot || patient.allergies),
-                  chronicDiseases: profile?.chronic_diseases ?? (chronicFromSnapshot || patient.chronicDiseases),
-                  emergencyContact: profile?.emergency_contact ?? patient.emergencyContact,
-                  medicalHistory: profile?.family_history ?? profile?.medical_history ?? (medicalHistorySnapshot || patient.medicalHistory),
+                  allergies:
+                    profile?.allergies ??
+                    (allergiesFromSnapshot || patient.allergies),
+                  chronicDiseases:
+                    profile?.chronic_diseases ??
+                    (chronicFromSnapshot || patient.chronicDiseases),
+                  emergencyContact:
+                    profile?.emergency_contact ?? patient.emergencyContact,
+                  medicalHistory:
+                    profile?.family_history ??
+                    profile?.medical_history ??
+                    (medicalHistorySnapshot || patient.medicalHistory),
                   doctorNotes: patient.doctorNotes,
                   uploadedDocuments: nextDocuments,
                 },
@@ -336,12 +436,21 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
           age: profile?.age ? String(profile.age) : selectedPatient.age,
           gender: profile?.gender ?? selectedPatient.gender,
           contact: profile?.contact ?? selectedPatient.contact,
-          patientId: profile?.id ?? selectedPatient.displayId ?? selectedPatient.id,
+          patientId:
+            profile?.id ?? selectedPatient.displayId ?? selectedPatient.id,
           bloodGroup: profile?.blood_group ?? selectedPatient.bloodGroup,
-          allergies: profile?.allergies ?? (allergiesFromSnapshot || selectedPatient.allergies),
-          chronicDiseases: profile?.chronic_diseases ?? (chronicFromSnapshot || selectedPatient.chronicDiseases),
-          emergencyContact: profile?.emergency_contact ?? selectedPatient.emergencyContact,
-          medicalHistory: profile?.family_history ?? profile?.medical_history ?? (medicalHistorySnapshot || selectedPatient.medicalHistory),
+          allergies:
+            profile?.allergies ??
+            (allergiesFromSnapshot || selectedPatient.allergies),
+          chronicDiseases:
+            profile?.chronic_diseases ??
+            (chronicFromSnapshot || selectedPatient.chronicDiseases),
+          emergencyContact:
+            profile?.emergency_contact ?? selectedPatient.emergencyContact,
+          medicalHistory:
+            profile?.family_history ??
+            profile?.medical_history ??
+            (medicalHistorySnapshot || selectedPatient.medicalHistory),
         });
       } catch {
         // keep existing context values if hydration fails
@@ -362,7 +471,12 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
             <DoctorPatientDropdown darkMode={darkMode} />
           </div>
         </div>
-        <img src={patientImg} alt="Banner" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
+        <img
+          src={patientImg}
+          alt="Banner"
+          className="h-40 md:h-70 w-40 md:w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="flex flex-col dark:text-white justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-[#060b12] dark:to-black font-sans gap-5 md:gap-4 px-2 md:px-3 pb-6">
@@ -370,18 +484,23 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
               <section className={sectionCardClassName}>
-                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Basic Info</h2>
+                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                  Basic Info
+                </h2>
                 <ul className="mt-3 space-y-2">
                   {basicInfo.map((item) => (
                     <li key={item.label} className={infoItemClassName}>
-                      <span className="font-semibold">{item.label}:</span> {item.value}
+                      <span className="font-semibold">{item.label}:</span>{" "}
+                      {item.value}
                     </li>
                   ))}
                 </ul>
               </section>
 
               <section className={sectionCardClassName}>
-                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Medical Info</h2>
+                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                  Medical Info
+                </h2>
                 <ul className="mt-3 space-y-2">
                   {medicalInfo.map((item) => {
                     const isMedicalHistory = item.label === "Family History";
@@ -392,7 +511,9 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
                       "not available",
                       "no available data.",
                     ].includes(medicalHistoryValue.toLowerCase());
-                    const shouldShowFamilyTreeButton = isMedicalHistory && (!medicalHistoryValue || isNotRecordedValue);
+                    const shouldShowFamilyTreeButton =
+                      isMedicalHistory &&
+                      (!medicalHistoryValue || isNotRecordedValue);
                     return (
                       <li key={item.label} className={infoItemClassName}>
                         <span className="font-semibold">{item.label}:</span>{" "}
@@ -400,7 +521,11 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
                           hasSavedFamilyTree ? (
                             <button
                               type="button"
-                              onClick={() => navigate(`/doctor/pages/family-tree?patient=${selectedPatient.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/doctor/pages/family-tree?patient=${selectedPatient.id}`,
+                                )
+                              }
                               className="inline-flex items-center gap-2 rounded-2xl border border-[#0B3C5D] bg-white px-3 py-1.5 text-xs font-medium text-black transition-all duration-300 hover:bg-[#0B3C5D] hover:text-white dark:bg-black dark:text-white dark:hover:bg-gray-800"
                             >
                               View Family Tree
@@ -420,11 +545,15 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
               <section className={sectionCardClassName}>
-                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Doctor Notes</h2>
+                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                  Doctor Notes
+                </h2>
                 <div className="mt-3 rounded-2xl border border-[#0B3C5D]/70 p-3 bg-white dark:bg-black/50">
                   <select
                     value={selectedDocumentTitle}
-                    onChange={(event) => setSelectedDocumentTitle(event.target.value)}
+                    onChange={(event) =>
+                      setSelectedDocumentTitle(event.target.value)
+                    }
                     className="w-full rounded-2xl border border-[#0B3C5D]/70 bg-white dark:bg-black px-3 py-2 text-sm text-black dark:text-white focus:outline-none"
                   >
                     <option value="">Select uploaded document</option>
@@ -434,11 +563,14 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
                       </option>
                     ))}
                   </select>
-                  {(selectedDocument?.doctorNote && !isEditingReportNote) ? null : (
+                  {selectedDocument?.doctorNote &&
+                  !isEditingReportNote ? null : (
                     <>
                       <textarea
                         value={reportNoteDraft}
-                        onChange={(event) => setReportNoteDraft(event.target.value)}
+                        onChange={(event) =>
+                          setReportNoteDraft(event.target.value)
+                        }
                         className="mt-3 w-full min-h-[84px] rounded-2xl border border-[#0B3C5D]/70 bg-white dark:bg-black p-3 text-sm text-black dark:text-white focus:outline-none"
                         placeholder="Write note for selected document"
                         disabled={!selectedDocument?.id}
@@ -447,46 +579,70 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
                         <button
                           type="button"
                           onClick={() => void handleSaveReportNote()}
-                          disabled={!selectedDocument?.id || savingReportNoteId === selectedDocument.id}
+                          disabled={
+                            !selectedDocument?.id ||
+                            savingReportNoteId === selectedDocument.id
+                          }
                           className="rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-4 py-2 text-xs font-medium text-white transition-all duration-300 hover:opacity-90 disabled:opacity-50"
                         >
-                          {selectedDocument?.id && savingReportNoteId === selectedDocument.id ? "Sending..." : "Send"}
+                          {selectedDocument?.id &&
+                          savingReportNoteId === selectedDocument.id
+                            ? "Sending..."
+                            : "Send"}
                         </button>
                       </div>
                     </>
                   )}
                   {selectedDocument?.doctorNote ? (
                     <div className="mt-3 rounded-2xl border border-[#0B3C5D]/50 bg-white dark:bg-black p-3">
-                      <p className="text-sm text-black dark:text-white">{selectedDocument.doctorNote}</p>
+                      <p className="text-sm text-black dark:text-white">
+                        {selectedDocument.doctorNote}
+                      </p>
                       <div className="mt-3 flex justify-end gap-2">
                         <button
                           type="button"
                           onClick={handleEditReportNote}
                           className="inline-flex items-center gap-1 rounded-2xl border border-[#0B3C5D] px-3 py-1 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-black dark:text-white hover:bg-[#0B3C5D] hover:text-white"
                         >
-                          <img src={editIcon} alt="Edit" className="h-3.5 w-3.5 object-contain" />
+                          <img
+                            src={editIcon}
+                            alt="Edit"
+                            className="h-3.5 w-3.5 object-contain"
+                          />
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => void handleDeleteReportNote()}
-                          disabled={deletingReportNoteId === selectedDocument.id}
+                          disabled={
+                            deletingReportNoteId === selectedDocument.id
+                          }
                           className="inline-flex items-center gap-1 rounded-2xl border border-red-600 px-3 py-1 text-xs font-medium transition-all duration-300 bg-white dark:bg-black text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-700 disabled:opacity-50"
                         >
-                          <img src={deleteIcon} alt="Delete" className="h-3.5 w-3.5 object-contain" />
-                          {deletingReportNoteId === selectedDocument.id ? "Deleting..." : "Delete"}
+                          <img
+                            src={deleteIcon}
+                            alt="Delete"
+                            className="h-3.5 w-3.5 object-contain"
+                          />
+                          {deletingReportNoteId === selectedDocument.id
+                            ? "Deleting..."
+                            : "Delete"}
                         </button>
                       </div>
                     </div>
                   ) : null}
                   {noteActionError ? (
-                    <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">{noteActionError}</p>
+                    <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+                      {noteActionError}
+                    </p>
                   ) : null}
                 </div>
               </section>
 
               <section className={sectionCardClassName}>
-                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">{t("auth", "uploadedDocuments", "Uploaded Documents")}</h2>
+                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                  {t("auth", "uploadedDocuments", "Uploaded Documents")}
+                </h2>
                 <ul className="mt-3 space-y-2">
                   {selectedPatient.uploadedDocuments.map((doc) => {
                     const isSelected = doc.title === selectedDocument?.title;
@@ -506,16 +662,24 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
                             onClick={() => handleOpenDocument(doc.title)}
                             className="inline-flex items-center gap-2 text-left"
                           >
-                            <img src={testResultsImg} alt="Document" className="h-5 w-5 object-contain" />
+                            <img
+                              src={testResultsImg}
+                              alt="Document"
+                              className="h-5 w-5 object-contain"
+                            />
                             <span className="font-semibold">{doc.title}</span>
                           </button>
                           <button
                             type="button"
-                            onClick={() => void handleDownloadDocument(doc.id ?? "")}
+                            onClick={() =>
+                              void handleDownloadDocument(doc.id ?? "")
+                            }
                             disabled={downloadingDocumentId === doc.id}
                             className="rounded-2xl border border-[#0B3C5D] bg-white px-3 py-1 text-xs font-medium text-black transition-all duration-300 hover:bg-[#0B3C5D] hover:text-white disabled:opacity-50 dark:bg-black dark:text-white dark:hover:bg-gray-800"
                           >
-                            {downloadingDocumentId === doc.id ? t("auth", "downloading", "Downloading...") : t("auth", "download", "Download")}
+                            {downloadingDocumentId === doc.id
+                              ? t("auth", "downloading", "Downloading...")
+                              : t("auth", "download", "Download")}
                           </button>
                         </div>
                       </li>
@@ -527,7 +691,6 @@ const PatientProfilePage = ({ darkMode = false }: PatientProfilePageProps) => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

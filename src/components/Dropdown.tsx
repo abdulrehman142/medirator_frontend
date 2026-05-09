@@ -8,15 +8,6 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useEffect, useRef, useState } from "react";
 
-
-
-
-
-
-
-
-
-
 interface DropdownProps {
   darkMode: boolean;
 }
@@ -24,12 +15,32 @@ interface DropdownProps {
 const Dropdown = ({ darkMode }: DropdownProps) => {
   const { t } = useLanguage();
   const services = [
-    { name: t("navbar", "familyHistory", "Family History"), img: historyImg, route: "/family-history" },
+    {
+      name: t("navbar", "familyHistory", "Family History"),
+      img: historyImg,
+      route: "/family-history",
+    },
     { name: t("navbar", "salts", "Salts"), img: saltsImg, route: "/salts" },
-    { name: t("navbar", "symptomPredictor", "Symptom Predictor"), img: predictionImg, route: "/symptom-predictor" },
-    { name: t("navbar", "appointments", "Appointments"), img: appointmentsImg, route: "/appointments" },
-    { name: t("navbar", "reportAnalysis", "Report Analysis"), img: testresultsImg, route: "/report-analysis" },
-    { name: t("navbar", "visualizer", "Visualizer"), img: visualizerImg, route: "/visualizer" },
+    {
+      name: t("navbar", "symptomPredictor", "Symptom Predictor"),
+      img: predictionImg,
+      route: "/symptom-predictor",
+    },
+    {
+      name: t("navbar", "appointments", "Appointments"),
+      img: appointmentsImg,
+      route: "/appointments",
+    },
+    {
+      name: t("navbar", "reportAnalysis", "Report Analysis"),
+      img: testresultsImg,
+      route: "/report-analysis",
+    },
+    {
+      name: t("navbar", "visualizer", "Visualizer"),
+      img: visualizerImg,
+      route: "/visualizer",
+    },
   ];
 
   const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
@@ -37,7 +48,9 @@ const Dropdown = ({ darkMode }: DropdownProps) => {
 
   useEffect(() => {
     const measure = () => {
-      const widths = itemRefs.current.map((el) => (el ? el.getBoundingClientRect().width : 0));
+      const widths = itemRefs.current.map((el) =>
+        el ? el.getBoundingClientRect().width : 0,
+      );
       const max = widths.length ? Math.max(...widths) : 0;
       setMaxWidth(max || null);
     };
@@ -75,7 +88,9 @@ const Dropdown = ({ darkMode }: DropdownProps) => {
             className="w-6 h-6 object-cover rounded flex-shrink-0"
             loading="lazy"
           />
-          <div className="font-ibm-plex-mono text-sm whitespace-nowrap">{service.name}</div>
+          <div className="font-ibm-plex-mono text-sm whitespace-nowrap">
+            {service.name}
+          </div>
         </Link>
       ))}
     </div>

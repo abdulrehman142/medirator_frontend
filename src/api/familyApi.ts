@@ -22,8 +22,13 @@ export interface FamilyRiskAnalysisResponse {
 }
 
 export const familyApi = {
-  async analyzeFamilyRisk(payload: FamilyRiskMemberPayload[]): Promise<FamilyRiskAnalysisResponse> {
-    const { data } = await http.post<FamilyRiskAnalysisResponse>("/family/analyze", payload);
+  async analyzeFamilyRisk(
+    payload: FamilyRiskMemberPayload[],
+  ): Promise<FamilyRiskAnalysisResponse> {
+    const { data } = await http.post<FamilyRiskAnalysisResponse>(
+      "/family/analyze",
+      payload,
+    );
     return data;
   },
 };

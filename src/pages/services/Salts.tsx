@@ -1,4 +1,3 @@
-
 import saltsImg from "/medirator_images/salts.png";
 import { useEffect, useState } from "react";
 import { clinicalApi } from "../../api/clinicalApi";
@@ -34,13 +33,21 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
               name: item.medication_name,
               dose: item.dosage,
               frequency: item.instructions,
-              startedOn: new Date(item.start_date ?? item.created_at).toLocaleDateString(),
+              startedOn: new Date(
+                item.start_date ?? item.created_at,
+              ).toLocaleDateString(),
             })),
           );
         }
         setCurrentError(null);
       } catch {
-        setCurrentError(t("services", "noCurrentSalts", "No available data for current salts."));
+        setCurrentError(
+          t(
+            "services",
+            "noCurrentSalts",
+            "No available data for current salts.",
+          ),
+        );
         setCurrentSalts([]);
       }
 
@@ -61,7 +68,9 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
         }
         setPastError(null);
       } catch {
-        setPastError(t("services", "noPastSalts", "No available data for past salts."));
+        setPastError(
+          t("services", "noPastSalts", "No available data for past salts."),
+        );
         setPastSalts([]);
       }
     };
@@ -69,14 +78,24 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
     void loadSalts();
   }, [t]);
 
-  const SaltCard = ({ salt, type }: { salt: SaltItem; type: "current" | "past" }) => (
+  const SaltCard = ({
+    salt,
+    type,
+  }: {
+    salt: SaltItem;
+    type: "current" | "past";
+  }) => (
     <div className="rounded-xl border border-[#0B3C5D]/30 dark:border-white/20 bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-4">
-      <div className="font-semibold text-[#0B3C5D] dark:text-white">{salt.name}</div>
+      <div className="font-semibold text-[#0B3C5D] dark:text-white">
+        {salt.name}
+      </div>
       <div className="text-sm text-[#4B5563] dark:text-gray-300 mt-1">
         {salt.dose} • {salt.frequency}
       </div>
       <div className="text-xs mt-2 text-[#6B7280] dark:text-gray-400">
-        {type === "current" ? `${t("services", "startedOn", "Started on")}: ${salt.startedOn}` : salt.period}
+        {type === "current"
+          ? `${t("services", "startedOn", "Started on")}: ${salt.startedOn}`
+          : salt.period}
       </div>
     </div>
   );
@@ -85,9 +104,16 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
     <div className={darkMode ? "dark" : ""}>
       <div className="flex justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-6 shadow-md">
         <div>
-          <h2 className="text-5xl font-bold">{t("navbar", "salts", "Salts")}</h2>
+          <h2 className="text-5xl font-bold">
+            {t("navbar", "salts", "Salts")}
+          </h2>
         </div>
-        <img src={saltsImg} alt={t("navbar", "salts", "Salts")} className="h-70 w-70" loading="lazy" />
+        <img
+          src={saltsImg}
+          alt={t("navbar", "salts", "Salts")}
+          className="h-70 w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="bg-white dark:bg-black px-6 py-8 min-h-screen">
@@ -95,7 +121,9 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Current Salts Section - Left Box */}
             <div className="rounded-2xl border-2 border-[#0B3C5D] bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-6">
-              <h3 className="text-3xl font-bold text-[#0B3C5D] dark:text-white mb-2">{t("services", "currentSaltsTitle", "Current Salts")}</h3>
+              <h3 className="text-3xl font-bold text-[#0B3C5D] dark:text-white mb-2">
+                {t("services", "currentSaltsTitle", "Current Salts")}
+              </h3>
               {currentError && (
                 <div className="mb-4 rounded-2xl border border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-950/20 dark:text-amber-300">
                   {currentError}
@@ -104,11 +132,19 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
 
               <div className="grid grid-cols-1 gap-4">
                 {currentSalts.map((salt) => (
-                  <SaltCard key={`current-${salt.name}-${salt.startedOn}`} salt={salt} type="current" />
+                  <SaltCard
+                    key={`current-${salt.name}-${salt.startedOn}`}
+                    salt={salt}
+                    type="current"
+                  />
                 ))}
                 {currentSalts.length === 0 && !currentError && (
                   <div className="rounded-xl border border-[#0B3C5D]/30 dark:border-white/20 bg-white dark:bg-[#0B3C5D]/10 p-4 text-sm text-[#4B5563] dark:text-gray-300">
-                    {t("services", "noCurrentSaltsAvailable", "No current salts available.")}
+                    {t(
+                      "services",
+                      "noCurrentSaltsAvailable",
+                      "No current salts available.",
+                    )}
                   </div>
                 )}
               </div>
@@ -116,7 +152,9 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
 
             {/* Past Salts Section - Right Box */}
             <div className="rounded-2xl border-2 border-[#0B3C5D] bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-6">
-              <h3 className="text-3xl font-bold text-[#0B3C5D] dark:text-white mb-2">{t("services", "pastSaltsTitle", "Past Salts")}</h3>
+              <h3 className="text-3xl font-bold text-[#0B3C5D] dark:text-white mb-2">
+                {t("services", "pastSaltsTitle", "Past Salts")}
+              </h3>
 
               {pastError && (
                 <div className="mb-4 rounded-2xl border border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-950/20 dark:text-amber-300">
@@ -126,11 +164,19 @@ const Salts = ({ darkMode = false }: SaltsProps) => {
 
               <div className="grid grid-cols-1 gap-4">
                 {pastSalts.map((salt) => (
-                  <SaltCard key={`past-${salt.name}-${salt.period}`} salt={salt} type="past" />
+                  <SaltCard
+                    key={`past-${salt.name}-${salt.period}`}
+                    salt={salt}
+                    type="past"
+                  />
                 ))}
                 {pastSalts.length === 0 && !pastError && (
                   <div className="rounded-xl border border-[#0B3C5D]/30 dark:border-white/20 bg-white dark:bg-[#0B3C5D]/10 p-4 text-sm text-[#4B5563] dark:text-gray-300">
-                    {t("services", "noPastSaltsAvailable", "No past salts available.")}
+                    {t(
+                      "services",
+                      "noPastSaltsAvailable",
+                      "No past salts available.",
+                    )}
                   </div>
                 )}
               </div>

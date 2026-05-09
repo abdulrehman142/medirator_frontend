@@ -44,15 +44,24 @@ export const authApi = {
   },
 
   async forgotPassword(email: string): Promise<{ message: string }> {
-    const { data } = await http.post<{ message: string }>("/auth/forgot-password", { email });
+    const { data } = await http.post<{ message: string }>(
+      "/auth/forgot-password",
+      { email },
+    );
     return data;
   },
 
-  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-    const { data } = await http.post<{ message: string }>("/auth/reset-password", {
-      token,
-      new_password: newPassword,
-    });
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const { data } = await http.post<{ message: string }>(
+      "/auth/reset-password",
+      {
+        token,
+        new_password: newPassword,
+      },
+    );
     return data;
   },
 

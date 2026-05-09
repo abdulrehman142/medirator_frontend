@@ -54,8 +54,12 @@ const DoctorPatientDropdown = ({ darkMode }: DoctorPatientDropdownProps) => {
           loading="lazy"
         />
         <div className="flex flex-col items-start text-left min-w-0">
-          <div className="font-ibm-plex-mono text-sm truncate w-32">{selectedPatient.name}</div>
-          <div className="text-[10px] opacity-80 truncate w-32">{selectedPatient.displayId}</div>
+          <div className="font-ibm-plex-mono text-sm truncate w-32">
+            {selectedPatient.name}
+          </div>
+          <div className="text-[10px] opacity-80 truncate w-32">
+            {selectedPatient.displayId}
+          </div>
         </div>
         <span className="text-xs opacity-80">{isOpen ? "▲" : "▼"}</span>
       </button>
@@ -84,8 +88,12 @@ const DoctorPatientDropdown = ({ darkMode }: DoctorPatientDropdownProps) => {
                 loading="lazy"
               />
               <div className="flex flex-col items-start min-w-0">
-                <div className="font-ibm-plex-mono text-sm truncate w-32">{patient.name}</div>
-                <div className="text-[10px] opacity-80 truncate w-32">{patient.displayId}</div>
+                <div className="font-ibm-plex-mono text-sm truncate w-32">
+                  {patient.name}
+                </div>
+                <div className="text-[10px] opacity-80 truncate w-32">
+                  {patient.displayId}
+                </div>
               </div>
             </button>
           ))}

@@ -58,7 +58,9 @@ export const toBooleanValue = (value: unknown, fallback = false) => {
 export const toTextList = (value: unknown): string | undefined => {
   if (Array.isArray(value)) {
     const normalized = value
-      .map((item) => (typeof item === "string" ? item.trim() : String(item).trim()))
+      .map((item) =>
+        typeof item === "string" ? item.trim() : String(item).trim(),
+      )
       .filter((item) => item.length > 0);
     return normalized.length > 0 ? normalized.join(", ") : undefined;
   }
@@ -87,7 +89,10 @@ export const calculateAgeFromDateOfBirth = (value: unknown) => {
   const today = new Date();
   let age = today.getFullYear() - dateOfBirth.getFullYear();
   const monthDifference = today.getMonth() - dateOfBirth.getMonth();
-  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dateOfBirth.getDate())) {
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < dateOfBirth.getDate())
+  ) {
     age -= 1;
   }
 
@@ -113,12 +118,16 @@ export const extractList = (payload: unknown, keys: string[]): unknown[] => {
   return [];
 };
 
-export const normalizeDoctorStatus = (value: unknown): AdminDoctor["status"] => {
+export const normalizeDoctorStatus = (
+  value: unknown,
+): AdminDoctor["status"] => {
   const normalized = String(value ?? "").toLowerCase();
   return normalized === "active" ? "Active" : "Suspended";
 };
 
-export const normalizeDoctorVerification = (value: unknown): AdminDoctor["verification"] => {
+export const normalizeDoctorVerification = (
+  value: unknown,
+): AdminDoctor["verification"] => {
   const normalized = String(value ?? "").toLowerCase();
 
   if (normalized === "approved" || normalized === "verified") {
@@ -136,14 +145,23 @@ export const mapDoctor = (raw: unknown): AdminDoctor => {
   const doctor = isRecord(raw) ? raw : {};
   return {
     id: toStringValue(doctor.id, doctor.doctor_id, doctor.user_id) || "Unknown",
-    name: toStringValue(doctor.name, doctor.full_name, doctor.doctor_name) || "Unnamed doctor",
-    specialization: toStringValue(doctor.specialization, doctor.speciality, doctor.department) || "Not specified",
+    name:
+      toStringValue(doctor.name, doctor.full_name, doctor.doctor_name) ||
+      "Unnamed doctor",
+    specialization:
+      toStringValue(
+        doctor.specialization,
+        doctor.speciality,
+        doctor.department,
+      ) || "Not specified",
     status: normalizeDoctorStatus(doctor.status),
     verification: normalizeDoctorVerification(doctor.verification),
   };
 };
 
-export const normalizePatientStatus = (value: unknown): AdminPatient["status"] => {
+export const normalizePatientStatus = (
+  value: unknown,
+): AdminPatient["status"] => {
   const normalized = String(value ?? "").toLowerCase();
 
   if (normalized === "active") {
@@ -156,7 +174,10 @@ export const normalizePatientStatus = (value: unknown): AdminPatient["status"] =
 export const mapPatient = (raw: unknown): AdminPatient => {
   const patient = isRecord(raw) ? raw : {};
   const ageFromDateOfBirth = calculateAgeFromDateOfBirth(
-    patient.date_of_birth ?? patient.dateOfBirth ?? patient.dob ?? patient.birth_date,
+    patient.date_of_birth ??
+      patient.dateOfBirth ??
+      patient.dob ??
+      patient.birth_date,
   );
 
   return {
@@ -179,15 +200,40 @@ export const mapPatient = (raw: unknown): AdminPatient => {
         patient.patient_name,
         patient.patientName,
       ) || "Unnamed patient",
-    age: toNumberValue(patient.age ?? patient.patient_age ?? patient.years_of_age ?? ageFromDateOfBirth, 0),
+    age: toNumberValue(
+      patient.age ??
+        patient.patient_age ??
+        patient.years_of_age ??
+        ageFromDateOfBirth,
+      0,
+    ),
     status: normalizePatientStatus(patient.status),
-    flagged_critical: toBooleanValue(patient.flagged_critical, toBooleanValue(patient.is_critical, false)),
-    family_history: toStringValue(patient.family_history, patient.familyHistory, patient.medical_history, patient.medicalHistory) || "No history recorded.",
+    flagged_critical: toBooleanValue(
+      patient.flagged_critical,
+      toBooleanValue(patient.is_critical, false),
+    ),
+    family_history:
+      toStringValue(
+        patient.family_history,
+        patient.familyHistory,
+        patient.medical_history,
+        patient.medicalHistory,
+      ) || "No history recorded.",
     gender: toStringValue(patient.gender, patient.sex) || undefined,
-    phone: toStringValue(patient.phone, patient.phone_number, patient.contact_number) || undefined,
-    blood_group: toStringValue(patient.blood_group, patient.bloodGroup) || undefined,
+    phone:
+      toStringValue(
+        patient.phone,
+        patient.phone_number,
+        patient.contact_number,
+      ) || undefined,
+    blood_group:
+      toStringValue(patient.blood_group, patient.bloodGroup) || undefined,
     allergies: toTextList(patient.allergies),
-    chronic_diseases: toTextList(patient.chronic_diseases ?? patient.chronicDiseases),
-    emergency_contact: toStringValue(patient.emergency_contact, patient.emergencyContact) || undefined,
+    chronic_diseases: toTextList(
+      patient.chronic_diseases ?? patient.chronicDiseases,
+    ),
+    emergency_contact:
+      toStringValue(patient.emergency_contact, patient.emergencyContact) ||
+      undefined,
   };
 };

@@ -20,12 +20,21 @@ export const appointmentsApi = {
     return data;
   },
 
-  async update(id: string, payload: AppointmentUpdatePayload): Promise<Appointment> {
-    const { data } = await http.patch<Appointment>(`/appointments/${id}`, payload);
+  async update(
+    id: string,
+    payload: AppointmentUpdatePayload,
+  ): Promise<Appointment> {
+    const { data } = await http.patch<Appointment>(
+      `/appointments/${id}`,
+      payload,
+    );
     return data;
   },
 
-  async list(params?: { start?: string; end?: string }): Promise<Appointment[]> {
+  async list(params?: {
+    start?: string;
+    end?: string;
+  }): Promise<Appointment[]> {
     const { data } = await http.get<Appointment[]>("/appointments", { params });
     return data;
   },

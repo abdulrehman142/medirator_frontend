@@ -1,7 +1,14 @@
 import "./index.css";
 import { useState, Suspense, lazy } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { BrowserRouter as Router, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 
 import Home from "./pages/Home";
 import Layout from "./components/Layout";
@@ -24,22 +31,46 @@ const Register = lazy(() => import("./pages/Register"));
 const Services = lazy(() => import("./pages/services/Services"));
 const FamilyHistory = lazy(() => import("./pages/services/FamilyHistory"));
 const Salts = lazy(() => import("./pages/services/Salts"));
-const SymptomPredictor = lazy(() => import("./pages/services/DiseasePrediction"));
+const SymptomPredictor = lazy(
+  () => import("./pages/services/DiseasePrediction"),
+);
 const Appointments = lazy(() => import("./pages/services/Appointments"));
 const ReportAnalysis = lazy(() => import("./pages/services/ReportAnalysis"));
 const Visualizer = lazy(() => import("./pages/services/Visualizer"));
 const PatientProfile = lazy(() => import("./pages/PatientProfile"));
-const DoctorHomePage = lazy(() => import("./pages/doctor/doctor_pages/HomePage"));
-const DoctorProfilePage = lazy(() => import("./pages/doctor/doctor_pages/DoctorProfilePage"));
-const DoctorPatientProfilePage = lazy(() => import("./pages/doctor/doctor_pages/PatientProfilePage"));
-const DoctorAppointmentsPage = lazy(() => import("./pages/doctor/doctor_pages/AppointmentsPage"));
-const DoctorPrescriptionPage = lazy(() => import("./pages/doctor/doctor_pages/PrescriptionPage"));
-const DoctorVisualizerPage = lazy(() => import("./pages/doctor/doctor_pages/VisualizerPage"));
-const DoctorNotesReportsPage = lazy(() => import("./pages/doctor/doctor_pages/NotesReportsPage"));
-const AdminDoctorManagementPage = lazy(() => import("./pages/admin/admin_pages/DoctorManagementPage"));
-const AdminPatientManagementPage = lazy(() => import("./pages/admin/admin_pages/PatientManagementPage"));
-const AdminSystemAnalyticsPage = lazy(() => import("./pages/admin/admin_pages/SystemAnalyticsPage"));
-const AdminTestReportManagementPage = lazy(() => import("./pages/admin/admin_pages/TestReportManagementPage"));
+const DoctorHomePage = lazy(
+  () => import("./pages/doctor/doctor_pages/HomePage"),
+);
+const DoctorProfilePage = lazy(
+  () => import("./pages/doctor/doctor_pages/DoctorProfilePage"),
+);
+const DoctorPatientProfilePage = lazy(
+  () => import("./pages/doctor/doctor_pages/PatientProfilePage"),
+);
+const DoctorAppointmentsPage = lazy(
+  () => import("./pages/doctor/doctor_pages/AppointmentsPage"),
+);
+const DoctorPrescriptionPage = lazy(
+  () => import("./pages/doctor/doctor_pages/PrescriptionPage"),
+);
+const DoctorVisualizerPage = lazy(
+  () => import("./pages/doctor/doctor_pages/VisualizerPage"),
+);
+const DoctorNotesReportsPage = lazy(
+  () => import("./pages/doctor/doctor_pages/NotesReportsPage"),
+);
+const AdminDoctorManagementPage = lazy(
+  () => import("./pages/admin/admin_pages/DoctorManagementPage"),
+);
+const AdminPatientManagementPage = lazy(
+  () => import("./pages/admin/admin_pages/PatientManagementPage"),
+);
+const AdminSystemAnalyticsPage = lazy(
+  () => import("./pages/admin/admin_pages/SystemAnalyticsPage"),
+);
+const AdminTestReportManagementPage = lazy(
+  () => import("./pages/admin/admin_pages/TestReportManagementPage"),
+);
 
 const LoadingSpinner = () => {
   const { t } = useLanguage();
@@ -48,7 +79,9 @@ const LoadingSpinner = () => {
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-black">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B3C5D] dark:border-white"></div>
-        <p className="mt-4 text-[#0B3C5D] dark:text-white">{t("auth", "loading", "Loading...")}</p>
+        <p className="mt-4 text-[#0B3C5D] dark:text-white">
+          {t("auth", "loading", "Loading...")}
+        </p>
       </div>
     </div>
   );
@@ -62,12 +95,13 @@ const AppLayoutWrapper = ({
   setDarkMode: Dispatch<SetStateAction<boolean>>;
 }) => {
   const location = useLocation();
-  const isMedibotPage = location.pathname === "/medibot" || location.pathname === "/contact";
-  
+  const isMedibotPage =
+    location.pathname === "/medibot" || location.pathname === "/contact";
+
   if (isMedibotPage) {
     return <Outlet />;
   }
-  
+
   return (
     <Layout darkMode={darkMode} setDarkMode={setDarkMode}>
       <Outlet />
@@ -85,18 +119,42 @@ const DoctorLayoutWrapper = ({
   const { t } = useLanguage();
   const doctorNavLinks = [
     { label: t("navbar", "home", "Home"), path: "/doctor/pages/home" },
-    { label: t("navbar", "profile", "Profile"), path: "/doctor/pages/auth-profile" },
-    { label: t("navbar", "prescription", "Prescription"), path: "/doctor/pages/prescription-medication" },
-    { label: t("navbar", "visualizer", "Visualizer"), path: "/doctor/pages/visualizer" },
-    { label: t("navbar", "appointments", "Appointments"), path: "/doctor/pages/appointment-management" },
+    {
+      label: t("navbar", "profile", "Profile"),
+      path: "/doctor/pages/auth-profile",
+    },
+    {
+      label: t("navbar", "prescription", "Prescription"),
+      path: "/doctor/pages/prescription-medication",
+    },
+    {
+      label: t("navbar", "visualizer", "Visualizer"),
+      path: "/doctor/pages/visualizer",
+    },
+    {
+      label: t("navbar", "appointments", "Appointments"),
+      path: "/doctor/pages/appointment-management",
+    },
   ];
 
   const doctorFooterLinks = [
     { label: t("navbar", "home", "Home"), path: "/doctor/pages/home" },
-    { label: t("navbar", "profile", "Profile"), path: "/doctor/pages/auth-profile" },
-    { label: t("navbar", "prescription", "Prescription"), path: "/doctor/pages/prescription-medication" },
-    { label: t("navbar", "visualizer", "Visualizer"), path: "/doctor/pages/visualizer" },
-    { label: t("navbar", "appointments", "Appointments"), path: "/doctor/pages/appointment-management" },
+    {
+      label: t("navbar", "profile", "Profile"),
+      path: "/doctor/pages/auth-profile",
+    },
+    {
+      label: t("navbar", "prescription", "Prescription"),
+      path: "/doctor/pages/prescription-medication",
+    },
+    {
+      label: t("navbar", "visualizer", "Visualizer"),
+      path: "/doctor/pages/visualizer",
+    },
+    {
+      label: t("navbar", "appointments", "Appointments"),
+      path: "/doctor/pages/appointment-management",
+    },
   ];
 
   return (
@@ -122,17 +180,41 @@ const AdminLayoutWrapper = ({
 }) => {
   const { t } = useLanguage();
   const adminNavLinks = [
-    { label: t("navbar", "doctorManagement", "Doctor Management"), path: "/admin/pages/doctor-management" },
-    { label: t("navbar", "patientManagement", "Patient Management"), path: "/admin/pages/patient-management" },
-    { label: t("navbar", "systemAnalytics", "System Analytics"), path: "/admin/pages/system-analytics" },
-    { label: t("navbar", "testReportManagement", "Test Report Management"), path: "/admin/pages/test-report-management" },
+    {
+      label: t("navbar", "doctorManagement", "Doctor Management"),
+      path: "/admin/pages/doctor-management",
+    },
+    {
+      label: t("navbar", "patientManagement", "Patient Management"),
+      path: "/admin/pages/patient-management",
+    },
+    {
+      label: t("navbar", "systemAnalytics", "System Analytics"),
+      path: "/admin/pages/system-analytics",
+    },
+    {
+      label: t("navbar", "testReportManagement", "Test Report Management"),
+      path: "/admin/pages/test-report-management",
+    },
   ];
 
   const adminFooterLinks = [
-    { label: t("navbar", "doctorManagement", "Doctor Management"), path: "/admin/pages/doctor-management" },
-    { label: t("navbar", "patientManagement", "Patient Management"), path: "/admin/pages/patient-management" },
-    { label: t("navbar", "systemAnalytics", "System Analytics"), path: "/admin/pages/system-analytics" },
-    { label: t("navbar", "testReportManagement", "Test Report Management"), path: "/admin/pages/test-report-management" },
+    {
+      label: t("navbar", "doctorManagement", "Doctor Management"),
+      path: "/admin/pages/doctor-management",
+    },
+    {
+      label: t("navbar", "patientManagement", "Patient Management"),
+      path: "/admin/pages/patient-management",
+    },
+    {
+      label: t("navbar", "systemAnalytics", "System Analytics"),
+      path: "/admin/pages/system-analytics",
+    },
+    {
+      label: t("navbar", "testReportManagement", "Test Report Management"),
+      path: "/admin/pages/test-report-management",
+    },
   ];
 
   return (
@@ -160,9 +242,26 @@ const AppRouter = ({
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-            <Route element={<AdminLayoutWrapper darkMode={darkMode} setDarkMode={setDarkMode} />}>
-              <Route path="/admin" element={<Navigate to="/admin/pages/system-analytics" replace />} />
-              <Route path="/admin/pages/management" element={<Navigate to="/admin/pages/doctor-management" replace />} />
+            <Route
+              element={
+                <AdminLayoutWrapper
+                  darkMode={darkMode}
+                  setDarkMode={setDarkMode}
+                />
+              }
+            >
+              <Route
+                path="/admin"
+                element={
+                  <Navigate to="/admin/pages/system-analytics" replace />
+                }
+              />
+              <Route
+                path="/admin/pages/management"
+                element={
+                  <Navigate to="/admin/pages/doctor-management" replace />
+                }
+              />
               <Route
                 path="/admin/pages/doctor-management"
                 element={<AdminDoctorManagementPage darkMode={darkMode} />}
@@ -183,10 +282,26 @@ const AppRouter = ({
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
-            <Route element={<DoctorLayoutWrapper darkMode={darkMode} setDarkMode={setDarkMode} />}>
-              <Route path="/doctor" element={<Navigate to="/doctor/pages/home" replace />} />
-              <Route path="/doctor/pages/home" element={<DoctorHomePage darkMode={darkMode} />} />
-              <Route path="/doctor/pages/auth-profile" element={<DoctorProfilePage darkMode={darkMode} />} />
+            <Route
+              element={
+                <DoctorLayoutWrapper
+                  darkMode={darkMode}
+                  setDarkMode={setDarkMode}
+                />
+              }
+            >
+              <Route
+                path="/doctor"
+                element={<Navigate to="/doctor/pages/home" replace />}
+              />
+              <Route
+                path="/doctor/pages/home"
+                element={<DoctorHomePage darkMode={darkMode} />}
+              />
+              <Route
+                path="/doctor/pages/auth-profile"
+                element={<DoctorProfilePage darkMode={darkMode} />}
+              />
               <Route
                 path="/doctor/pages/patient-management"
                 element={<DoctorPatientProfilePage darkMode={darkMode} />}
@@ -203,32 +318,104 @@ const AppRouter = ({
                 path="/doctor/pages/visualizer"
                 element={<DoctorVisualizerPage darkMode={darkMode} />}
               />
-              <Route path="/doctor/pages/notes-reports" element={<DoctorNotesReportsPage darkMode={darkMode} />} />
-              <Route path="/doctor/pages/family-tree" element={<FamilyHistory darkMode={darkMode} />} />
+              <Route
+                path="/doctor/pages/notes-reports"
+                element={<DoctorNotesReportsPage darkMode={darkMode} />}
+              />
+              <Route
+                path="/doctor/pages/family-tree"
+                element={<FamilyHistory darkMode={darkMode} />}
+              />
             </Route>
           </Route>
 
-          <Route element={<AppLayoutWrapper darkMode={darkMode} setDarkMode={setDarkMode} />}>
+          <Route
+            element={
+              <AppLayoutWrapper darkMode={darkMode} setDarkMode={setDarkMode} />
+            }
+          >
             <Route path="/" element={<Home darkMode={darkMode} />} />
             <Route element={<ProtectedRoute allowedRoles={["patient"]} />}>
-              <Route path="/services" element={<Services darkMode={darkMode} />} />
-              <Route path="/family-history" element={<FamilyHistory darkMode={darkMode} />} />
-              <Route path="/medical-history" element={<Navigate to="/family-history" replace />} />
+              <Route
+                path="/services"
+                element={<Services darkMode={darkMode} />}
+              />
+              <Route
+                path="/family-history"
+                element={<FamilyHistory darkMode={darkMode} />}
+              />
+              <Route
+                path="/medical-history"
+                element={<Navigate to="/family-history" replace />}
+              />
               <Route path="/salts" element={<Salts darkMode={darkMode} />} />
-              <Route path="/symptom-predictor" element={<SymptomPredictor darkMode={darkMode} />} />
-              <Route path="/appointments" element={<Appointments darkMode={darkMode} />} />
-              <Route path="/report-analysis" element={<ReportAnalysis darkMode={darkMode} />} />
-              <Route path="/test-reports" element={<Navigate to="/report-analysis" replace />} />
-              <Route path="/test-results" element={<Navigate to="/report-analysis" replace />} />
-              <Route path="/profile" element={<PatientProfile darkMode={darkMode} />} />
-              <Route path="/visualizer" element={<Visualizer darkMode={darkMode} />} />
+              <Route
+                path="/symptom-predictor"
+                element={<SymptomPredictor darkMode={darkMode} />}
+              />
+              <Route
+                path="/appointments"
+                element={<Appointments darkMode={darkMode} />}
+              />
+              <Route
+                path="/report-analysis"
+                element={<ReportAnalysis darkMode={darkMode} />}
+              />
+              <Route
+                path="/test-reports"
+                element={<Navigate to="/report-analysis" replace />}
+              />
+              <Route
+                path="/test-results"
+                element={<Navigate to="/report-analysis" replace />}
+              />
+              <Route
+                path="/profile"
+                element={<PatientProfile darkMode={darkMode} />}
+              />
+              <Route
+                path="/visualizer"
+                element={<Visualizer darkMode={darkMode} />}
+              />
             </Route>
-            <Route path="/help-and-guidance" element={<Visualizer darkMode={darkMode} />} />
+            <Route
+              path="/help-and-guidance"
+              element={<Visualizer darkMode={darkMode} />}
+            />
             <Route path="/how-it-works" element={<HowitWorks />} />
-            <Route path="/medibot" element={<Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}><Medibot /></Suspense>} />
-            <Route path="/contact" element={<Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}><Medibot /></Suspense>} />
+            <Route
+              path="/medibot"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="min-h-screen flex items-center justify-center">
+                      Loading...
+                    </div>
+                  }
+                >
+                  <Medibot />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="min-h-screen flex items-center justify-center">
+                      Loading...
+                    </div>
+                  }
+                >
+                  <Medibot />
+                </Suspense>
+              }
+            />
             <Route path="/login" element={<Login darkMode={darkMode} />} />
-            <Route path="/register" element={<Register darkMode={darkMode} />} />
+            <Route
+              path="/register"
+              element={<Register darkMode={darkMode} />}
+            />
             <Route path="/faqs" element={<FAQs />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsConditions />} />

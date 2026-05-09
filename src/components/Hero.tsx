@@ -13,8 +13,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
-
-
 const Hero = () => {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
@@ -23,19 +21,39 @@ const Hero = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
   const allServices = [
-    { name: t("navbar", "familyHistory", "Family History"), route: "/family-history", image: historyImg },
+    {
+      name: t("navbar", "familyHistory", "Family History"),
+      route: "/family-history",
+      image: historyImg,
+    },
     { name: t("navbar", "salts", "Salts"), route: "/salts", image: saltsImg },
-    { name: t("navbar", "symptomPredictor", "Symptom Predictor"), route: "/symptom-predictor", image: predictorImg },
-    { name: t("navbar", "appointments", "Appointments"), route: "/appointments", image: appointmentsImg },
-    { name: t("navbar", "reportAnalysis", "Report Analysis"), route: "/report-analysis", image: testresultsImg },
-    { name: t("navbar", "visualizer", "Visualizer"), route: "/visualizer", image: visualizerImg },
+    {
+      name: t("navbar", "symptomPredictor", "Symptom Predictor"),
+      route: "/symptom-predictor",
+      image: predictorImg,
+    },
+    {
+      name: t("navbar", "appointments", "Appointments"),
+      route: "/appointments",
+      image: appointmentsImg,
+    },
+    {
+      name: t("navbar", "reportAnalysis", "Report Analysis"),
+      route: "/report-analysis",
+      image: testresultsImg,
+    },
+    {
+      name: t("navbar", "visualizer", "Visualizer"),
+      route: "/visualizer",
+      image: visualizerImg,
+    },
   ];
 
   const filteredServices =
     search.trim() === ""
       ? []
       : allServices.filter((service) =>
-          service.name.toLowerCase().includes(search.toLowerCase())
+          service.name.toLowerCase().includes(search.toLowerCase()),
         );
 
   // Hero section images carousel
@@ -56,8 +74,16 @@ const Hero = () => {
   };
 
   // Function to render your editable box
-  const renderEditableBox = (id: string, text: string, setText: (val: string) => void) => {
-    const placeholder = t("hero", "searchPlaceholder", "Search for services...");
+  const renderEditableBox = (
+    id: string,
+    text: string,
+    setText: (val: string) => void,
+  ) => {
+    const placeholder = t(
+      "hero",
+      "searchPlaceholder",
+      "Search for services...",
+    );
 
     return (
       <div className="relative w-full">
@@ -99,7 +125,9 @@ const Hero = () => {
                   className="w-6 h-6 object-cover rounded"
                   loading="lazy"
                 />
-                <div className="font-ibm-plex-mono text-sm truncate">{service.name}</div>
+                <div className="font-ibm-plex-mono text-sm truncate">
+                  {service.name}
+                </div>
               </button>
             ))}
           </div>
@@ -111,7 +139,7 @@ const Hero = () => {
   const handleSend = () => {
     if (search.trim() !== "") {
       const selectedService = allServices.find(
-        (service) => service.name.toLowerCase() === search.toLowerCase()
+        (service) => service.name.toLowerCase() === search.toLowerCase(),
       );
 
       if (selectedService) {
@@ -131,12 +159,19 @@ const Hero = () => {
         <div className="flex flex-col p-4 md:p-10 flex-1 justify-center md:justify-center">
           {/* Hero Heading */}
           <div className="font-ibm-plex-mono text-black  dark:text-white font-bold text-3xl md:text-5xl py-2 md:py-4">
-            {t("hero", "headingLine1", "Our doctors")}<br/>
-             {t("hero", "headingLine2", "will take")}<br/>
-              {t("hero", "headingLine3", "it from here")}<br/>
+            {t("hero", "headingLine1", "Our doctors")}
+            <br />
+            {t("hero", "headingLine2", "will take")}
+            <br />
+            {t("hero", "headingLine3", "it from here")}
+            <br />
           </div>
           <div className="font-ibm-plex-mono text-black dark:text-white text-base md:text-xl py-2 md:py-4">
-            {t("hero", "subtitle", "Compassionate care meets clinical excellence.")}
+            {t(
+              "hero",
+              "subtitle",
+              "Compassionate care meets clinical excellence.",
+            )}
           </div>
           {/* Editable Box + Button */}
           <div className="bg-[#0B3C5D] border-4 border-[#0B3C5D] dark:bg-black rounded-full py-3 px-4 md:px-6 flex items-center w-fit">

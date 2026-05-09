@@ -27,15 +27,21 @@ const RolePageTemplate = ({
             className="h-24 w-24 md:h-32 md:w-32 object-contain mb-3 md:mb-4"
             loading="lazy"
           />
-          <div className="text-xl text-[#0B3C5D] dark:text-white md:text-2xl font-bold">{title}</div>
-          <div className="p-2 m-2 text-sm text-[#8e8e93] md:text-base">{subtitle}</div>
+          <div className="text-xl text-[#0B3C5D] dark:text-white md:text-2xl font-bold">
+            {title}
+          </div>
+          <div className="p-2 m-2 text-sm text-[#8e8e93] md:text-base">
+            {subtitle}
+          </div>
         </div>
 
         <div className="w-full max-w-4xl m-2 md:m-4 px-3 md:px-4 md:px-8 py-6 md:py-8 relative z-10">
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <section>
-                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Workflow Checklist</h2>
+                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                  Workflow Checklist
+                </h2>
                 <ul className="mt-3 space-y-2">
                   {checklist.map((item) => (
                     <li
@@ -49,7 +55,9 @@ const RolePageTemplate = ({
               </section>
 
               <section>
-                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">AI + Insights</h2>
+                <h2 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                  AI + Insights
+                </h2>
                 <ul className="mt-3 space-y-2">
                   {highlights.map((item) => (
                     <li

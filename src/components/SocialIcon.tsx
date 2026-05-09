@@ -21,7 +21,13 @@ const SocialIcon: React.FC<SocialIconProps> = ({
 }) => {
   const [hovered, setHovered] = useState(false);
 
-  const src = darkMode ? (hovered ? darkHover : darkImg) : hovered ? lightHover : lightImg;
+  const src = darkMode
+    ? hovered
+      ? darkHover
+      : darkImg
+    : hovered
+      ? lightHover
+      : lightImg;
 
   return (
     <div
@@ -30,7 +36,12 @@ const SocialIcon: React.FC<SocialIconProps> = ({
       onMouseLeave={() => setHovered(false)}
       onClick={onClick}
     >
-      <img src={src} alt={alt} className="w-5 h-5 pointer-events-none" loading="lazy" />
+      <img
+        src={src}
+        alt={alt}
+        className="w-5 h-5 pointer-events-none"
+        loading="lazy"
+      />
     </div>
   );
 };

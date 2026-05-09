@@ -1,5 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
-import { diseasePredictionApi, type DiseasePredictionResponse } from "../../api/diseasePredictionApi";
+import {
+  diseasePredictionApi,
+  type DiseasePredictionResponse,
+} from "../../api/diseasePredictionApi";
 import { useLanguage } from "../../context/LanguageContext";
 import diseasePredictionImg from "/medirator_images/predictive.png";
 interface DiseasePredictionProps {
@@ -9,12 +12,15 @@ interface DiseasePredictionProps {
 const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
   const { t } = useLanguage();
   const [symptoms, setSymptoms] = useState<string[]>([]);
-  const [selectedSymptoms, setSelectedSymptoms] = useState<Set<string>>(new Set());
+  const [selectedSymptoms, setSelectedSymptoms] = useState<Set<string>>(
+    new Set(),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isPrediciting, setIsPredicting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [prediction, setPrediction] = useState<DiseasePredictionResponse | null>(null);
+  const [prediction, setPrediction] =
+    useState<DiseasePredictionResponse | null>(null);
 
   // Load symptoms on mount
   useEffect(() => {
@@ -26,7 +32,13 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
         setSymptoms(response.symptoms || []);
       } catch (error) {
         console.error("Failed to load symptoms:", error);
-        setApiError(t("services", "failedToLoadSymptoms", "Failed to load symptoms. Please try again."));
+        setApiError(
+          t(
+            "services",
+            "failedToLoadSymptoms",
+            "Failed to load symptoms. Please try again.",
+          ),
+        );
       } finally {
         setIsLoading(false);
       }
@@ -63,7 +75,9 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
 
   const handlePredictDisease = async () => {
     if (selectedSymptoms.size === 0) {
-      setApiError(t("services", "selectSymptoms", "Please select at least one symptom."));
+      setApiError(
+        t("services", "selectSymptoms", "Please select at least one symptom."),
+      );
       return;
     }
 
@@ -81,7 +95,11 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
       setApiError(
         error instanceof Error
           ? error.message
-          : t("services", "predictionFailed", "Disease prediction failed. Please try again.")
+          : t(
+              "services",
+              "predictionFailed",
+              "Disease prediction failed. Please try again.",
+            ),
       );
     } finally {
       setIsPredicting(false);
@@ -97,13 +115,14 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
 
   return (
     <div className={darkMode ? "dark" : ""}>
-       <div className="flex flex-col md:flex-row justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-4 shadow-md gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-center bg-[#0B3C5D] dark:bg-black text-white p-4 shadow-md gap-4">
         <div>
           <h2 className="text-3xl md:text-5xl font-bold ml-0 md:ml-5 md:pl-5 text-center md:text-left">
             Symptom Predictor
           </h2>
           <p className="text-sm md:text-base text-center md:text-left ml-0 md:ml-5 md:pl-5 mt-2 text-gray-200">
-            Select your symptoms and let our AI help identify potential diseases.
+            Select your symptoms and let our AI help identify potential
+            diseases.
           </p>
         </div>
         <img
@@ -150,7 +169,11 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
                     <div className="mb-4">
                       <input
                         type="text"
-                        placeholder={t("services", "searchSymptoms", "Search symptoms...")}
+                        placeholder={t(
+                          "services",
+                          "searchSymptoms",
+                          "Search symptoms...",
+                        )}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full px-4 py-2 border border-[#E6E9EE] rounded-lg bg-white dark:bg-black/20 dark:border-white/10 dark:text-white text-[#0B3C5D] placeholder-gray-400"
@@ -180,13 +203,19 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
                         </div>
                       ) : (
                         <div className="text-center py-8 text-[#6B7280] dark:text-gray-400">
-                          {t("services", "noSymptomsFound", "No symptoms found matching your search.")}
+                          {t(
+                            "services",
+                            "noSymptomsFound",
+                            "No symptoms found matching your search.",
+                          )}
                         </div>
                       )}
                     </div>
 
                     <div className="text-sm text-[#6B7280] dark:text-gray-400">
-                      {t("services", "symptomsSelected", "Selected")} {selectedSymptoms.size} {t("services", "symptoms", "symptoms")}
+                      {t("services", "symptomsSelected", "Selected")}{" "}
+                      {selectedSymptoms.size}{" "}
+                      {t("services", "symptoms", "symptoms")}
                     </div>
                   </div>
                 </div>
@@ -218,7 +247,11 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
                       </div>
                     ) : (
                       <p className="text-sm text-[#6B7280] dark:text-gray-400 italic">
-                        {t("services", "noSymptomSelected", "No symptoms selected")}
+                        {t(
+                          "services",
+                          "noSymptomSelected",
+                          "No symptoms selected",
+                        )}
                       </p>
                     )}
                   </div>
@@ -236,9 +269,11 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
                         className="inline-block w-5 h-5 mr-2"
                         loading="lazy"
                       />
-                      {isPrediciting ? t("auth", "loading", "Predicting...") : t("services", "predictDisease", "Predict Disease")}
+                      {isPrediciting
+                        ? t("auth", "loading", "Predicting...")
+                        : t("services", "predictDisease", "Predict Disease")}
                     </button>
- 
+
                     {selectedSymptoms.size > 0 && (
                       <button
                         onClick={handleClearAll}
@@ -260,7 +295,11 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
                       <div className="space-y-3">
                         <div>
                           <div className="text-sm font-medium text-green-600 dark:text-green-400">
-                            {t("services", "predictedDisease", "Predicted Disease")}
+                            {t(
+                              "services",
+                              "predictedDisease",
+                              "Predicted Disease",
+                            )}
                           </div>
                           <div className="text-2xl font-bold text-green-700 dark:text-green-300">
                             {prediction.predicted_disease}
@@ -285,7 +324,8 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
                         </div>
 
                         <div className="text-xs text-green-600 dark:text-green-400">
-                          Matched: {prediction.valid_count}/{prediction.input_count} symptoms
+                          Matched: {prediction.valid_count}/
+                          {prediction.input_count} symptoms
                         </div>
                       </div>
                     </div>
@@ -298,7 +338,11 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
           {!isLoading && symptoms.length === 0 && (
             <div className="rounded-2xl border-2 border-amber-500 bg-amber-50 dark:bg-amber-950/20 p-6 text-center">
               <p className="text-amber-700 dark:text-amber-300">
-                {t("services", "noSymptomsAvailable", "Disease prediction models are not available at the moment.")}
+                {t(
+                  "services",
+                  "noSymptomsAvailable",
+                  "Disease prediction models are not available at the moment.",
+                )}
               </p>
             </div>
           )}

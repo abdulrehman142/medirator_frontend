@@ -12,7 +12,7 @@ export default function Home({ darkMode }: HomeProps) {
   return (
     <>
       <Hero />
-      <Services darkMode={darkMode}/>
+      <Services darkMode={darkMode} />
       <Whychooseus darkMode={darkMode} />
       <Rating />
       <Complaints darkMode={darkMode} />

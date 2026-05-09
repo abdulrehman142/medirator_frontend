@@ -9,10 +9,13 @@ const DEFAULT_LANGUAGE: SupportedLanguageCode = "en";
 const localeLoaders = import.meta.glob("./locales/*/common.json");
 const loadedLanguages = new Set<SupportedLanguageCode>();
 
-const isSupportedLanguage = (language: string | null | undefined): language is SupportedLanguageCode =>
-  language === "en" || language === "ur";
+const isSupportedLanguage = (
+  language: string | null | undefined,
+): language is SupportedLanguageCode => language === "en" || language === "ur";
 
-export const normalizeLanguage = (language: string | null | undefined): SupportedLanguageCode =>
+export const normalizeLanguage = (
+  language: string | null | undefined,
+): SupportedLanguageCode =>
   isSupportedLanguage(language) ? language : DEFAULT_LANGUAGE;
 
 export const getStoredLanguage = (): SupportedLanguageCode => {
@@ -38,7 +41,9 @@ const loadLanguageResources = async (language: SupportedLanguageCode) => {
   loadedLanguages.add(language);
 };
 
-export const ensureLanguageResources = async (language: SupportedLanguageCode) => {
+export const ensureLanguageResources = async (
+  language: SupportedLanguageCode,
+) => {
   await loadLanguageResources(language);
 };
 

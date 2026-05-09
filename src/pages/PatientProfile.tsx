@@ -101,11 +101,16 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
       const storedProfile = readStoredProfile();
 
       try {
-        const [me, patientProfile] = await Promise.all([usersApi.me(), usersApi.getMyPatientProfile()]);
+        const [me, patientProfile] = await Promise.all([
+          usersApi.me(),
+          usersApi.getMyPatientProfile(),
+        ]);
 
         const nextFullName = me.full_name || storedProfile?.fullName || "";
         const nextEmail = me.email || storedProfile?.email || "";
-        const nextPatientId = formatPatientId(me.id || storedProfile?.patientId || "");
+        const nextPatientId = formatPatientId(
+          me.id || storedProfile?.patientId || "",
+        );
 
         setFullName(nextFullName);
         setEmail(nextEmail);
@@ -113,10 +118,24 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
         setAge(patientProfile?.age?.toString() ?? storedProfile?.age ?? "");
         setGender(patientProfile?.gender ?? storedProfile?.gender ?? "");
         setPhone(patientProfile?.phone ?? storedProfile?.phone ?? "");
-        setBloodGroup(patientProfile?.blood_group ?? storedProfile?.bloodGroup ?? "");
-        setAllergies(patientProfile?.allergies?.join(", ") ?? storedProfile?.allergies ?? "");
-        setChronicDiseases(patientProfile?.chronic_diseases?.join(", ") ?? storedProfile?.chronicDiseases ?? "");
-        setEmergencyContact(patientProfile?.emergency_contact ?? storedProfile?.emergencyContact ?? "");
+        setBloodGroup(
+          patientProfile?.blood_group ?? storedProfile?.bloodGroup ?? "",
+        );
+        setAllergies(
+          patientProfile?.allergies?.join(", ") ??
+            storedProfile?.allergies ??
+            "",
+        );
+        setChronicDiseases(
+          patientProfile?.chronic_diseases?.join(", ") ??
+            storedProfile?.chronicDiseases ??
+            "",
+        );
+        setEmergencyContact(
+          patientProfile?.emergency_contact ??
+            storedProfile?.emergencyContact ??
+            "",
+        );
 
         writeStoredProfile({
           fullName: nextFullName,
@@ -125,11 +144,20 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
           age: patientProfile?.age?.toString() ?? storedProfile?.age ?? "",
           gender: patientProfile?.gender ?? storedProfile?.gender ?? "",
           phone: patientProfile?.phone ?? storedProfile?.phone ?? "",
-          bloodGroup: patientProfile?.blood_group ?? storedProfile?.bloodGroup ?? "",
-          allergies: patientProfile?.allergies?.join(", ") ?? storedProfile?.allergies ?? "",
+          bloodGroup:
+            patientProfile?.blood_group ?? storedProfile?.bloodGroup ?? "",
+          allergies:
+            patientProfile?.allergies?.join(", ") ??
+            storedProfile?.allergies ??
+            "",
           chronicDiseases:
-            patientProfile?.chronic_diseases?.join(", ") ?? storedProfile?.chronicDiseases ?? "",
-          emergencyContact: patientProfile?.emergency_contact ?? storedProfile?.emergencyContact ?? "",
+            patientProfile?.chronic_diseases?.join(", ") ??
+            storedProfile?.chronicDiseases ??
+            "",
+          emergencyContact:
+            patientProfile?.emergency_contact ??
+            storedProfile?.emergencyContact ??
+            "",
         });
       } catch {
         if (storedProfile) {
@@ -188,8 +216,11 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
         phone: updatedPatientProfile?.phone || phone,
         bloodGroup: updatedPatientProfile?.blood_group || bloodGroup,
         allergies: updatedPatientProfile?.allergies?.join(", ") || allergies,
-        chronicDiseases: updatedPatientProfile?.chronic_diseases?.join(", ") || chronicDiseases,
-        emergencyContact: updatedPatientProfile?.emergency_contact || emergencyContact,
+        chronicDiseases:
+          updatedPatientProfile?.chronic_diseases?.join(", ") ||
+          chronicDiseases,
+        emergencyContact:
+          updatedPatientProfile?.emergency_contact || emergencyContact,
       };
 
       setFullName(nextProfile.fullName);
@@ -225,7 +256,12 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
             Update the details the doctor sees for this patient account.
           </p>
         </div>
-        <img src={patientImg} alt="Patient Profile" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
+        <img
+          src={patientImg}
+          alt="Patient Profile"
+          className="h-40 md:h-70 w-40 md:w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="bg-white dark:bg-black min-h-screen px-3 md:px-6 py-6 text-black dark:text-white">
@@ -247,16 +283,28 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
               <div className="rounded-2xl border border-[#0B3C5D]/70 bg-[#F7FAFC] dark:bg-[#0B3C5D]/20 p-5">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="rounded-xl border border-[#0B3C5D]/40 bg-white dark:bg-black p-4 min-h-28 flex flex-col justify-center">
-                    <div className="text-xs text-[#6B7280] dark:text-gray-400 uppercase tracking-wide">Full Name</div>
-                    <div className="mt-1 text-base md:text-lg font-semibold break-words text-[#0B3C5D] dark:text-white">{displayValue(fullName)}</div>
+                    <div className="text-xs text-[#6B7280] dark:text-gray-400 uppercase tracking-wide">
+                      Full Name
+                    </div>
+                    <div className="mt-1 text-base md:text-lg font-semibold break-words text-[#0B3C5D] dark:text-white">
+                      {displayValue(fullName)}
+                    </div>
                   </div>
                   <div className="rounded-xl border border-[#0B3C5D]/40 bg-white dark:bg-black p-4 min-h-28 flex flex-col justify-center">
-                    <div className="text-xs text-[#6B7280] dark:text-gray-400 uppercase tracking-wide">Email</div>
-                    <div className="mt-1 text-base md:text-lg font-semibold break-words text-[#0B3C5D] dark:text-white">{displayValue(email)}</div>
+                    <div className="text-xs text-[#6B7280] dark:text-gray-400 uppercase tracking-wide">
+                      Email
+                    </div>
+                    <div className="mt-1 text-base md:text-lg font-semibold break-words text-[#0B3C5D] dark:text-white">
+                      {displayValue(email)}
+                    </div>
                   </div>
                   <div className="rounded-xl border border-[#0B3C5D]/40 bg-white dark:bg-black p-4 min-h-28 flex flex-col justify-center">
-                    <div className="text-xs text-[#6B7280] dark:text-gray-400 uppercase tracking-wide">Patient ID</div>
-                    <div className="mt-1 text-base md:text-lg font-semibold break-words text-[#0B3C5D] dark:text-white">{displayValue(patientId)}</div>
+                    <div className="text-xs text-[#6B7280] dark:text-gray-400 uppercase tracking-wide">
+                      Patient ID
+                    </div>
+                    <div className="mt-1 text-base md:text-lg font-semibold break-words text-[#0B3C5D] dark:text-white">
+                      {displayValue(patientId)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -269,7 +317,12 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
                   className="inline-flex w-fit rounded-2xl border border-[#0B3C5D] bg-[#0B3C5D] px-5 py-2 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90 disabled:opacity-50 items-center justify-center gap-2 whitespace-nowrap"
                 >
                   {!editMode && (
-                    <img src={editIcon} alt="Edit" className="w-4 h-4 object-cover rounded" loading="lazy" />
+                    <img
+                      src={editIcon}
+                      alt="Edit"
+                      className="w-4 h-4 object-cover rounded"
+                      loading="lazy"
+                    />
                   )}
                   {editMode ? "Save Changes" : "Edit"}
                 </button>
@@ -379,7 +432,6 @@ const PatientProfile = ({ darkMode = false }: PatientProfilePageProps) => {
               </label>
             </div>
           </section>
-
         </div>
       </div>
     </div>

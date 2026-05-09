@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useLayoutEffect, useMemo, useSyncExternalStore } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 
 import i18n, {
   ensureLanguageResources,
@@ -42,7 +49,8 @@ const applyDocumentLanguage = (language: SupportedLanguageCode) => {
   document.body.dir = direction;
 };
 
-const getCurrentLanguage = () => normalizeLanguage(i18n.language ?? getStoredLanguage());
+const getCurrentLanguage = () =>
+  normalizeLanguage(i18n.language ?? getStoredLanguage());
 
 const subscribeToLanguage = (onStoreChange: () => void) => {
   const handleLanguageChange = () => onStoreChange();
@@ -56,10 +64,18 @@ const subscribeToLanguage = (onStoreChange: () => void) => {
   };
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined,
+);
 
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const language = useSyncExternalStore(subscribeToLanguage, getCurrentLanguage, getCurrentLanguage);
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const language = useSyncExternalStore(
+    subscribeToLanguage,
+    getCurrentLanguage,
+    getCurrentLanguage,
+  );
 
   useLayoutEffect(() => {
     applyDocumentLanguage(language);
@@ -67,12 +83,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   console.log("Active language:", language);
 
-  const t = useCallback((namespace: TranslationNamespace, key: string, fallback: string) => {
-    return i18n.t(`${namespace}.${key}`, {
-      defaultValue: fallback,
-      ns: "common",
-    }) as string;
-  }, []);
+  const t = useCallback(
+    (namespace: TranslationNamespace, key: string, fallback: string) => {
+      return i18n.t(`${namespace}.${key}`, {
+        defaultValue: fallback,
+        ns: "common",
+      }) as string;
+    },
+    [],
+  );
 
   const setLanguage = useCallback((nextLanguage: SupportedLanguageCode) => {
     const normalizedLanguage = normalizeLanguage(nextLanguage);
@@ -90,10 +109,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setLanguage,
       t,
     }),
-    [language, setLanguage, t]
+    [language, setLanguage, t],
   );
 
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  );
 };
 
 export const useLanguage = () => {

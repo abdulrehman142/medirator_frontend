@@ -9,12 +9,6 @@ import sunIcon from "/medirator_images/sun.png";
 import moonIcon from "/medirator_images/moon.jpg";
 import { useLanguage } from "../context/LanguageContext";
 
-
-
-
-
-
-
 interface FooterProps {
   darkMode: boolean;
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
@@ -45,7 +39,13 @@ const SocialIcon: React.FC<SocialIconProps> = ({
 }) => {
   const [hovered, setHovered] = useState(false);
 
-  const src = darkMode ? (hovered ? darkHover : darkImg) : hovered ? lightHover : lightImg;
+  const src = darkMode
+    ? hovered
+      ? darkHover
+      : darkImg
+    : hovered
+      ? lightHover
+      : lightImg;
 
   return (
     <div
@@ -79,7 +79,8 @@ const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
     { label: t("navbar", "login", "Login"), path: "/login" },
     { label: t("navbar", "aboutUs", "About Us"), path: "/about" },
   ];
-  const footerLinks = customLinks && customLinks.length > 0 ? customLinks : defaultFooterLinks;
+  const footerLinks =
+    customLinks && customLinks.length > 0 ? customLinks : defaultFooterLinks;
 
   const firstColumn = footerLinks.slice(0, 3);
   const secondColumn = footerLinks.slice(3, 6);
@@ -128,7 +129,9 @@ const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
             >
               <div
                 className={`absolute top-1 left-1 w-4 h-4 rounded-full transform transition-transform duration-300 ${
-                  darkMode ? "translate-x-[16px] bg-[#484C5B]" : "translate-x-0 bg-gray-200"
+                  darkMode
+                    ? "translate-x-[16px] bg-[#484C5B]"
+                    : "translate-x-0 bg-gray-200"
                 }`}
               ></div>
               <img
@@ -231,7 +234,11 @@ const Footer = ({ darkMode, setDarkMode, customLinks }: FooterProps) => {
       {/* Footer Hero / Logo Section */}
       <div className="overflow-hidden bg-[#FFFFFF] dark:bg-black">
         <h1 className="tracking-tight font-jersey text-[#0B3C5D] dark:text-white  xl:text-[90px] text-[91.03px] text-center xl:leading-[180.24px] leading-[56.9px]">
-         {t("footer", "heroLine", "Medirator-Your Custom Healthcare Assistant")}
+          {t(
+            "footer",
+            "heroLine",
+            "Medirator-Your Custom Healthcare Assistant",
+          )}
         </h1>
       </div>
     </div>

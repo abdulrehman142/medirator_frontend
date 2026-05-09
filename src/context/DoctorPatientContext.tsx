@@ -62,7 +62,11 @@ const toAgeString = (...values: unknown[]) => {
       return String(value);
     }
 
-    if (typeof value === "string" && value.trim().length > 0 && !Number.isNaN(Number(value))) {
+    if (
+      typeof value === "string" &&
+      value.trim().length > 0 &&
+      !Number.isNaN(Number(value))
+    ) {
       return String(Number(value));
     }
   }
@@ -84,7 +88,10 @@ const calculateAgeFromDateOfBirth = (value: unknown) => {
   let age = today.getFullYear() - dateOfBirth.getFullYear();
   const monthDifference = today.getMonth() - dateOfBirth.getMonth();
 
-  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dateOfBirth.getDate())) {
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < dateOfBirth.getDate())
+  ) {
     age -= 1;
   }
 
@@ -115,7 +122,8 @@ const buildPatientRecord = (
     contact: details?.phone ?? "Not specified",
     bloodGroup: details?.bloodGroup ?? "Not specified",
     allergies: details?.allergies ?? "Not recorded",
-    chronicDiseases: details?.chronicDiseases ?? (medicalHistory || "Not recorded"),
+    chronicDiseases:
+      details?.chronicDiseases ?? (medicalHistory || "Not recorded"),
     emergencyContact: details?.emergencyContact ?? "Not recorded",
     medicalHistory: medicalHistory || "Not recorded",
     // PATIENT SCOPE: These arrays are initially empty for each patient
@@ -156,16 +164,36 @@ const normalizeRegisteredPatient = (patient: {
   medicalHistory?: string;
 }) =>
   buildPatientRecord(
-    toStringValue(patient.id, patient.user_id, patient.patient_id, patient.patientId, patient.patientID),
-    toStringValue(patient.display_id, patient.patient_id, patient.patientId, patient.patientID, patient.id),
-    toStringValue(patient.name, patient.full_name, patient.patient_name, patient.fullName) || "Unnamed patient",
+    toStringValue(
+      patient.id,
+      patient.user_id,
+      patient.patient_id,
+      patient.patientId,
+      patient.patientID,
+    ),
+    toStringValue(
+      patient.display_id,
+      patient.patient_id,
+      patient.patientId,
+      patient.patientID,
+      patient.id,
+    ),
+    toStringValue(
+      patient.name,
+      patient.full_name,
+      patient.patient_name,
+      patient.fullName,
+    ) || "Unnamed patient",
     Number(
       toAgeString(
         patient.age,
         patient.patient_age,
         patient.years_of_age,
         calculateAgeFromDateOfBirth(
-          patient.date_of_birth ?? patient.dateOfBirth ?? patient.dob ?? patient.birth_date,
+          patient.date_of_birth ??
+            patient.dateOfBirth ??
+            patient.dob ??
+            patient.birth_date,
         ),
       ),
     ) || 0,
@@ -175,8 +203,15 @@ const normalizeRegisteredPatient = (patient: {
       phone: patient.phone,
       bloodGroup: toStringValue(patient.blood_group, patient.bloodGroup),
       allergies: (patient.allergies ?? []).join(", "),
-      chronicDiseases: (patient.chronic_diseases ?? patient.chronicDiseases ?? []).join(", "),
-      emergencyContact: toStringValue(patient.emergency_contact, patient.emergencyContact),
+      chronicDiseases: (
+        patient.chronic_diseases ??
+        patient.chronicDiseases ??
+        []
+      ).join(", "),
+      emergencyContact: toStringValue(
+        patient.emergency_contact,
+        patient.emergencyContact,
+      ),
     },
   );
 
@@ -189,9 +224,15 @@ interface DoctorPatientContextValue {
   selectPatientById: (patientId: string) => void;
 }
 
-const DoctorPatientContext = createContext<DoctorPatientContextValue | null>(null);
+const DoctorPatientContext = createContext<DoctorPatientContextValue | null>(
+  null,
+);
 
-export const DoctorPatientProvider = ({ children }: { children: ReactNode }) => {
+export const DoctorPatientProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [patients, setPatients] = useState<DoctorPatientRecord[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState("");
 
@@ -205,7 +246,11 @@ export const DoctorPatientProvider = ({ children }: { children: ReactNode }) => 
               .filter((patient) => patient.id.trim().length > 0)
           : [];
         setPatients(nextPatients);
-        setSelectedPatientId((current) => (nextPatients.some((patient) => patient.id === current) ? current : nextPatients[0]?.id ?? ""));
+        setSelectedPatientId((current) =>
+          nextPatients.some((patient) => patient.id === current)
+            ? current
+            : (nextPatients[0]?.id ?? ""),
+        );
       } catch {
         setPatients([]);
         setSelectedPatientId("");
@@ -216,7 +261,10 @@ export const DoctorPatientProvider = ({ children }: { children: ReactNode }) => 
   }, []);
 
   const selectedPatient = useMemo(
-    () => patients.find((patient) => patient.id === selectedPatientId) ?? patients[0] ?? emptyPatient,
+    () =>
+      patients.find((patient) => patient.id === selectedPatientId) ??
+      patients[0] ??
+      emptyPatient,
     [patients, selectedPatientId],
   );
 
@@ -244,7 +292,9 @@ export const useDoctorPatient = () => {
   const context = useContext(DoctorPatientContext);
 
   if (!context) {
-    throw new Error("useDoctorPatient must be used within a DoctorPatientProvider");
+    throw new Error(
+      "useDoctorPatient must be used within a DoctorPatientProvider",
+    );
   }
 
   return context;

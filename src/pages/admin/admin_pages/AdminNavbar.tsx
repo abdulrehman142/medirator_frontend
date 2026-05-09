@@ -46,7 +46,12 @@ const ToggleIcon = ({ darkMode, onClick }: ToggleIconProps) => {
       onMouseLeave={() => setHovered(false)}
       onClick={onClick}
     >
-      <img src={icon} alt="Toggle Dark Mode" className="w-6 h-6 pointer-events-none" loading="lazy" />
+      <img
+        src={icon}
+        alt="Toggle Dark Mode"
+        className="w-6 h-6 pointer-events-none"
+        loading="lazy"
+      />
     </div>
   );
 };
@@ -61,11 +66,16 @@ const AdminNavbar = ({ darkMode, setDarkMode, links }: AdminNavbarProps) => {
     { code: "en", label: t("navbar", "english", "English") },
     { code: "ur", label: t("navbar", "urdu", "Urdu") },
   ] as const;
-  const activeLanguage = languageOptions.find((option) => option.code === language);
+  const activeLanguage = languageOptions.find(
+    (option) => option.code === language,
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (languageDropdownRef.current && !languageDropdownRef.current.contains(event.target as Node)) {
+      if (
+        languageDropdownRef.current &&
+        !languageDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsLanguageDropdownOpen(false);
       }
     };
@@ -80,7 +90,12 @@ const AdminNavbar = ({ darkMode, setDarkMode, links }: AdminNavbarProps) => {
         <div className="flex items-center">
           <div className="flex">
             <div className="flex items-center p-2">
-              <img src={mediratorLogo} alt="Medirator Logo" className="h-8 w-8" loading="lazy" />
+              <img
+                src={mediratorLogo}
+                alt="Medirator Logo"
+                className="h-8 w-8"
+                loading="lazy"
+              />
               <div className="font-eczar font-bold dark:text-white text-[#0B3C5D] text-xl md:text-2xl ml-1">
                 Medirator
               </div>
@@ -95,7 +110,9 @@ const AdminNavbar = ({ darkMode, setDarkMode, links }: AdminNavbarProps) => {
                         to={child.path}
                         className="group flex items-center justify-center rounded p-2 m-2 font-ibm-plex-mono font-medium text-sm transition-all duration-200 whitespace-nowrap hover:bg-[#0B3C5D] dark:hover:bg-[#0B3C5D] dark:text-white text-black"
                       >
-                        <span className="flex items-center group-hover:text-white">{child.label}</span>
+                        <span className="flex items-center group-hover:text-white">
+                          {child.label}
+                        </span>
                       </NavLink>
                     ))
                   : [
@@ -104,16 +121,21 @@ const AdminNavbar = ({ darkMode, setDarkMode, links }: AdminNavbarProps) => {
                         to={item.path}
                         className="group flex items-center justify-center rounded p-2 m-2 font-ibm-plex-mono font-medium text-sm transition-all duration-200 whitespace-nowrap hover:bg-[#0B3C5D] dark:hover:bg-[#0B3C5D] dark:text-white text-black"
                       >
-                        <span className="flex items-center group-hover:text-white">{item.label}</span>
+                        <span className="flex items-center group-hover:text-white">
+                          {item.label}
+                        </span>
                       </NavLink>,
-                    ]
+                    ],
               )}
             </div>
           </div>
         </div>
 
         <div className="hidden md:flex gap-2 relative ml-auto mr-4 items-center">
-          <ToggleIcon darkMode={darkMode} onClick={() => setDarkMode(!darkMode)} />
+          <ToggleIcon
+            darkMode={darkMode}
+            onClick={() => setDarkMode(!darkMode)}
+          />
           <div className="relative" ref={languageDropdownRef}>
             <button
               onClick={() => setIsLanguageDropdownOpen((prev) => !prev)}
@@ -121,13 +143,20 @@ const AdminNavbar = ({ darkMode, setDarkMode, links }: AdminNavbarProps) => {
             >
               <span className="flex items-center gap-2 min-w-0">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0B3C5D] dark:bg-white/10 shrink-0">
-                  <img src={languageIcon} alt="Language" className="h-4 w-4 object-contain" loading="lazy" />
+                  <img
+                    src={languageIcon}
+                    alt="Language"
+                    className="h-4 w-4 object-contain"
+                    loading="lazy"
+                  />
                 </span>
                 <span className="min-w-0 text-left leading-tight">
                   <span className="block text-[11px] uppercase tracking-[0.18em] opacity-70">
                     {t("navbar", "language", "Language")}
                   </span>
-                  <span className="block truncate font-medium">{activeLanguage?.label ?? "English"}</span>
+                  <span className="block truncate font-medium">
+                    {activeLanguage?.label ?? "English"}
+                  </span>
                 </span>
               </span>
               <img
@@ -143,7 +172,9 @@ const AdminNavbar = ({ darkMode, setDarkMode, links }: AdminNavbarProps) => {
             {isLanguageDropdownOpen && (
               <div
                 className={`absolute right-0 mt-2 z-50 flex flex-col shadow-lg rounded-2xl p-2 border-2 min-w-[180px] ${
-                  darkMode ? "bg-[#071621] border-white/10" : "bg-white border-[#0B3C5D]"
+                  darkMode
+                    ? "bg-[#071621] border-white/10"
+                    : "bg-white border-[#0B3C5D]"
                 }`}
               >
                 {languageOptions.map((option) => (
@@ -176,7 +207,12 @@ const AdminNavbar = ({ darkMode, setDarkMode, links }: AdminNavbarProps) => {
             }}
             className="bg-white border rounded-2xl border-[#0B3C5D] dark:bg-black hover:text-white dark:text-white hover:bg-[#0B3C5D] dark:hover:bg-gray-800 text-black p-2 px-4 text-sm transition-all duration-300 inline-flex items-center gap-2 whitespace-nowrap"
           >
-            <img src={logoutImg} alt="Logout" className="w-5 h-5 object-cover rounded" loading="lazy" />
+            <img
+              src={logoutImg}
+              alt="Logout"
+              className="w-5 h-5 object-cover rounded"
+              loading="lazy"
+            />
             {t("navbar", "logout", "Logout")}
           </button>
         </div>

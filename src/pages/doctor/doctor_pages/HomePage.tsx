@@ -78,7 +78,11 @@ const HomePage = ({ darkMode = false }: HomePageProps) => {
                         ? "bg-white w-6"
                         : "bg-white opacity-50"
                     }`}
-                    aria-label={t("doctor", "goToImageAria", `Go to image ${idx + 1}`)}
+                    aria-label={t(
+                      "doctor",
+                      "goToImageAria",
+                      `Go to image ${idx + 1}`,
+                    )}
                   />
                 ))}
               </div>
@@ -89,7 +93,11 @@ const HomePage = ({ darkMode = false }: HomePageProps) => {
 
       <Complaints darkMode={darkMode} />
 
-      <RoleReviews role="doctor" title={t("doctor", "reviewsTitle", "Doctors Speak for Us!")} seedReviews={doctorSeedReviews} />
+      <RoleReviews
+        role="doctor"
+        title={t("doctor", "reviewsTitle", "Doctors Speak for Us!")}
+        seedReviews={doctorSeedReviews}
+      />
     </div>
   );
 };

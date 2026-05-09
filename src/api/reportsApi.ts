@@ -43,25 +43,33 @@ export const reportsApi = {
   },
 
   // PATIENT SCOPE VALIDATION: Enforce patient_id filtering to ensure documents are scoped to patient
-  async list(params?: { patient_id?: string; report_type?: string }): Promise<TestReport[]> {
+  async list(params?: {
+    patient_id?: string;
+    report_type?: string;
+  }): Promise<TestReport[]> {
     const { data } = await http.get<TestReport[]>("/reports", { params });
-    
+
     // PATIENT SCOPE VALIDATION: Client-side validation - filter reports to match requested patient_id
     if (params?.patient_id && Array.isArray(data)) {
       return data.filter((report) => {
-        const reportPatientId = report.patient_id || report.metadata?.patient_id;
+        const reportPatientId =
+          report.patient_id || report.metadata?.patient_id;
         return reportPatientId === params.patient_id;
       });
     }
-    
+
     return data;
   },
 
-  async downloadFile(reportId: string): Promise<{ blob: Blob; fileName: string }> {
+  async downloadFile(
+    reportId: string,
+  ): Promise<{ blob: Blob; fileName: string }> {
     const response = await http.get<Blob>(`/reports/${reportId}/download`, {
       responseType: "blob",
     });
-    const dispositionHeader = response.headers["content-disposition"] as string | undefined;
+    const dispositionHeader = response.headers["content-disposition"] as
+      | string
+      | undefined;
     const match = dispositionHeader?.match(/filename="?([^"]+)"?/i);
     return {
       blob: response.data,
@@ -69,7 +77,10 @@ export const reportsApi = {
     };
   },
 
-  async updateStatus(reportId: string, status: "Pending" | "Approved" | "Rejected"): Promise<TestReport> {
+  async updateStatus(
+    reportId: string,
+    status: "Pending" | "Approved" | "Rejected",
+  ): Promise<TestReport> {
     const normalizedStatus = status.toLowerCase();
     const { data } = await http.patch<TestReport>(`/reports/${reportId}`, {
       status: normalizedStatus,
@@ -79,7 +90,10 @@ export const reportsApi = {
   },
 
   // PATIENT SCOPE VALIDATION: Update metadata with patient_id enforcement
-  async updateMetadata(reportId: string, metadata: Record<string, string>): Promise<TestReport> {
+  async updateMetadata(
+    reportId: string,
+    metadata: Record<string, string>,
+  ): Promise<TestReport> {
     const { data } = await http.patch<TestReport>(`/reports/${reportId}`, {
       metadata,
     });
@@ -87,7 +101,9 @@ export const reportsApi = {
   },
 
   async remove(reportId: string): Promise<{ message: string }> {
-    const { data } = await http.delete<{ message: string }>(`/reports/${reportId}`);
+    const { data } = await http.delete<{ message: string }>(
+      `/reports/${reportId}`,
+    );
     return data;
   },
 };

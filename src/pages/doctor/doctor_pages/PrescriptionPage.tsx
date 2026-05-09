@@ -29,15 +29,24 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
   const { user } = useAuth();
   const { selectedPatient } = useDoctorPatient();
   const [apiError, setApiError] = useState<string | null>(null);
-  const [currentPrescriptions, setCurrentPrescriptions] = useState<PrescriptionRecord[]>([]);
-  const [pastPrescriptions, setPastPrescriptions] = useState<PrescriptionRecord[]>([]);
-  const [formValues, setFormValues] = useState<Omit<PrescriptionRecord, "id" | "createdAt">>({
+  const [currentPrescriptions, setCurrentPrescriptions] = useState<
+    PrescriptionRecord[]
+  >([]);
+  const [pastPrescriptions, setPastPrescriptions] = useState<
+    PrescriptionRecord[]
+  >([]);
+  const [formValues, setFormValues] = useState<
+    Omit<PrescriptionRecord, "id" | "createdAt">
+  >({
     medicineName: "",
     dosage: "",
     frequency: "",
     duration: "",
   });
-  const [editTarget, setEditTarget] = useState<{ id: string; source: "current" | "past" } | null>(null);
+  const [editTarget, setEditTarget] = useState<{
+    id: string;
+    source: "current" | "past";
+  } | null>(null);
 
   const isFormComplete =
     formValues.medicineName.trim().length > 0 &&
@@ -66,15 +75,19 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
         clinicalApi.listCurrentMedications(selectedPatient.id),
         clinicalApi.listPastMedications(selectedPatient.id),
       ]);
-      const currentMeds = currentResult.status === "fulfilled" ? currentResult.value : [];
-      const pastMeds = pastResult.status === "fulfilled" ? pastResult.value : [];
+      const currentMeds =
+        currentResult.status === "fulfilled" ? currentResult.value : [];
+      const pastMeds =
+        pastResult.status === "fulfilled" ? pastResult.value : [];
       setCurrentPrescriptions(
         currentMeds.map((item) => ({
           id: item.id,
           medicineName: item.medication_name,
           dosage: item.dosage,
           frequency: item.instructions,
-          duration: item.end_date ? `${new Date(item.start_date ?? item.created_at).toLocaleDateString()} - ${new Date(item.end_date).toLocaleDateString()}` : "Ongoing",
+          duration: item.end_date
+            ? `${new Date(item.start_date ?? item.created_at).toLocaleDateString()} - ${new Date(item.end_date).toLocaleDateString()}`
+            : "Ongoing",
           createdAt: new Date(item.created_at).toLocaleDateString(),
         })),
       );
@@ -84,11 +97,16 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
           medicineName: item.medication_name,
           dosage: item.dosage,
           frequency: item.instructions,
-          duration: item.end_date ? `${new Date(item.start_date ?? item.created_at).toLocaleDateString()} - ${new Date(item.end_date).toLocaleDateString()}` : "Completed",
+          duration: item.end_date
+            ? `${new Date(item.start_date ?? item.created_at).toLocaleDateString()} - ${new Date(item.end_date).toLocaleDateString()}`
+            : "Completed",
           createdAt: new Date(item.created_at).toLocaleDateString(),
         })),
       );
-      if (currentResult.status === "rejected" && pastResult.status === "rejected") {
+      if (
+        currentResult.status === "rejected" &&
+        pastResult.status === "rejected"
+      ) {
         setApiError("No available data.");
       } else {
         setApiError(null);
@@ -128,7 +146,8 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     } catch (error) {
       const detail =
         error instanceof AxiosError
-          ? ((error.response?.data as { detail?: string } | undefined)?.detail ?? error.message)
+          ? ((error.response?.data as { detail?: string } | undefined)
+              ?.detail ?? error.message)
           : "Unable to save prescription.";
       setApiError(detail || "Unable to save prescription.");
     }
@@ -142,7 +161,10 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     });
   };
 
-  const loadForEdit = (prescription: PrescriptionRecord, source: "current" | "past") => {
+  const loadForEdit = (
+    prescription: PrescriptionRecord,
+    source: "current" | "past",
+  ) => {
     setFormValues({
       medicineName: prescription.medicineName,
       dosage: prescription.dosage,
@@ -152,9 +174,14 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     setEditTarget({ id: prescription.id, source });
   };
 
-  const movePrescription = async (source: "current" | "past", prescriptionId: string) => {
+  const movePrescription = async (
+    source: "current" | "past",
+    prescriptionId: string,
+  ) => {
     try {
-      await clinicalApi.updateMedication(prescriptionId, { status: source === "current" ? "past" : "current" });
+      await clinicalApi.updateMedication(prescriptionId, {
+        status: source === "current" ? "past" : "current",
+      });
       await loadPrescriptions();
       setApiError(null);
     } catch {
@@ -162,7 +189,8 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     }
   };
 
-  const latestPrescription = currentPrescriptions[currentPrescriptions.length - 1] ?? null;
+  const latestPrescription =
+    currentPrescriptions[currentPrescriptions.length - 1] ?? null;
 
   useEffect(() => {
     setFormValues({
@@ -182,7 +210,11 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
     doc.text("Prescription", 20, 20);
 
     doc.setFontSize(12);
-    doc.text(`Patient: ${selectedPatient.name} (${selectedPatient.id})`, 20, 32);
+    doc.text(
+      `Patient: ${selectedPatient.name} (${selectedPatient.id})`,
+      20,
+      32,
+    );
     doc.text(`Medicine: ${prescription.medicineName}`, 20, 44);
     doc.text(`Dosage: ${prescription.dosage}`, 20, 56);
     doc.text(`Frequency: ${prescription.frequency}`, 20, 68);
@@ -218,7 +250,12 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
             <DoctorPatientDropdown darkMode={darkMode} />
           </div>
         </div>
-        <img src={saltsImg} alt="Prescription" className="h-40 md:h-70 w-40 md:w-70" loading="lazy" />
+        <img
+          src={saltsImg}
+          alt="Prescription"
+          className="h-40 md:h-70 w-40 md:w-70"
+          loading="lazy"
+        />
       </div>
 
       <div className="dark:text-white dark:bg-black font-sans px-3 md:px-6 py-6 space-y-6">
@@ -231,7 +268,9 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
           <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6 self-start">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Create Prescription</h3>
+                <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                  Create Prescription
+                </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Enter the medicine, dosage, frequency, and duration.
                 </p>
@@ -250,7 +289,12 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                 <span>Medicine name</span>
                 <input
                   value={formValues.medicineName}
-                  onChange={(event) => setFormValues((current) => ({ ...current, medicineName: event.target.value }))}
+                  onChange={(event) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      medicineName: event.target.value,
+                    }))
+                  }
                   placeholder="Type medicine name"
                   className="w-full rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-4 py-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-[#0B3C5D]"
                 />
@@ -260,7 +304,12 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                 <span>Dosage</span>
                 <input
                   value={formValues.dosage}
-                  onChange={(event) => setFormValues((current) => ({ ...current, dosage: event.target.value }))}
+                  onChange={(event) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      dosage: event.target.value,
+                    }))
+                  }
                   placeholder="e.g. 500mg"
                   className="w-full rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-4 py-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-[#0B3C5D]"
                 />
@@ -270,7 +319,12 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                 <span>Frequency</span>
                 <input
                   value={formValues.frequency}
-                  onChange={(event) => setFormValues((current) => ({ ...current, frequency: event.target.value }))}
+                  onChange={(event) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      frequency: event.target.value,
+                    }))
+                  }
                   placeholder="e.g. Twice a day"
                   className="w-full rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-4 py-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-[#0B3C5D]"
                 />
@@ -280,7 +334,12 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                 <span>Duration</span>
                 <input
                   value={formValues.duration}
-                  onChange={(event) => setFormValues((current) => ({ ...current, duration: event.target.value }))}
+                  onChange={(event) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      duration: event.target.value,
+                    }))
+                  }
                   placeholder="e.g. 7 days"
                   className="w-full rounded-2xl border border-[#0B3C5D] bg-white dark:bg-black px-4 py-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-[#0B3C5D]"
                 />
@@ -298,7 +357,13 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                 onClick={savePrescription}
                 disabled={!isFormComplete}
               >
-                {editTarget ? <img src={editIcon} alt="Edit" className={iconImageClassName} /> : null}
+                {editTarget ? (
+                  <img
+                    src={editIcon}
+                    alt="Edit"
+                    className={iconImageClassName}
+                  />
+                ) : null}
                 {editTarget ? "Edit" : "Save"}
               </button>
               <button
@@ -311,7 +376,11 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                 }}
                 disabled={!latestPrescription}
               >
-                <img src={downloadIcon} alt="Download" className={iconImageClassName} />
+                <img
+                  src={downloadIcon}
+                  alt="Download"
+                  className={iconImageClassName}
+                />
                 Download
               </button>
               <button
@@ -324,7 +393,11 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                 }}
                 disabled={!latestPrescription}
               >
-                <img src={printIcon} alt="Print" className={iconImageClassName} />
+                <img
+                  src={printIcon}
+                  alt="Print"
+                  className={iconImageClassName}
+                />
                 Print
               </button>
             </div>
@@ -348,21 +421,31 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                   >
                     <div className="flex items-center justify-between gap-3 flex-wrap">
                       <div>
-                        <div className="font-semibold">{prescription.medicineName}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{prescription.createdAt}</div>
+                        <div className="font-semibold">
+                          {prescription.medicineName}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {prescription.createdAt}
+                        </div>
                       </div>
                       <button
                         type="button"
                         className={iconButtonClassName}
                         onClick={() => loadForEdit(prescription, "current")}
                       >
-                        <img src={editIcon} alt="Edit" className={iconImageClassName} />
+                        <img
+                          src={editIcon}
+                          alt="Edit"
+                          className={iconImageClassName}
+                        />
                         Edit
                       </button>
                       <button
                         type="button"
                         className={iconButtonClassName}
-                        onClick={() => movePrescription("current", prescription.id)}
+                        onClick={() =>
+                          movePrescription("current", prescription.id)
+                        }
                       >
                         Archive
                       </button>
@@ -378,7 +461,9 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
             </div>
 
             <div className="bg-white dark:bg-black border-4 border-[#0B3C5D] rounded-2xl shadow p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">Past Prescriptions</h3>
+              <h3 className="text-lg md:text-xl font-semibold text-[#0B3C5D] dark:text-white">
+                Past Prescriptions
+              </h3>
               <div className="mt-4 space-y-3">
                 {pastPrescriptions.map((prescription) => (
                   <div
@@ -387,21 +472,31 @@ const PrescriptionPage = ({ darkMode = false }: PrescriptionPageProps) => {
                   >
                     <div className="flex items-center justify-between gap-3 flex-wrap">
                       <div>
-                        <div className="font-semibold">{prescription.medicineName}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{prescription.createdAt}</div>
+                        <div className="font-semibold">
+                          {prescription.medicineName}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {prescription.createdAt}
+                        </div>
                       </div>
                       <button
                         type="button"
                         className={iconButtonClassName}
                         onClick={() => loadForEdit(prescription, "past")}
                       >
-                        <img src={editIcon} alt="Edit" className={iconImageClassName} />
+                        <img
+                          src={editIcon}
+                          alt="Edit"
+                          className={iconImageClassName}
+                        />
                         Edit
                       </button>
                       <button
                         type="button"
                         className={iconButtonClassName}
-                        onClick={() => movePrescription("past", prescription.id)}
+                        onClick={() =>
+                          movePrescription("past", prescription.id)
+                        }
                       >
                         Restore
                       </button>
