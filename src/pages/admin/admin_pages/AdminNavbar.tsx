@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import mediratorLogo from "/medirator_images/mediratorlogo.png";
 import logoutImg from "/medirator_images/logout.png";

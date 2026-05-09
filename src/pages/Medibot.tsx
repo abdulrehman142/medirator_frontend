@@ -46,7 +46,6 @@ export default function Medibot() {
   >("idle");
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [voiceHint, setVoiceHint] = useState<string | null>(null);
-  const [interimTranscript, setInterimTranscript] = useState<string>("");
   const [modelPreference, setModelPreference] = useState<"gemini" | "xrayas">(
     "gemini",
   );
@@ -398,7 +397,6 @@ export default function Medibot() {
     }
     recognitionRef.current = null;
     setVoiceState("idle");
-    setInterimTranscript("");
     if (clearHint) {
       setVoiceHint(null);
     }

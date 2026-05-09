@@ -75,7 +75,11 @@ const AdminHomePage = ({ darkMode = false }: AdminHomePageProps) => {
       setInsights(resolvedInsights);
       setDoctors(resolvedDoctors);
       setPatients(resolvedPatients);
-      setAnalytics(resolvedAnalytics);
+       setAnalytics(
+         resolvedAnalytics
+           ? { ...resolvedAnalytics, alerts: resolvedAnalytics.alerts ?? [] }
+           : null,
+       );
 
       const hasAnyData =
         Boolean(resolvedMetrics) ||

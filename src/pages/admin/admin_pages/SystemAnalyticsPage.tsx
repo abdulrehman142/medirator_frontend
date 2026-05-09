@@ -86,11 +86,6 @@ const SystemAnalyticsPage = ({
       completedAppointments: doctor.completed_appointments,
     })) ?? [];
 
-  const peakUsageTimes =
-    analytics?.peak_usage_times?.map(
-      (slot) => `${slot.label} (${slot.count})`,
-    ) ?? [];
-
   const recentActivity = analytics?.recent_activity ?? [];
 
   const renderBars = (
