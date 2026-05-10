@@ -16,6 +16,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DoctorLayout from "./pages/doctor/doctor_pages/DoctorLayout";
 import AdminLayout from "./pages/admin/admin_pages/AdminLayout";
+import SymptomPredictor from "./pages/services/DiseasePrediction";
 import { DoctorPatientProvider } from "./context/DoctorPatientContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { useLanguage } from "./context/LanguageContext";
@@ -31,9 +32,6 @@ const Register = lazy(() => import("./pages/Register"));
 const Services = lazy(() => import("./pages/services/Services"));
 const FamilyHistory = lazy(() => import("./pages/services/FamilyHistory"));
 const Salts = lazy(() => import("./pages/services/Salts"));
-const SymptomPredictor = lazy(
-  () => import("./pages/services/DiseasePrediction"),
-);
 const Appointments = lazy(() => import("./pages/services/Appointments"));
 const ReportAnalysis = lazy(() => import("./pages/services/ReportAnalysis"));
 const Visualizer = lazy(() => import("./pages/services/Visualizer"));
