@@ -1,6 +1,5 @@
 [build]
-  # No build step required — publishing prebuilt `dist` dropped into repo root
-  command = "echo 'Using prebuilt dist; no build required'"
+  command = "npm run build"
   publish = "dist"
 
 [build.environment]
