@@ -10,6 +10,7 @@ import editIcon from "/medirator_images/edit.png";
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiBaseURL } from "../api/http";
 import { tokenStore } from "../auth/tokenStore";
 
 type ChatMessage = {
@@ -108,7 +109,7 @@ export default function Medibot() {
     if (!token) return;
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/chat/sessions", {
+      const res = await fetch(`${apiBaseURL}/chat/sessions`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -139,7 +140,7 @@ export default function Medibot() {
     if (!token) return null;
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/chat/sessions", {
+      const res = await fetch(`${apiBaseURL}/chat/sessions`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -164,7 +165,7 @@ export default function Medibot() {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/chat/sessions/${sessionId}/messages`,
+        `${apiBaseURL}/chat/sessions/${sessionId}/messages`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -212,7 +213,7 @@ export default function Medibot() {
     const token = tokenStore.getAccessToken();
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/chat/sessions/${sessionId}`,
+        `${apiBaseURL}/chat/sessions/${sessionId}`,
         {
           method: "PATCH",
           headers: {
@@ -239,7 +240,7 @@ export default function Medibot() {
     const token = tokenStore.getAccessToken();
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/chat/sessions/${sessionId}`,
+        `${apiBaseURL}/chat/sessions/${sessionId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -320,7 +321,7 @@ export default function Medibot() {
       outgoingFiles.forEach((f) => form.append("files", f));
 
       const token = tokenStore.getAccessToken();
-      const res = await fetch("http://localhost:8000/api/v1/chat/message", {
+      const res = await fetch(`${apiBaseURL}/chat/message`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,
