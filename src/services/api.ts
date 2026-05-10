@@ -1,3 +1,5 @@
+import { http } from "../api/http";
+
 export type SymptomPredictionResponse = Record<string, unknown>;
 
 const mlBaseURL =
@@ -17,9 +19,25 @@ export async function predictSymptoms(
     body: JSON.stringify({ symptoms: input }),
   });
 
-  if (!response.ok) {
+  if (response.ok) {
+    return response.json();
+  }
+
+  if (response.status !== 404) {
     throw new Error("Prediction request failed");
   }
 
-  return response.json();
+  const symptoms = input
+    .split(",")
+    .map((symptom) => symptom.trim())
+    .filter(Boolean);
+
+  const { data } = await http.post<SymptomPredictionResponse>(
+    "/symptom-predictor/predict-disease",
+    {
+      symptoms,
+    },
+  );
+
+  return data;
 }
