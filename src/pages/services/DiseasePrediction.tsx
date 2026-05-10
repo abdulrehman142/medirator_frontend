@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 
 import { diseasePredictionApi } from "../../api/diseasePredictionApi";
 import { useLanguage } from "../../context/LanguageContext";
-import { predictSymptoms, type SymptomPredictionResponse } from "../../services/api";
-import diseasePredictionImg from "/medirator_images/predictive.png";
+import { predictSymptoms } from "../../services/api";
+  interface PredictionResult {
+    prediction: string;
+    confidence: number;
+  }import diseasePredictionImg from "/medirator_images/predictive.png";
 
 interface DiseasePredictionProps {
   darkMode?: boolean;
@@ -20,7 +23,7 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
   const [isPredicting, setIsPredicting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [prediction, setPrediction] =
-    useState<SymptomPredictionResponse | null>(null);
+    useState<PredictionResult | null>(null);
 
   useEffect(() => {
     const loadSymptoms = async () => {
@@ -88,7 +91,10 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
 
     try {
       const response = await predictSymptoms(Array.from(selectedSymptoms).join(", "));
-      setPrediction(response);
+      setPrediction({
+        prediction: response.prediction,
+        confidence: response.confidence,
+      });
     } catch (error) {
       console.error("Prediction failed:", error);
       setApiError("AI service is currently unavailable. Please try again.");
@@ -262,12 +268,23 @@ const DiseasePrediction = ({ darkMode = false }: DiseasePredictionProps) => {
 
                 {prediction && (
                   <div className="rounded-2xl border-2 border-green-500 bg-green-50 p-5 shadow-sm dark:bg-green-950/20">
-                    <h3 className="mb-2 text-lg font-semibold text-green-700 dark:text-green-300">
+                    <h3 className="mb-4 text-lg font-semibold text-green-700 dark:text-green-300">
                       {t("services", "prediction", "Prediction")}
                     </h3>
-                    <pre className="overflow-x-auto rounded-2xl bg-white p-4 text-sm leading-6 text-gray-800 dark:bg-black/30 dark:text-gray-100">
-                      {JSON.stringify(prediction, null, 2)}
-                    </pre>
+                    <div className="space-y-3 rounded-2xl bg-white p-4 text-sm text-gray-800 dark:bg-black/30 dark:text-gray-100">
+                      <div>
+                        <span className="font-semibold">Predicted Disease:</span>
+                        <p className="mt-1 text-base font-medium text-[#0B3C5D] dark:text-white">
+                          {prediction.prediction}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Confidence:</span>
+                        <p className="mt-1 text-base font-medium text-[#0B3C5D] dark:text-white">
+                          {(prediction.confidence * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

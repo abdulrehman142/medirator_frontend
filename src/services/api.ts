@@ -1,6 +1,11 @@
 import { http } from "../api/http";
 
-export type SymptomPredictionResponse = Record<string, unknown>;
+export interface SymptomPredictionResponse {
+  status: string;
+  prediction: string;
+  confidence: number;
+  details: unknown;
+}
 
 export async function predictSymptoms(
   input: string,
