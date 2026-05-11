@@ -4,9 +4,11 @@ import { tokenStore } from "../auth/tokenStore";
 import { getStoredLanguage } from "../i18n";
 import type { TokenPair } from "../types/api";
 
-export const apiBaseURL =
-  import.meta.env.VITE_API_BASE_URL ??
-  "https://medirator-backend.onrender.com/api/v1";
+const configuredBaseURL = import.meta.env.VITE_API_BASE_URL?.trim();
+
+export const apiBaseURL = import.meta.env.PROD
+  ? "/api/v1"
+  : configuredBaseURL || "https://medirator-backend.onrender.com/api/v1";
 
 export const http = axios.create({
   baseURL: apiBaseURL,

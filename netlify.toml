@@ -3,7 +3,13 @@
   publish = "dist"
 
 [build.environment]
-  VITE_API_BASE_URL = "https://medirator-backend.onrender.com/api/v1"
+  VITE_API_BASE_URL = "/api/v1"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://medirator-backend.onrender.com/api/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
