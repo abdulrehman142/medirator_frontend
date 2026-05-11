@@ -145,10 +145,10 @@ export const mapDoctor = (raw: unknown): AdminDoctor => {
   const doctor = isRecord(raw) ? raw : {};
 
   const apiId = toStringValue(
-    doctor.id,
     doctor.user_id,
     doctor.userId,
     doctor._id,
+    doctor.id,
     doctor.doctor_id,
   );
   const displayId = toStringValue(
