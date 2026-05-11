@@ -143,8 +143,24 @@ export const normalizeDoctorVerification = (
 
 export const mapDoctor = (raw: unknown): AdminDoctor => {
   const doctor = isRecord(raw) ? raw : {};
+
+  const apiId = toStringValue(
+    doctor.id,
+    doctor.user_id,
+    doctor.userId,
+    doctor._id,
+    doctor.doctor_id,
+  );
+  const displayId = toStringValue(
+    doctor.doctor_id,
+    doctor.doctorId,
+    doctor.id,
+    doctor.user_id,
+  );
+
   return {
-    id: toStringValue(doctor.id, doctor.doctor_id, doctor.user_id) || "Unknown",
+    id: apiId || "Unknown",
+    display_id: displayId || undefined,
     name:
       toStringValue(doctor.name, doctor.full_name, doctor.doctor_name) ||
       "Unnamed doctor",

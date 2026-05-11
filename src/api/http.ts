@@ -40,18 +40,6 @@ http.interceptors.request.use((config) => {
   config.headers["Accept-Language"] = language;
   config.headers["X-Language"] = language;
 
-  if (
-    config.data &&
-    typeof config.data === "object" &&
-    !(config.data instanceof FormData) &&
-    !Array.isArray(config.data)
-  ) {
-    config.data = {
-      ...config.data,
-      lang: language,
-    };
-  }
-
   return config;
 });
 

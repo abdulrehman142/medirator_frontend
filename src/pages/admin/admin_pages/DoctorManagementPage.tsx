@@ -9,6 +9,7 @@ interface DoctorManagementPageProps {
 
 interface DoctorRecord {
   id: string;
+  display_id?: string;
   name: string;
   specialization: string;
   status: "Active" | "Suspended";
@@ -17,12 +18,14 @@ interface DoctorRecord {
 
 const normalizeDoctor = (doctor: {
   id?: string;
+  display_id?: string;
   name?: string;
   specialization?: string;
   status?: "Active" | "Suspended";
   verification?: "Approved" | "Pending" | "Rejected";
 }): DoctorRecord => ({
   id: doctor.id ?? "Unknown",
+  display_id: doctor.display_id,
   name: doctor.name ?? "Unnamed doctor",
   specialization: doctor.specialization ?? "Not specified",
   status: doctor.status ?? "Suspended",
@@ -165,7 +168,7 @@ const DoctorManagementPage = ({
               <tbody>
                 {filteredDoctors.map((doctor) => (
                   <tr key={doctor.id} className="border-t border-[#0B3C5D]/40">
-                    <td className="px-4 py-3">{doctor.id}</td>
+                    <td className="px-4 py-3">{doctor.display_id ?? doctor.id}</td>
                     <td className="px-4 py-3">{doctor.name}</td>
                     <td className="px-4 py-3">{doctor.specialization}</td>
                     <td className="px-4 py-3">
@@ -203,7 +206,10 @@ const DoctorManagementPage = ({
                         <button
                           type="button"
                           onClick={() => approveDoctor(doctor.id)}
-                          disabled={doctor.verification === "Approved"}
+                          disabled={
+                            doctor.verification === "Approved" ||
+                            doctor.id === "Unknown"
+                          }
                           className={`rounded-2xl border px-3 py-1.5 ${
                             doctor.verification === "Approved"
                               ? "border-gray-400 text-gray-400 cursor-not-allowed"
@@ -215,7 +221,10 @@ const DoctorManagementPage = ({
                         <button
                           type="button"
                           onClick={() => rejectDoctor(doctor.id)}
-                          disabled={doctor.verification === "Rejected"}
+                          disabled={
+                            doctor.verification === "Rejected" ||
+                            doctor.id === "Unknown"
+                          }
                           className={`rounded-2xl border px-3 py-1.5 ${
                             doctor.verification === "Rejected"
                               ? "border-gray-400 text-gray-400 cursor-not-allowed"

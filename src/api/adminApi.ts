@@ -45,6 +45,7 @@ export interface CompletedAppointmentsResponse {
 
 export interface AdminDoctor {
   id: string;
+  display_id?: string;
   name: string;
   specialization: string;
   status: "Active" | "Suspended";
@@ -111,13 +112,21 @@ export const adminApi = {
     doctorId: string,
     payload: Partial<AdminDoctor>,
   ): Promise<AdminDoctor> {
-    const requestPayload = {
-      ...payload,
-      status: payload.status,
-      doctor_status: payload.status,
-      verification: payload.verification,
-      verification_status: payload.verification,
-    };
+    const requestPayload: Record<string, unknown> = {};
+
+    if (payload.status) {
+      const status = payload.status.toLowerCase();
+      requestPayload.status = status;
+      requestPayload.doctor_status = status;
+      requestPayload.is_active = status === "active";
+    }
+
+    if (payload.verification) {
+      const verification = payload.verification.toLowerCase();
+      requestPayload.verification = verification;
+      requestPayload.verification_status = verification;
+      requestPayload.is_verified = verification === "approved";
+    }
 
     const { data } = await http.patch<unknown>(
       `/admin/doctors/${doctorId}`,
