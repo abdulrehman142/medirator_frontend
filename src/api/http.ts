@@ -10,7 +10,8 @@ export const apiBaseURL =
 
 export const http = axios.create({
   baseURL: apiBaseURL,
-  withCredentials: true,
+  // Token-based auth is sent via Authorization header; cookies are not required.
+  withCredentials: false,
   timeout: 15000,
 });
 
